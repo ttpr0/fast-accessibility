@@ -28,10 +28,7 @@ public:
     TopologyStore topology;
     std::vector<int> edge_weights;
 
-    Graph(GraphStore store, TopologyStore topology, std::vector<int> weights)
-        : store(store), topology(topology), edge_weights(weights)
-    {
-    }
+    Graph(GraphStore store, TopologyStore topology, std::vector<int> weights) : store(store), topology(topology), edge_weights(weights) {}
 
     std::unique_ptr<IGraphExplorer> getGraphExplorer();
 
@@ -47,22 +44,6 @@ public:
 };
 
 //*******************************************
-// edge-ref iterators
-//*******************************************
-
-class EdgeRefIterator : public IIterator<EdgeRef>
-{
-public:
-    TopologyAccessor* accessor;
-
-    EdgeRefIterator() {}
-
-    EdgeRefIterator(TopologyAccessor* accessor) { this->accessor = accessor; }
-
-    std::tuple<EdgeRef, bool> next();
-};
-
-//*******************************************
 // base-graph explorer
 //******************************************
 
@@ -71,18 +52,11 @@ class BaseGraphExplorer : public IGraphExplorer
 public:
     Graph* graph;
     TopologyAccessor accessor;
-    int* edge_weights;
+    std::vector<int>& edge_weights;
 
-    BaseGraphExplorer(Graph* graph, TopologyAccessor accessor, int* weights)
-        : accessor(accessor)
-    {
-        this->graph = graph;
-        this->accessor = accessor;
-        this->edge_weights = weights;
-    }
+    BaseGraphExplorer(Graph* graph, TopologyAccessor accessor, std::vector<int>& weights) : graph(graph), accessor(accessor), edge_weights(weights) {}
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ,
-                          std::function<void(EdgeRef)> func);
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
 
     int getEdgeWeight(EdgeRef edge);
 
@@ -98,14 +72,9 @@ public:
 class BaseGraphIndex : public IGraphIndex
 {
 public:
-    int node_count;
-    Coord* node_geoms;
+    std::vector<Coord>& node_geoms;
 
-    BaseGraphIndex(int nodecount, Coord* node_geoms)
-    {
-        this->node_count = node_count;
-        this->node_geoms = node_geoms;
-    }
+    BaseGraphIndex(std::vector<Coord>& node_geoms) : node_geoms(node_geoms) {}
 
     int getClosestNode(Coord point);
 };

@@ -47,12 +47,12 @@ CHGraph::CHGraph(GraphStore store, TopologyStore topology, std::vector<int> weig
 
 std::unique_ptr<IGraphExplorer> CHGraph::getGraphExplorer()
 {
-    return std::make_unique<CHGraphExplorer>(this, this->topology.getAccessor(), this->ch_topology.getAccessor(), this->edge_weights.data(), this->ch_store.sh_weights.data(),
-                                             this->ch_store.node_levels.data());
+    return std::make_unique<CHGraphExplorer>(this, this->topology.getAccessor(), this->ch_topology.getAccessor(), this->edge_weights, this->ch_store.sh_weights,
+                                             this->ch_store.node_levels);
 }
 std::unique_ptr<IGraphIndex> CHGraph::getIndex()
 {
-    return std::make_unique<BaseGraphIndex>(this->nodeCount(), this->store.node_geoms.data());
+    return std::make_unique<BaseGraphIndex>(this->store.node_geoms);
 }
 int CHGraph::nodeCount()
 {
@@ -87,12 +87,12 @@ CHShortcut CHGraph::getShortcut(int shortcut)
 {
     return this->ch_store.getShortcut(shortcut);
 }
-std::tuple<CHEdge*, int> CHGraph::getDownEdges(Direction dir)
+const std::vector<CHEdge>& CHGraph::getDownEdges(Direction dir)
 {
     if (dir == Direction::FORWARD) {
-        return std::make_tuple(this->fwd_down_edges.data(), this->fwd_down_edges.size());
+        return this->fwd_down_edges;
     } else {
-        return std::make_tuple(this->bwd_down_edges.data(), this->bwd_down_edges.size());
+        return this->bwd_down_edges;
     }
 }
 

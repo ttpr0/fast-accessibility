@@ -5,8 +5,7 @@
 
 #include "algorithm/all_dijkstra.h"
 #include "algorithm/phast.h"
-#include "algorithm/phast2.h"
-#include "algorithm/phast3.h"
+#include "algorithm/range_phast.h"
 #include "graph/graph.h"
 #include "graph/loader.h"
 
@@ -27,7 +26,7 @@ int main()
     for (int i = 0; i < N; i++) {
         start_nodes.push_back(rand() % graph->nodeCount());
     }
-    int range = 900;
+    int range = 2700;
 #ifdef PRINT_RESULT
     int n = 10023;
 #endif
@@ -47,22 +46,21 @@ int main()
         for (int i = 0; i < N; i++) {
             int start = start_nodes[i];
 #ifdef PRINT_RESULT
-            auto dist = calcPHAST(ch_graph.get(), start, range);
+            auto dist = calcPHAST(ch_graph.get(), start);
             cout << "PHAST: " << dist[n] << endl;
 #else
-            calcPHAST(ch_graph.get(), start, range);
+            calcPHAST(ch_graph.get(), start);
 #endif
         }
     });
-
     ankerl::nanobench::Bench().run("test 3", [&] {
         for (int i = 0; i < N; i++) {
             int start = start_nodes[i];
 #ifdef PRINT_RESULT
-            auto dist = calcPHAST2(ch_graph.get(), start, range);
-            cout << "PHAST2: " << dist[n] << endl;
+            auto dist = calcRangePHAST(ch_graph.get(), start, range);
+            cout << "PHAST: " << dist[n] << endl;
 #else
-            calcPHAST2(ch_graph.get(), start, range);
+            calcRangePHAST(ch_graph.get(), start, range);
 #endif
         }
     });
@@ -70,10 +68,21 @@ int main()
         for (int i = 0; i < N; i++) {
             int start = start_nodes[i];
 #ifdef PRINT_RESULT
-            auto dist = calcPHAST3(ch_graph.get(), start, range);
+            auto dist = calcRangePHAST2(ch_graph.get(), start, range);
+            cout << "PHAST2: " << dist[n] << endl;
+#else
+            calcRangePHAST2(ch_graph.get(), start, range);
+#endif
+        }
+    });
+    ankerl::nanobench::Bench().run("test 5", [&] {
+        for (int i = 0; i < N; i++) {
+            int start = start_nodes[i];
+#ifdef PRINT_RESULT
+            auto dist = calcRangePHAST3(ch_graph.get(), start, range);
             cout << "PHAST3: " << dist[n] << endl;
 #else
-            calcPHAST3(ch_graph.get(), start, range);
+            calcRangePHAST3(ch_graph.get(), start, range);
 #endif
         }
     });

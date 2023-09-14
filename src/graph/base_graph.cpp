@@ -9,11 +9,11 @@
 
 std::unique_ptr<IGraphExplorer> Graph::getGraphExplorer()
 {
-    return std::make_unique<BaseGraphExplorer>(this, this->topology.getAccessor(), this->edge_weights.data());
+    return std::make_unique<BaseGraphExplorer>(this, this->topology.getAccessor(), this->edge_weights);
 }
 std::unique_ptr<IGraphIndex> Graph::getIndex()
 {
-    return std::make_unique<BaseGraphIndex>(this->nodeCount(), this->store.node_geoms.data());
+    return std::make_unique<BaseGraphIndex>(this->store.node_geoms);
 }
 int Graph::nodeCount()
 {
@@ -82,7 +82,7 @@ int BaseGraphIndex::getClosestNode(Coord point)
 {
     int closest = -1;
     int min_dist = 100000;
-    for (int i = 0; i < this->node_count; i++) {
+    for (int i = 0; i < this->node_geoms.size(); i++) {
         Coord other = this->node_geoms[i];
         float d_lon = other.lon - point.lon;
         float d_lat = other.lat - point.lat;

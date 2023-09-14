@@ -43,7 +43,7 @@ public:
     short getNodeLevel(int node);
     int shortcutCount();
     CHShortcut getShortcut(int shortcut);
-    std::tuple<CHEdge*, int> getDownEdges(Direction dir);
+    const std::vector<CHEdge>& getDownEdges(Direction dir);
 };
 
 //*******************************************
@@ -56,19 +56,17 @@ public:
     CHGraph* graph;
     TopologyAccessor accessor;
     TopologyAccessor sh_accessor;
-    int* edge_weights;
-    int* sh_weights;
-    short* node_levels;
+    std::vector<int>& edge_weights;
+    std::vector<int>& sh_weights;
+    std::vector<short>& node_levels;
 
     CHGraphExplorer(CHGraph* graph, TopologyAccessor accessor,
-                    TopologyAccessor sh_accessor, int* edge_weights,
-                    int* sh_weights, short* node_levels)
-        : accessor(accessor), sh_accessor(sh_accessor)
+                    TopologyAccessor sh_accessor, std::vector<int>& edge_weights,
+                    std::vector<int>& sh_weights, std::vector<short>& node_levels)
+        : accessor(accessor), sh_accessor(sh_accessor), edge_weights(edge_weights), 
+            sh_weights(sh_weights), node_levels(node_levels)
     {
         this->graph = graph;
-        this->edge_weights = edge_weights;
-        this->sh_weights = sh_weights;
-        this->node_levels = node_levels;
     }
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ,
@@ -76,69 +74,4 @@ public:
     int getEdgeWeight(EdgeRef edge);
     int getTurnCost(EdgeRef from, int via, EdgeRef to);
     int getOtherNode(EdgeRef edge, int node);
-};
-
-//*******************************************
-// edge-ref iterators
-//******************************************
-
-class CHEdgeRefIterator : public IIterator<EdgeRef>
-{
-public:
-    TopologyAccessor* accessor;
-    TopologyAccessor* ch_accessor;
-    char type;
-
-    CHEdgeRefIterator(TopologyAccessor* accessor, TopologyAccessor* ch_accessor)
-    {
-        this->accessor = accessor;
-        this->ch_accessor = ch_accessor;
-        this->type = 0;
-    }
-
-    std::tuple<EdgeRef, bool> next();
-};
-
-class CHUpwardIterator : public IIterator<EdgeRef>
-{
-public:
-    int this_node;
-    short* node_levels;
-    TopologyAccessor* accessor;
-    TopologyAccessor* ch_accessor;
-    char type;
-
-    CHUpwardIterator(int this_node, short* levels, TopologyAccessor* accessor,
-                     TopologyAccessor* ch_accessor)
-    {
-        this->this_node = this_node;
-        this->node_levels = levels;
-        this->accessor = accessor;
-        this->ch_accessor = ch_accessor;
-        this->type = 0;
-    }
-
-    std::tuple<EdgeRef, bool> next();
-};
-
-class CHDownwardIterator : public IIterator<EdgeRef>
-{
-public:
-    int this_node;
-    short* node_levels;
-    TopologyAccessor* accessor;
-    TopologyAccessor* ch_accessor;
-    char type;
-
-    CHDownwardIterator(int this_node, short* levels, TopologyAccessor* accessor,
-                       TopologyAccessor* ch_accessor)
-    {
-        this->this_node = this_node;
-        this->node_levels = levels;
-        this->accessor = accessor;
-        this->ch_accessor = ch_accessor;
-        this->type = 0;
-    }
-
-    std::tuple<EdgeRef, bool> next();
 };

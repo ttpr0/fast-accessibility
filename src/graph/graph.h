@@ -53,5 +53,5 @@ public:
     virtual short getNodeLevel(int node) = 0;
     virtual int shortcutCount() = 0;
     virtual CHShortcut getShortcut(int shortcut) = 0;
-    virtual std::tuple<CHEdge*, int> getDownEdges(Direction dir) = 0;
+    virtual const std::vector<CHEdge>& getDownEdges(Direction dir) = 0;
 };
