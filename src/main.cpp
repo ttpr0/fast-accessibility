@@ -1,16 +1,16 @@
+#include <time.h>
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
-#include <random>
 #include <vector>
 
+#include "./benchmark.h"
 #include "algorithm/all_dijkstra.h"
 #include "algorithm/phast.h"
 #include "algorithm/range_phast.h"
+#include "benchmark.h"
 #include "graph/graph.h"
 #include "graph/loader.h"
-
-#define ANKERL_NANOBENCH_IMPLEMENT
-#include <nanobench.h>
 
 using namespace std;
 
@@ -21,71 +21,47 @@ int main()
     auto graph = loadGraph("./graphs/bench_ch");
     auto ch_graph = loadCHGraph("./graphs/bench_ch");
 
-    const int N = 1;
-    std::vector<int> start_nodes;
-    for (int i = 0; i < N; i++) {
-        start_nodes.push_back(rand() % graph->nodeCount());
+    const std::vector<CHEdge>& down_edges = ch_graph->getDownEdges(Direction::FORWARD);
+    int length = down_edges.size();
+    int count = 0;
+    int sum = 0;
+    for (int i = 0; i < length; ++i) {
+        auto edge = down_edges[i];
+        sum += edge.count;
+        count += 1;
+        if (count == 10000) {
+            int avg = sum / count;
+            if (avg == 2) {
+                cout << i << endl;
+            }
+            sum = 0;
+            count = 0;
+        }
+        i += edge.count - 1;
     }
-    int range = 2700;
-#ifdef PRINT_RESULT
-    int n = 10023;
-#endif
 
-    ankerl::nanobench::Bench().run("test 1", [&] {
-        for (int i = 0; i < N; i++) {
-            int start = start_nodes[i];
-#ifdef PRINT_RESULT
-            auto dist = calcAllDijkstra(graph.get(), start, range);
-            cout << "Dijkstra: " << dist[n] << endl;
-#else
-            calcAllDijkstra(graph.get(), start, range);
-#endif
-        }
-    });
-    ankerl::nanobench::Bench().run("test 2", [&] {
-        for (int i = 0; i < N; i++) {
-            int start = start_nodes[i];
-#ifdef PRINT_RESULT
-            auto dist = calcPHAST(ch_graph.get(), start);
-            cout << "PHAST: " << dist[n] << endl;
-#else
-            calcPHAST(ch_graph.get(), start);
-#endif
-        }
-    });
-    ankerl::nanobench::Bench().run("test 3", [&] {
-        for (int i = 0; i < N; i++) {
-            int start = start_nodes[i];
-#ifdef PRINT_RESULT
-            auto dist = calcRangePHAST(ch_graph.get(), start, range);
-            cout << "PHAST: " << dist[n] << endl;
-#else
-            calcRangePHAST(ch_graph.get(), start, range);
-#endif
-        }
-    });
-    ankerl::nanobench::Bench().run("test 4", [&] {
-        for (int i = 0; i < N; i++) {
-            int start = start_nodes[i];
-#ifdef PRINT_RESULT
-            auto dist = calcRangePHAST2(ch_graph.get(), start, range);
-            cout << "PHAST2: " << dist[n] << endl;
-#else
-            calcRangePHAST2(ch_graph.get(), start, range);
-#endif
-        }
-    });
-    ankerl::nanobench::Bench().run("test 5", [&] {
-        for (int i = 0; i < N; i++) {
-            int start = start_nodes[i];
-#ifdef PRINT_RESULT
-            auto dist = calcRangePHAST3(ch_graph.get(), start, range);
-            cout << "PHAST3: " << dist[n] << endl;
-#else
-            calcRangePHAST3(ch_graph.get(), start, range);
-#endif
-        }
-    });
+    // benchmark_range_search(graph.get(), ch_graph.get());
+    benchmark_supply_count(graph.get(), ch_graph.get());
+
+    // auto [dem_points, dem_weights] = read_points("./data/population_wittmund.txt");
+    // auto [sup_points, sup_weights] = read_points("./data/physicians_wittmund.txt");
+
+    // calcDijkstra2SFCA(graph.get(), dem_points, dem_weights, sup_points, sup_weights, 1800);
+
+    // int start = 100;
+    // int range = 1800;
+    // int n = 10023;
+
+    // auto dist = calcAllDijkstra(ch_graph.get(), start, range);
+    // cout << "Dijkstra: " << dist[n] << endl;
+    // auto dist = calcPHAST(ch_graph.get(), start);
+    // cout << "PHAST: " << dist[n] << endl;
+    // auto dist = calcRangePHAST(ch_graph.get(), start, range);
+    // cout << "RangePHAST: " << dist[n] << endl;
+    // auto dist = calcRangePHAST2(ch_graph.get(), start, range);
+    // cout << "RangePHAST2: " << dist[n] << endl;
+    // auto dist = calcRangePHAST3(ch_graph.get(), start, range);
+    // cout << "RangePHAST3: " << dist[n] << endl;
 
     // auto t1 = std::chrono::high_resolution_clock::now();
     // for (int i = 0; i < N; i++) {
