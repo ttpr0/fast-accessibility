@@ -7,13 +7,18 @@
 // base-graph
 //*******************************************
 
+Graph::Graph(GraphStore store, TopologyStore topology, std::vector<int> weights) : store(store), topology(topology), edge_weights(weights)
+{
+    this->index = build_kdtree_index(store.node_geoms);
+}
+
 std::unique_ptr<IGraphExplorer> Graph::getGraphExplorer()
 {
     return std::make_unique<BaseGraphExplorer>(this, this->topology.getAccessor(), this->edge_weights);
 }
-std::unique_ptr<IGraphIndex> Graph::getIndex()
+IGraphIndex& Graph::getIndex()
 {
-    return std::make_unique<BaseGraphIndex>(this->store.node_geoms);
+    return *this->index;
 }
 int Graph::nodeCount()
 {
@@ -93,4 +98,27 @@ int BaseGraphIndex::getClosestNode(Coord point)
         }
     }
     return closest;
+}
+
+KDTreeIndex::KDTreeIndex(std::vector<Coord>& node_geoms)
+{
+    this->tree = KDTree();
+    for (int i = 0; i < node_geoms.size(); i++) {
+        auto coord = node_geoms[i];
+        this->tree.insert(coord.lon, coord.lat, i);
+    }
+}
+
+int KDTreeIndex::getClosestNode(Coord point)
+{
+    auto [id, ok] = this->tree.get_closest(point.lon, point.lat, 0.01);
+    if (ok) {
+        return id;
+    }
+    return -1;
+}
+
+std::unique_ptr<IGraphIndex> build_kdtree_index(std::vector<Coord>& node_geoms)
+{
+    return std::make_unique<KDTreeIndex>(node_geoms);
 }

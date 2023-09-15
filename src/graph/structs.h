@@ -40,26 +40,18 @@ struct EdgeRef
     int other_id;
     char type;
 
-    bool isEdge() {
-        return this->type < 100;
-    }
-    bool isCrossBorder() {
-        return this->type == 10;
-    }
-    bool isSkip() {
-        return this->type == 20;
-    }
-    bool isShortcut() {
-        return this->type >= 100;
-    }
-    bool isCHShortcut() {
-        return this->type == 100;
-    }
+    bool isEdge() { return this->type < 100; }
+    bool isCrossBorder() { return this->type == 10; }
+    bool isSkip() { return this->type == 20; }
+    bool isShortcut() { return this->type >= 100; }
+    bool isCHShortcut() { return this->type == 100; }
 };
 
-struct CHEdge {
+struct CHEdge
+{
     int from;
     int to;
     int weight;
-    int count;
+    short count;
+    bool skip;
 };

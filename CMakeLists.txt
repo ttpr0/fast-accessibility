@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
     src/graph/ch_graph.cpp
     src/graph/loader.cpp
     src/graph/topology_storage.cpp
+    src/kd_tree/kd_tree.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

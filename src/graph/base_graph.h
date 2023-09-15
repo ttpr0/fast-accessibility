@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "../kd_tree/kd_tree.h"
 #include "./graph.h"
 #include "./graph_storage.h"
 #include "./topology_storage.h"
@@ -16,6 +17,7 @@ class Graph;
 class BaseGraphExplorer;
 class EdgeRefIterator;
 class BaseGraphIndex;
+class KDTreeIndex;
 
 //*******************************************
 // base-graph
@@ -27,12 +29,13 @@ public:
     GraphStore store;
     TopologyStore topology;
     std::vector<int> edge_weights;
+    std::unique_ptr<IGraphIndex> index;
 
-    Graph(GraphStore store, TopologyStore topology, std::vector<int> weights) : store(store), topology(topology), edge_weights(weights) {}
+    Graph(GraphStore store, TopologyStore topology, std::vector<int> weights);
 
     std::unique_ptr<IGraphExplorer> getGraphExplorer();
 
-    std::unique_ptr<IGraphIndex> getIndex();
+    IGraphIndex& getIndex();
 
     int nodeCount();
     int edgeCount();
@@ -78,3 +81,15 @@ public:
 
     int getClosestNode(Coord point);
 };
+
+class KDTreeIndex : public IGraphIndex
+{
+public:
+    KDTree tree;
+
+    KDTreeIndex(std::vector<Coord>& node_geoms);
+
+    int getClosestNode(Coord point);
+};
+
+std::unique_ptr<IGraphIndex> build_kdtree_index(std::vector<Coord>& node_geoms);

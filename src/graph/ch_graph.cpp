@@ -18,31 +18,39 @@ CHGraph::CHGraph(GraphStore store, TopologyStore topology, std::vector<int> weig
         explorer->forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &fwd_down_edges, &count, &this_id](EdgeRef ref) {
             int other_id = ref.other_id;
             int weight = explorer->getEdgeWeight(ref);
-            fwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1});
+            fwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
             count += 1;
         });
-        for (int j = fwd_down_edges.size() - count; j < fwd_down_edges.size(); j++) {
-            auto ch_edge = fwd_down_edges[j];
-            ch_edge.count = count;
-            fwd_down_edges[j] = ch_edge;
+        if (count > 16) {
+            for (int j = fwd_down_edges.size() - count; j < fwd_down_edges.size(); j++) {
+                auto ch_edge = fwd_down_edges[j];
+                ch_edge.count = count;
+                ch_edge.skip = true;
+                fwd_down_edges[j] = ch_edge;
+            }
         }
 
         count = 0;
         explorer->forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &bwd_down_edges, &count, &this_id](EdgeRef ref) {
             int other_id = ref.other_id;
             int weight = explorer->getEdgeWeight(ref);
-            bwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1});
+            bwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
             count += 1;
         });
-        for (int j = bwd_down_edges.size() - count; j < bwd_down_edges.size(); j++) {
-            auto ch_edge = bwd_down_edges[j];
-            ch_edge.count = count;
-            bwd_down_edges[j] = ch_edge;
+        if (count > 16) {
+            for (int j = bwd_down_edges.size() - count; j < bwd_down_edges.size(); j++) {
+                auto ch_edge = bwd_down_edges[j];
+                ch_edge.count = count;
+                ch_edge.skip = true;
+                bwd_down_edges[j] = ch_edge;
+            }
         }
     }
 
     this->fwd_down_edges = fwd_down_edges;
     this->bwd_down_edges = bwd_down_edges;
+
+    this->index = build_kdtree_index(store.node_geoms);
 }
 
 std::unique_ptr<IGraphExplorer> CHGraph::getGraphExplorer()
@@ -50,9 +58,9 @@ std::unique_ptr<IGraphExplorer> CHGraph::getGraphExplorer()
     return std::make_unique<CHGraphExplorer>(this, this->topology.getAccessor(), this->ch_topology.getAccessor(), this->edge_weights, this->ch_store.sh_weights,
                                              this->ch_store.node_levels);
 }
-std::unique_ptr<IGraphIndex> CHGraph::getIndex()
+IGraphIndex& CHGraph::getIndex()
 {
-    return std::make_unique<BaseGraphIndex>(this->store.node_geoms);
+    return *this->index;
 }
 int CHGraph::nodeCount()
 {

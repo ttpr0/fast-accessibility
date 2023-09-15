@@ -20,6 +20,7 @@ public:
     GraphStore store;
     TopologyStore topology;
     std::vector<int> edge_weights;
+    std::unique_ptr<IGraphIndex> index;
 
     // additional ch components
     CHStore ch_store;
@@ -29,11 +30,10 @@ public:
     // stores all backwards-down edges
     std::vector<CHEdge> bwd_down_edges;
 
-    CHGraph(GraphStore store, TopologyStore topology, std::vector<int> weights,
-            CHStore ch_store, TopologyStore ch_topology);
+    CHGraph(GraphStore store, TopologyStore topology, std::vector<int> weights, CHStore ch_store, TopologyStore ch_topology);
 
     std::unique_ptr<IGraphExplorer> getGraphExplorer();
-    std::unique_ptr<IGraphIndex> getIndex();
+    IGraphIndex& getIndex();
     int nodeCount();
     int edgeCount();
     Node getNode(int node);
@@ -60,17 +60,14 @@ public:
     std::vector<int>& sh_weights;
     std::vector<short>& node_levels;
 
-    CHGraphExplorer(CHGraph* graph, TopologyAccessor accessor,
-                    TopologyAccessor sh_accessor, std::vector<int>& edge_weights,
-                    std::vector<int>& sh_weights, std::vector<short>& node_levels)
-        : accessor(accessor), sh_accessor(sh_accessor), edge_weights(edge_weights), 
-            sh_weights(sh_weights), node_levels(node_levels)
+    CHGraphExplorer(CHGraph* graph, TopologyAccessor accessor, TopologyAccessor sh_accessor, std::vector<int>& edge_weights, std::vector<int>& sh_weights,
+                    std::vector<short>& node_levels)
+        : accessor(accessor), sh_accessor(sh_accessor), edge_weights(edge_weights), sh_weights(sh_weights), node_levels(node_levels)
     {
         this->graph = graph;
     }
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ,
-                          std::function<void(EdgeRef)> func);
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
     int getTurnCost(EdgeRef from, int via, EdgeRef to);
     int getOtherNode(EdgeRef edge, int node);
