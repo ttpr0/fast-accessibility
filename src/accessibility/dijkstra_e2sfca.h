@@ -22,6 +22,9 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
 
     // create array containing accessibility results
     std::vector<float> access(dem_points.size());
+    for (int i = 0; i < access.size(); i++) {
+        access[i] = 0;
+    }
 
     std::vector<bool> visited(g->nodeCount());
     std::vector<int> dist(g->nodeCount());
@@ -84,7 +87,7 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
             if (!visited[d_node]) {
                 continue;
             }
-            float distance_decay = dist[d_node] / max_range;
+            float distance_decay = 1 - dist[d_node] / (float)max_range;
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -97,7 +100,7 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
             if (!visited[d_node]) {
                 continue;
             }
-            float distance_decay = dist[d_node] / max_range;
+            float distance_decay = 1 - dist[d_node] / (float)max_range;
             access[i] += R * distance_decay;
         }
     }

@@ -22,6 +22,9 @@ std::vector<float> calcRangePHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poin
 
     // create array containing accessibility results
     std::vector<float> access(dem_points.size());
+    for (int i = 0; i < access.size(); i++) {
+        access[i] = 0;
+    }
 
     std::vector<bool> visited(g->nodeCount());
     std::vector<int> dist(g->nodeCount());
@@ -98,7 +101,7 @@ std::vector<float> calcRangePHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poin
             if (d_dist >= 1000000000) {
                 continue;
             }
-            float distance_decay = d_dist / max_range;
+            float distance_decay = 1 - d_dist / max_range;
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -112,7 +115,7 @@ std::vector<float> calcRangePHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poin
             if (d_dist >= 1000000000) {
                 continue;
             }
-            float distance_decay = d_dist / max_range;
+            float distance_decay = 1 - d_dist / max_range;
             access[i] += R * distance_decay;
         }
     }
@@ -170,6 +173,9 @@ std::vector<float> calcRangeRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poi
 
     // create array containing accessibility results
     std::vector<float> access(dem_points.size());
+    for (int i = 0; i < access.size(); i++) {
+        access[i] = 0;
+    }
 
     std::vector<bool> visited(g->nodeCount());
     std::vector<int> dist(g->nodeCount());
@@ -245,7 +251,7 @@ std::vector<float> calcRangeRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poi
             if (d_dist >= 1000000000) {
                 continue;
             }
-            float distance_decay = d_dist / max_range;
+            float distance_decay = 1 - d_dist / max_range;
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -259,7 +265,7 @@ std::vector<float> calcRangeRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poi
             if (d_dist >= 1000000000) {
                 continue;
             }
-            float distance_decay = d_dist / max_range;
+            float distance_decay = 1 - d_dist / max_range;
             access[i] += R * distance_decay;
         }
     }
@@ -326,6 +332,9 @@ std::vector<float> calcRangeRPHAST2SFCA2(ICHGraph* g, std::vector<Coord>& dem_po
 
     // create array containing accessibility results
     std::vector<float> access(dem_points.size());
+    for (int i = 0; i < access.size(); i++) {
+        access[i] = 0;
+    }
 
     std::vector<bool> visited(g->nodeCount());
     std::vector<int> dist(g->nodeCount());
@@ -401,7 +410,7 @@ std::vector<float> calcRangeRPHAST2SFCA2(ICHGraph* g, std::vector<Coord>& dem_po
             if (d_dist >= 1000000000) {
                 continue;
             }
-            float distance_decay = d_dist / max_range;
+            float distance_decay = 1 - d_dist / max_range;
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -415,7 +424,7 @@ std::vector<float> calcRangeRPHAST2SFCA2(ICHGraph* g, std::vector<Coord>& dem_po
             if (d_dist >= 1000000000) {
                 continue;
             }
-            float distance_decay = d_dist / max_range;
+            float distance_decay = 1 - d_dist / max_range;
             access[i] += R * distance_decay;
         }
     }
