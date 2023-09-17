@@ -27,6 +27,10 @@
 *.out
 *.app
 
+# Python files
+__pycache__
+*.pyd
+
 # Build Directories
 /build
 
