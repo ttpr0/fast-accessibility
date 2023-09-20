@@ -170,7 +170,7 @@ void benchmark_supply_count(IGraph* graph, ICHGraph* ch_graph)
 
     // create random benchmark data
     const int N = 5;
-    int max_range = 1800;
+    int max_range = 2700;
     std::vector<int> counts = {10, 30, 50, 100, 150, 200};
     std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>>>> supply_views;
     for (auto count : counts) {
@@ -216,6 +216,12 @@ void benchmark_supply_count(IGraph* graph, ICHGraph* ch_graph)
             for (int i = 0; i < N; i++) {
                 auto [s_p, s_w] = views[i];
                 calcRangeRPHAST2SFCA2(ch_graph, dem_points, dem_weights, s_p, s_w, max_range);
+            }
+        });
+        bench.run("Range-RPHAST3", [&] {
+            for (int i = 0; i < N; i++) {
+                auto [s_p, s_w] = views[i];
+                calcRangeRPHAST2SFCA3(ch_graph, dem_points, dem_weights, s_p, s_w, max_range);
             }
         });
 

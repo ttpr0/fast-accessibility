@@ -35,4 +35,8 @@ NB_MODULE(_pyaccess_ext, m)
     m.def("load_chgraph", &loadCHGraph);
 
     m.def("calc_dijkstra_2sfca", &calcDijkstra2SFCA);
+    m.def("calc_range_phast_2sfca", &calcRangePHAST2SFCA);
+    m.def("calc_range_rphast_2sfca", &calcRangeRPHAST2SFCA);
+    m.def("calc_range_rphast_2sfca2", &calcRangeRPHAST2SFCA2);
+    m.def("calc_range_rphast_2sfca3", &calcRangeRPHAST2SFCA3);
 }

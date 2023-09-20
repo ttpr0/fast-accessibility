@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <mutex>
 #include <queue>
 #include <tuple>
 #include <vector>
@@ -28,6 +29,7 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
 
     std::vector<bool> visited(g->nodeCount());
     std::vector<int> dist(g->nodeCount());
+    std::mutex m;
 #pragma omp parallel for firstprivate(visited, dist)
     for (int i = 0; i < sup_points.size(); i++) {
         // get supply information
@@ -101,7 +103,9 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
                 continue;
             }
             float distance_decay = 1 - dist[d_node] / (float)max_range;
+            m.lock();
             access[i] += R * distance_decay;
+            m.unlock();
         }
     }
     return access;
