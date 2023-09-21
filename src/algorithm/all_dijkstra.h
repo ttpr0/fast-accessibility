@@ -34,7 +34,7 @@ std::vector<int> calcAllDijkstra(IGraph* g, int start, int max_range)
             continue;
         }
         visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }

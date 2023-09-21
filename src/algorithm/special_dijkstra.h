@@ -8,7 +8,7 @@
 #include "../graph/graph.h"
 #include "./pq_item.h"
 
-std::vector<int> calcPHAST(ICHGraph* g, int start)
+std::vector<int> calcCountDijkstra(IGraph* g, int start, int count)
 {
     std::vector<int> dist(g->nodeCount());
     std::vector<bool> visited(g->nodeCount());
@@ -18,11 +18,11 @@ std::vector<int> calcPHAST(ICHGraph* g, int start)
     }
     dist[start] = 0;
 
-    std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
-
     auto explorer = g->getGraphExplorer();
 
+    std::priority_queue<pq_item> heap;
+    heap.push({start, 0});
+    int found_count = 0;
     while (true) {
         if (heap.empty()) {
             break;
@@ -34,7 +34,14 @@ std::vector<int> calcPHAST(ICHGraph* g, int start)
             continue;
         }
         visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id](EdgeRef ref) {
+        found_count += 1;
+        if (found_count == count) {
+            break;
+        }
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&dist, &visited, &explorer, &heap, &curr_id](EdgeRef ref) {
+            if (ref.isShortcut()) {
+                return;
+            }
             int other_id = ref.other_id;
             if (visited[other_id]) {
                 return;
@@ -45,17 +52,6 @@ std::vector<int> calcPHAST(ICHGraph* g, int start)
                 heap.push({other_id, new_length});
             }
         });
-    }
-
-    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
-    int length = down_edges.size();
-    for (int i = 0; i < length; i++) {
-        auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
-        }
     }
 
     return dist;
