@@ -55,3 +55,10 @@ struct CHEdge
     short count;
     bool skip;
 };
+
+struct TiledSHEdge
+{
+    int from;
+    int to;
+    int weight;
+};

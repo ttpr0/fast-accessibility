@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "../util.h"
@@ -54,4 +55,16 @@ public:
     virtual int shortcutCount() = 0;
     virtual CHShortcut getShortcut(int shortcut) = 0;
     virtual const std::vector<CHEdge>& getDownEdges(Direction dir) = 0;
+};
+
+class ITiledGraph : public IGraph
+{
+public:
+    virtual ~ITiledGraph() {}
+
+    virtual short getNodeTile(int node) = 0;
+    virtual short tileCount() = 0;
+    virtual int shortcutCount() = 0;
+    virtual Shortcut getShortcut(int shortcut) = 0;
+    virtual const std::span<TiledSHEdge> getIndexEdges(short tile, Direction dir) = 0;
 };
