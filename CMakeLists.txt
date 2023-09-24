@@ -17,6 +17,7 @@ add_executable(${exe_name}
     src/main.cpp
     src/graph/base_graph.cpp
     src/graph/ch_graph.cpp
+    src/graph/tiled_graph.cpp
     src/graph/loader.cpp
     src/graph/topology_storage.cpp
     src/kd_tree/kd_tree.cpp
@@ -39,6 +40,7 @@ set(lib_name libaccess)
 add_library(${lib_name} SHARED
     src/graph/base_graph.cpp
     src/graph/ch_graph.cpp
+    src/graph/tiled_graph.cpp
     src/graph/loader.cpp
     src/graph/topology_storage.cpp
     src/kd_tree/kd_tree.cpp

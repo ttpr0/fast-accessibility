@@ -8,6 +8,7 @@
 
 #include "accessibility/dijkstra_e2sfca.h"
 #include "accessibility/phast_e2sfca.h"
+#include "accessibility/tiled_e2sfca.h"
 #include "graph/geom.h"
 #include "graph/graph.h"
 #include "graph/loader.h"
@@ -28,8 +29,10 @@ NB_MODULE(_pyaccess_ext, m)
 
     auto i_graph = py::class_<IGraph>(m, "IGraph");
     auto i_ch_graph = py::class_<ICHGraph, IGraph>(m, "ICHGraph");
+    auto i_tiled_graph = py::class_<ITiledGraph, IGraph>(m, "ITiledGraph");
     auto graph = py::class_<Graph, IGraph>(m, "Graph");
     auto ch_graph = py::class_<CHGraph, ICHGraph>(m, "CHGraph");
+    auto tiled_graph = py::class_<TiledGraph, ITiledGraph>(m, "TiledGraph");
 
     m.def("load_graph", &loadGraph);
     m.def("load_chgraph", &loadCHGraph);
@@ -39,4 +42,6 @@ NB_MODULE(_pyaccess_ext, m)
     m.def("calc_range_rphast_2sfca", &calcRangeRPHAST2SFCA);
     m.def("calc_range_rphast_2sfca2", &calcRangeRPHAST2SFCA2);
     m.def("calc_range_rphast_2sfca3", &calcRangeRPHAST2SFCA3);
+    m.def("calc_tiled_2sfca", &calcTiled2SFCA);
+    m.def("calc_tiled_2sfca2", &calcTiled2SFCA2);
 }

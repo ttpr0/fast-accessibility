@@ -35,6 +35,14 @@ class CHGraph(ICHGraph):
     ...
 
 
+class ITiledGraph(IGraph):
+    ...
+
+
+class TiledGraph(ITiledGraph):
+    ...
+
+
 def load_graph(path: str) -> Graph:
     ...
 
@@ -60,4 +68,12 @@ def calc_range_rphast_2sfca2(graph: ICHGraph, dem_points: CoordVector, dem_weigh
 
 
 def calc_range_rphast_2sfca3(graph: ICHGraph, dem_points: CoordVector, dem_weights: IntVector, sup_points: CoordVector, sup_weights: IntVector, max_range: int) -> FloatVector:
+    ...
+
+
+def calc_tiled_2sfca(graph: ITiledGraph, dem_points: CoordVector, dem_weights: IntVector, sup_points: CoordVector, sup_weights: IntVector, max_range: int) -> FloatVector:
+    ...
+
+
+def calc_tiled_2sfca2(graph: ITiledGraph, dem_points: CoordVector, dem_weights: IntVector, sup_points: CoordVector, sup_weights: IntVector, max_range: int) -> FloatVector:
     ...

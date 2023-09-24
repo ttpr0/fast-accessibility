@@ -263,7 +263,7 @@ std::tuple<std::vector<Shortcut>, std::vector<std::tuple<int, char>>, std::vecto
         shortcuts.push_back(Shortcut{node_a, node_b, s, c});
         weights.push_back(weight);
     }
-    int start = 8 + shc_count * 18;
+    start = 8 + shc_count * 18;
     for (int i = 0; i < edgeref_count; i++) {
         int e = *(reinterpret_cast<int*>(&buffer[start + i * 5 + 0]));
         char t = *(reinterpret_cast<char*>(&buffer[start + i * 5 + 4]));
@@ -293,7 +293,7 @@ std::tuple<std::unordered_map<short, std::tuple<int, int>>, std::vector<TiledSHE
 
         tile_ranges[tile] = std::make_tuple(s, c);
     }
-    int start = 8 + tile_count * 10;
+    start = 8 + tile_count * 10;
     for (int i = 0; i < edge_count; i++) {
         int from = *(reinterpret_cast<int*>(&buffer[start + i * 12 + 0]));
         int to = *(reinterpret_cast<int*>(&buffer[start + i * 12 + 4]));
@@ -380,7 +380,7 @@ std::unique_ptr<TiledGraph> loadTiledGraph(const std::string& path)
     auto [skip_node_entries, skip_fwd_entries, skip_bwd_entries] = loadTypedTopology(path + "-skip_topology", nodecount);
 
     // load ch store
-    auto [shortcuts, edge_refs, sh_weights] = loadTiledShortcuts(path + "-skip_shortcut");
+    auto [shortcuts, edge_refs, sh_weights] = loadTiledShortcuts(path + "-skip_shortcuts");
     auto node_tiles = loadNodeTiles(path + "-tiles", nodecount);
     auto edge_types = loadEdgeTypes(path + "-tiles_types", edgecount);
 
@@ -390,5 +390,5 @@ std::unique_ptr<TiledGraph> loadTiledGraph(const std::string& path)
     auto topology = TopologyStore(node_entries, fwd_entries, bwd_entries);
     auto skip_topology = TypedTopologyStore(skip_node_entries, skip_fwd_entries, skip_bwd_entries);
     auto skip_store = TiledStore(shortcuts, edge_refs, node_tiles, sh_weights, edge_types);
-    return std::make_unique<TiledGraph>(store, topology, weights, skip_store, skip_topology);
+    return std::make_unique<TiledGraph>(store, topology, weights, skip_store, skip_topology, tile_ranges, index_edges);
 }
