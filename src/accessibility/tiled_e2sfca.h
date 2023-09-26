@@ -203,7 +203,7 @@ std::vector<float> calcTiled2SFCA2(ITiledGraph* g, std::vector<Coord>& dem_point
                     heap.push({other_id, new_length});
                 }
             };
-            if (curr_tile == s_tile || active_tiles[curr_tile]) {
+            if (curr_tile == s_tile) {
                 explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, handler);
             } else {
                 found_tiles[curr_tile] = true;
