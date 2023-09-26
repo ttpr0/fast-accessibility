@@ -33,6 +33,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph)
     const int N = 1;
     const int N2 = 3;
     const int N3 = 3;
+    const int RANGE = 1800;
     const int B = std::pow(2, 14);
     const int T = std::pow(2, 14);
     std::vector<std::vector<int>> start_nodes;
@@ -103,7 +104,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph)
                         target_count += 1;
                     }
                 }
-                bench.run("Restricted-Dijkstra", [&] { calcRestrictedDijkstra(ch_graph, start, dist, visited, targets, target_count); });
+                bench.run("Restricted-Dijkstra", [&] { calcRestrictedRangeDijkstra(ch_graph, start, dist, visited, RANGE, targets, target_count); });
 
                 // benchmark phast
                 for (int l = 0; l < ch_graph->nodeCount(); l++) {
