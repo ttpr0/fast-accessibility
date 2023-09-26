@@ -5,6 +5,7 @@
 #include <tuple>
 #include <vector>
 
+#include "../graph/ch_graph.h"
 #include "../graph/graph.h"
 #include "./pq_item.h"
 
@@ -269,6 +270,96 @@ std::vector<int> calcRangePHAST4(ICHGraph* g, int start, int max_range)
         if (dist[edge.to] > new_len) {
             dist[edge.to] = new_len;
         }
+    }
+
+    return dist;
+}
+
+std::vector<int> calcRangePHAST5(CHGraph2* g, int start, int max_range)
+{
+    int tile_count = g->tileCount();
+    std::vector<bool> active_tiles(tile_count);
+    for (int i = 0; i < tile_count; i++) {
+        active_tiles[i] = false;
+    }
+    std::vector<int> dist(g->nodeCount());
+    std::vector<bool> visited(g->nodeCount());
+    for (int i = 0; i < g->nodeCount(); i++) {
+        dist[i] = 1000000000;
+        visited[i] = false;
+    }
+    dist[start] = 0;
+
+    std::priority_queue<pq_item> heap;
+    heap.push({start, 0});
+
+    auto explorer = g->getGraphExplorer();
+
+    while (true) {
+        if (heap.empty()) {
+            break;
+        }
+        auto item = heap.top();
+        int curr_id = item.node;
+        heap.pop();
+        if (visited[curr_id]) {
+            continue;
+        }
+        visited[curr_id] = true;
+        short curr_tile = g->getNodeTile(curr_id);
+        active_tiles[curr_tile] = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+            int other_id = ref.other_id;
+            if (visited[other_id]) {
+                return;
+            }
+            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            if (new_length > max_range) {
+                return;
+            }
+            if (dist[other_id] > new_length) {
+                dist[other_id] = new_length;
+                heap.push({other_id, new_length});
+            }
+        });
+    }
+    // iterative down-sweep
+    const std::vector<CHEdge4>& down_edges = g->getDownEdges4(Direction::FORWARD);
+    CHEdge4 overlay_dummy = down_edges[0];
+    int overlay_start = 1;
+    int overlay_end = 1 + overlay_dummy.to;
+    for (int i = overlay_start; i < overlay_end; i++) {
+        CHEdge4 edge = down_edges[i];
+        int curr_len = dist[edge.from];
+        int new_len = curr_len + edge.weight;
+        if (new_len > max_range) {
+            continue;
+        }
+        if (dist[edge.to] > new_len) {
+            dist[edge.to] = new_len;
+            active_tiles[edge.to_tile] = true;
+        }
+    }
+    for (int i = overlay_end; i < down_edges.size(); i++) {
+        CHEdge4 curr_dummy = down_edges[i];
+        int curr_tile = curr_dummy.to_tile;
+        int curr_count = curr_dummy.to;
+        if (active_tiles[curr_tile]) {
+            int tile_start = i + 1;
+            int tile_end = i + 1 + curr_count;
+            for (int j = tile_start; j < tile_end; j++) {
+                CHEdge4 edge = down_edges[j];
+                int curr_len = dist[edge.from];
+                int new_len = curr_len + edge.weight;
+                if (new_len > max_range) {
+                    continue;
+                }
+                if (dist[edge.to] > new_len) {
+                    dist[edge.to] = new_len;
+                }
+            }
+        }
+        i += curr_count;
     }
 
     return dist;

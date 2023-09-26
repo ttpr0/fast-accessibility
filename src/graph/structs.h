@@ -56,6 +56,15 @@ struct CHEdge
     bool skip;
 };
 
+struct CHEdge4
+{
+    int from;
+    int to;
+    int weight;
+    short to_tile;
+    bool is_dummy;
+};
+
 struct TiledSHEdge
 {
     int from;

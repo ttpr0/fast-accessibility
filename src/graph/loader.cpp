@@ -392,3 +392,34 @@ std::unique_ptr<TiledGraph> loadTiledGraph(const std::string& path)
     auto skip_store = TiledStore(shortcuts, edge_refs, node_tiles, sh_weights, edge_types);
     return std::make_unique<TiledGraph>(store, topology, weights, skip_store, skip_topology, tile_ranges, index_edges);
 }
+
+std::unique_ptr<CHGraph2> loadCHGraph2(std::string path)
+{
+    // load graph storage
+    auto nodes = loadGraphNodes(path + "-nodes");
+    int nodecount = nodes.size();
+    auto edges = loadGraphEdges(path + "-edges");
+    int edgecount = edges.size();
+    auto node_geoms = loadGraphGeom(path + "-geom", nodecount, edgecount);
+
+    // load topology
+    auto [node_entries, fwd_entries, bwd_entries] = loadTopology(path + "-graph", nodecount);
+
+    // load weights
+    auto weights = loadEdgeWeights(path + "-fastest_weighting", edgecount);
+
+    // load ch-topology
+    auto [ch_node_entries, ch_fwd_entries, ch_bwd_entries] = loadTopology(path + "-ch_graph", nodecount);
+
+    // load ch store
+    auto [shortcuts, sh_weights] = loadCHShortcuts(path + "-shortcut");
+    auto node_levels = loadCHLevels(path + "-level", nodecount);
+
+    auto node_tiles = loadNodeTiles(path + "-tiles", nodecount);
+
+    auto store = GraphStore(nodes, edges, node_geoms);
+    auto topology = TopologyStore(node_entries, fwd_entries, bwd_entries);
+    auto ch_topology = TopologyStore(ch_node_entries, ch_fwd_entries, ch_bwd_entries);
+    auto ch_store = CHStore(shortcuts, node_levels, sh_weights);
+    return std::make_unique<CHGraph2>(store, topology, weights, ch_store, ch_topology, std::move(node_tiles));
+}

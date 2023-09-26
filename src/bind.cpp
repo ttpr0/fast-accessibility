@@ -8,6 +8,7 @@
 
 #include "accessibility/dijkstra_e2sfca.h"
 #include "accessibility/phast_e2sfca.h"
+#include "accessibility/range_query.h"
 #include "accessibility/tiled_e2sfca.h"
 #include "graph/geom.h"
 #include "graph/graph.h"
@@ -24,18 +25,22 @@ NB_MODULE(_pyaccess_ext, m)
     coord_vec.def("append", [](vector<Coord>& v, tuple<float, float> val) { v.push_back(Coord{get<0>(val), get<1>(val)}); });
 
     auto coord = py::class_<Coord>(m, "Coord");
-    coord.def("lon", [](Coord& c) { return c.lon; });
-    coord.def("lat", [](Coord& c) { return c.lat; });
+    coord.def(py::init<>());
+    coord.def_rw("lon", &Coord::lon);
+    coord.def_rw("lat", &Coord::lat);
 
     auto i_graph = py::class_<IGraph>(m, "IGraph");
     auto i_ch_graph = py::class_<ICHGraph, IGraph>(m, "ICHGraph");
     auto i_tiled_graph = py::class_<ITiledGraph, IGraph>(m, "ITiledGraph");
     auto graph = py::class_<Graph, IGraph>(m, "Graph");
     auto ch_graph = py::class_<CHGraph, ICHGraph>(m, "CHGraph");
+    auto ch_graph_2 = py::class_<CHGraph2, ICHGraph>(m, "CHGraph2");
     auto tiled_graph = py::class_<TiledGraph, ITiledGraph>(m, "TiledGraph");
 
     m.def("load_graph", &loadGraph);
     m.def("load_chgraph", &loadCHGraph);
+    m.def("load_chgraph_2", &loadCHGraph2);
+    m.def("load_tiled_graph", &loadTiledGraph);
 
     m.def("calc_dijkstra_2sfca", &calcDijkstra2SFCA);
     m.def("calc_range_phast_2sfca", &calcRangePHAST2SFCA);
@@ -44,4 +49,7 @@ NB_MODULE(_pyaccess_ext, m)
     m.def("calc_range_rphast_2sfca3", &calcRangeRPHAST2SFCA3);
     m.def("calc_tiled_2sfca", &calcTiled2SFCA);
     m.def("calc_tiled_2sfca2", &calcTiled2SFCA2);
+    m.def("calc_range_dijkstra", &calcDijkstraRangeQuery);
+    m.def("calc_range_phast", &calcPHASTRangeQuery);
+    m.def("calc_range_phast_2", &calcPHASTRangeQuery2);
 }

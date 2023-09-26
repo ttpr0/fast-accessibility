@@ -18,3 +18,5 @@ std::unique_ptr<Graph> loadGraph(std::string path);
 std::unique_ptr<CHGraph> loadCHGraph(std::string path);
 
 std::unique_ptr<TiledGraph> loadTiledGraph(const std::string& path);
+
+std::unique_ptr<CHGraph2> loadCHGraph2(std::string path);

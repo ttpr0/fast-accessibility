@@ -11,7 +11,7 @@
 #include "./topology_storage.h"
 
 //*******************************************
-// base-graph
+// ch-graph
 //******************************************
 
 class CHGraph : public ICHGraph
@@ -44,6 +44,37 @@ public:
     int shortcutCount();
     CHShortcut getShortcut(int shortcut);
     const std::vector<CHEdge>& getDownEdges(Direction dir);
+};
+
+class CHGraph2 : public ICHGraph
+{
+public:
+    CHGraph ch_graph;
+
+    // tile of every node
+    std::vector<short> node_tiles;
+    // stores all fowwards-down edges
+    std::vector<CHEdge4> fwd_down_edges;
+    // stores all backwards-down edges
+    std::vector<CHEdge4> bwd_down_edges;
+
+    CHGraph2(GraphStore store, TopologyStore topology, std::vector<int> weights, CHStore ch_store, TopologyStore ch_topology, std::vector<short> node_tiles);
+
+    std::unique_ptr<IGraphExplorer> getGraphExplorer();
+    IGraphIndex& getIndex();
+    int nodeCount();
+    int edgeCount();
+    Node getNode(int node);
+    Edge getEdge(int edge);
+    Coord getNodeGeom(int node);
+
+    short getNodeLevel(int node);
+    int shortcutCount();
+    CHShortcut getShortcut(int shortcut);
+    const std::vector<CHEdge>& getDownEdges(Direction dir);
+    short getNodeTile(int node);
+    int tileCount();
+    const std::vector<CHEdge4>& getDownEdges4(Direction dir);
 };
 
 //*******************************************
