@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "graph/graph.h"
-#include "graph/loader.h"
+#include "../graph/graph.h"
+#include "../graph/loader.h"
 
 std::tuple<std::vector<Coord>, std::vector<int>> read_points(const std::string& filename)
 {
@@ -34,7 +34,7 @@ std::tuple<std::vector<Coord>, std::vector<int>> read_points(const std::string& 
     return std::make_tuple(std::move(points), std::move(weights));
 }
 
-std::tuple<std::vector<Coord>, std::vector<int>> select_random(std::vector<Coord> points, std::vector<int> weights, int count)
+std::tuple<std::vector<Coord>, std::vector<int>> select_random(std::vector<Coord>& points, std::vector<int>& weights, int count)
 {
     std::vector<Coord> new_locs(count);
     std::vector<int> new_weights(count);

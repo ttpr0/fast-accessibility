@@ -10,11 +10,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../algorithm/one_to_many.h"
+#include "../algorithm/special_dijkstra.h"
+#include "../graph/graph.h"
+#include "../graph/loader.h"
 #include "./benchmark_util.h"
-#include "algorithm/one_to_many.h"
-#include "algorithm/special_dijkstra.h"
-#include "graph/graph.h"
-#include "graph/loader.h"
 
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
