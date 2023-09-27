@@ -102,6 +102,9 @@ void calcPHAST(ICHGraph* g, int start, std::vector<DistLabel>& flags, short coun
         }
         int new_len = curr_flag.dist + edge.weight;
         auto& other_flag = flags[edge.to];
+        if (other_flag._counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
         if (other_flag.dist > new_len) {
             other_flag.dist = new_len;
         }
@@ -155,6 +158,9 @@ void calcRPHAST(ICHGraph* g, int start, std::vector<DistLabel>& flags, short cou
         }
         int new_len = curr_flag.dist + edge.weight;
         auto& other_flag = flags[edge.to];
+        if (other_flag._counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
         if (other_flag.dist > new_len) {
             other_flag.dist = new_len;
         }
