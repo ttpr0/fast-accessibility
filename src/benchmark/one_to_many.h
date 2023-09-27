@@ -96,8 +96,11 @@ void benchmark_one_to_many(ICHGraph* ch_graph, ITiledGraph* tiled_graph)
                 // create benchmark instance
                 auto bench = nanobench::Bench();
 
-                std::vector<int> dist(ch_graph->nodeCount());
-                std::vector<bool> visited(ch_graph->nodeCount());
+                std::vector<DistLabel> flags(ch_graph->nodeCount());
+                for (int n = 0; n < flags.size(); n++) {
+                    flags[n] = {1000000000, false, -1};
+                }
+                short counter = 0;
 
                 // benchmark rphast preprocessing
                 std::vector<CHEdge> down_edges_subset;
@@ -115,70 +118,45 @@ void benchmark_one_to_many(ICHGraph* ch_graph, ITiledGraph* tiled_graph)
 
                 // benchmark restricted-dijkstra
                 bench.run("Restricted-Dijkstra", [&] {
-                    int target_count = 0;
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                        if (targets[l]) {
-                            target_count += 1;
-                        }
-                    }
-                    calcRestrictedRangeDijkstra(ch_graph, start, dist, visited, RANGE, targets, target_count);
+                    counter = (counter + 1) % 10000;
+                    calcRangeDijkstra(ch_graph, start, flags, counter, RANGE);
                 });
 
                 // benchmark phast
                 bench.run("PHAST", [&] {
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                    }
-                    calcPHAST(ch_graph, start, dist, visited);
+                    counter = (counter + 1) % 10000;
+                    calcPHAST(ch_graph, start, flags, counter);
                 });
 
                 // benchmark rphast
 
                 bench.run("RPHAST", [&] {
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                    }
-                    calcRPHAST(ch_graph, start, dist, visited, down_edges_subset);
+                    counter = (counter + 1) % 10000;
+                    calcRPHAST(ch_graph, start, flags, counter, down_edges_subset);
                 });
 
                 // benchmark range-phast
                 bench.run("RangePHAST", [&] {
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                    }
-                    calcRangePHAST(ch_graph, start, dist, visited, RANGE);
+                    counter = (counter + 1) % 10000;
+                    calcRangePHAST(ch_graph, start, flags, counter, RANGE);
                 });
 
                 // benchmark range-rphast with normal preprocessing
                 bench.run("RangeRPHAST", [&] {
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                    }
-                    calcRangeRPHAST(ch_graph, start, dist, visited, RANGE, down_edges_subset);
+                    counter = (counter + 1) % 10000;
+                    calcRangeRPHAST(ch_graph, start, flags, counter, RANGE, down_edges_subset);
                 });
 
                 // benchmark range-rphast with range preprocessing
                 bench.run("RangeRPHAST2", [&] {
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                    }
-                    calcRangeRPHAST(ch_graph, start, dist, visited, RANGE, down_edges_subset_2);
+                    counter = (counter + 1) % 10000;
+                    calcRangeRPHAST(ch_graph, start, flags, counter, RANGE, down_edges_subset_2);
                 });
 
                 // benchmark range-rphast with range preprocessing
                 bench.run("GRASP", [&] {
-                    for (int l = 0; l < ch_graph->nodeCount(); l++) {
-                        dist[l] = 1000000000;
-                        visited[l] = false;
-                    }
-                    calcGRASP(tiled_graph, start, dist, visited, RANGE);
+                    counter = (counter + 1) % 10000;
+                    calcGRASP(tiled_graph, start, flags, counter, RANGE);
                 });
 
                 auto& results_list = bench.results();

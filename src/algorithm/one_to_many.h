@@ -7,17 +7,17 @@
 
 #include "../graph/graph.h"
 #include "./pq_item.h"
+#include "./util.h"
 
 // simple dijkstra with range and target count restriction
-void calcRestrictedRangeDijkstra(IGraph* g, int start, std::vector<int>& dist, std::vector<bool>& visited, int max_range, std::vector<bool>& targets, int target_count)
+void calcRangeDijkstra(IGraph* g, int start, std::vector<DistLabel>& flags, short counter, int max_range)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     auto explorer = g->getGraphExplorer();
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
-    int found_count = 0;
     while (true) {
         if (heap.empty()) {
             break;
@@ -25,30 +25,29 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, std::vector<int>& dist, s
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        if (targets[curr_id]) {
-            found_count += 1;
-            if (found_count == target_count) {
-                break;
-            }
-        }
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&dist, &visited, &explorer, &heap, &curr_id, &max_range](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -56,9 +55,9 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, std::vector<int>& dist, s
 }
 
 // simple PHAST
-void calcPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool>& visited)
+void calcPHAST(ICHGraph* g, int start, std::vector<DistLabel>& flags, short counter)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     auto explorer = g->getGraphExplorer();
 
@@ -71,18 +70,23 @@ void calcPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool>
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -92,18 +96,22 @@ void calcPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool>
     int length = down_edges.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
 }
 
 // simple RPHAST
-void calcRPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool>& visited, std::vector<CHEdge>& down_edges_subset)
+void calcRPHAST(ICHGraph* g, int start, std::vector<DistLabel>& flags, short counter, std::vector<CHEdge>& down_edges_subset)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     auto explorer = g->getGraphExplorer();
 
@@ -116,18 +124,23 @@ void calcRPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -136,10 +149,14 @@ void calcRPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool
     int length = down_edges_subset.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges_subset[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
 }
@@ -192,9 +209,9 @@ std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::vector<bool>& targets)
 }
 
 // PHAST with simple range restriction
-void calcRangePHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool>& visited, int max_range)
+void calcRangePHAST(ICHGraph* g, int start, std::vector<DistLabel>& flags, short counter, int max_range)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     auto explorer = g->getGraphExplorer();
 
@@ -207,21 +224,26 @@ void calcRangePHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id, &max_range](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -231,21 +253,28 @@ void calcRangePHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<
     int length = down_edges.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
             continue;
         }
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto& other_flag = flags[edge.to];
+        if (other_flag._counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
 }
 
 // RPHAST with simple range restriction
-void calcRangeRPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector<bool>& visited, int max_range, std::vector<CHEdge>& down_edges_subset)
+void calcRangeRPHAST(ICHGraph* g, int start, std::vector<DistLabel>& flags, short counter, int max_range, std::vector<CHEdge>& down_edges_subset)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     auto explorer = g->getGraphExplorer();
 
@@ -258,21 +287,26 @@ void calcRangeRPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id, &max_range](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -281,13 +315,20 @@ void calcRangeRPHAST(ICHGraph* g, int start, std::vector<int>& dist, std::vector
     int length = down_edges_subset.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges_subset[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
             continue;
         }
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto& other_flag = flags[edge.to];
+        if (other_flag._counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
 }
@@ -350,9 +391,9 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, int max_range, std::vecto
 }
 
 // PHAST with graph-partitioning
-void calcPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<bool>& visited, int max_range)
+void calcPHAST2(CHGraph2* g, int start, std::vector<DistLabel>& flags, short counter, int max_range)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     int tile_count = g->tileCount();
     std::vector<bool> active_tiles(tile_count);
@@ -371,23 +412,28 @@ void calcPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<bool
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
+        curr_flag.visited = true;
         short curr_tile = g->getNodeTile(curr_id);
         active_tiles[curr_tile] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id, &max_range](EdgeRef ref) {
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -399,13 +445,20 @@ void calcPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<bool
     int overlay_end = 1 + overlay_dummy.to;
     for (int i = overlay_start; i < overlay_end; i++) {
         CHEdge4 edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
             continue;
         }
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto& other_flag = flags[edge.to];
+        if (other_flag._counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
             active_tiles[edge.to_tile] = true;
         }
     }
@@ -418,13 +471,20 @@ void calcPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<bool
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {
                 CHEdge4 edge = down_edges[j];
-                int curr_len = dist[edge.from];
-                int new_len = curr_len + edge.weight;
+                auto curr_flag = flags[edge.from];
+                if (curr_flag._counter != counter) {
+                    continue;
+                }
+                int new_len = curr_flag.dist + edge.weight;
                 if (new_len > max_range) {
                     continue;
                 }
-                if (dist[edge.to] > new_len) {
-                    dist[edge.to] = new_len;
+                auto& other_flag = flags[edge.to];
+                if (other_flag._counter != counter) {
+                    other_flag = {1000000000, false, counter};
+                }
+                if (other_flag.dist > new_len) {
+                    other_flag.dist = new_len;
                 }
             }
         }
@@ -433,9 +493,9 @@ void calcPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<bool
 }
 
 // RPHAST with graph-partitioning
-void calcRPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<bool>& visited, int max_range, std::vector<CHEdge4>& down_edges_subset)
+void calcRPHAST2(CHGraph2* g, int start, std::vector<DistLabel>& flags, short counter, int max_range, std::vector<CHEdge4>& down_edges_subset)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     int tile_count = g->tileCount();
     std::vector<bool> active_tiles(tile_count);
@@ -454,23 +514,28 @@ void calcRPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<boo
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
+        curr_flag.visited = true;
         short curr_tile = g->getNodeTile(curr_id);
         active_tiles[curr_tile] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id, &max_range](EdgeRef ref) {
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -481,17 +546,23 @@ void calcRPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<boo
     int overlay_end = 1 + overlay_dummy.to;
     for (int i = overlay_start; i < overlay_end; i++) {
         CHEdge4 edge = down_edges_subset[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
             continue;
         }
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto& other_flag = flags[edge.to];
+        if (other_flag._counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
             active_tiles[edge.to_tile] = true;
         }
     }
-    // iterative down sweep
     for (int i = overlay_end; i < down_edges_subset.size(); i++) {
         CHEdge4 curr_dummy = down_edges_subset[i];
         int curr_tile = curr_dummy.to_tile;
@@ -501,13 +572,20 @@ void calcRPHAST2(CHGraph2* g, int start, std::vector<int>& dist, std::vector<boo
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {
                 CHEdge4 edge = down_edges_subset[j];
-                int curr_len = dist[edge.from];
-                int new_len = curr_len + edge.weight;
+                auto curr_flag = flags[edge.from];
+                if (curr_flag._counter != counter) {
+                    continue;
+                }
+                int new_len = curr_flag.dist + edge.weight;
                 if (new_len > max_range) {
                     continue;
                 }
-                if (dist[edge.to] > new_len) {
-                    dist[edge.to] = new_len;
+                auto& other_flag = flags[edge.to];
+                if (other_flag._counter != counter) {
+                    other_flag = {1000000000, false, counter};
+                }
+                if (other_flag.dist > new_len) {
+                    other_flag.dist = new_len;
                 }
             }
         }
@@ -579,9 +657,9 @@ std::vector<CHEdge4> preprocessRPHAST2(CHGraph2* g, std::vector<bool>& targets)
     return std::move(down_edges_subset);
 }
 
-void calcGRASP(ITiledGraph* g, int start, std::vector<int>& dist, std::vector<bool>& visited, int max_range)
+void calcGRASP(ITiledGraph* g, int start, std::vector<DistLabel>& flags, short counter, int max_range)
 {
-    dist[start] = 0;
+    flags[start] = {0, false, counter};
 
     short start_tile = g->getNodeTile(start);
 
@@ -606,22 +684,27 @@ void calcGRASP(ITiledGraph* g, int start, std::vector<int>& dist, std::vector<bo
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
+        curr_flag.visited = true;
         short curr_tile = g->getNodeTile(curr_id);
-        auto handler = [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        auto handler = [&flags, &counter, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         };
@@ -639,10 +722,17 @@ void calcGRASP(ITiledGraph* g, int start, std::vector<int>& dist, std::vector<bo
         auto& down_edges = g->getIndexEdges(i, Direction::FORWARD);
         for (int j = 0; j < down_edges.size(); j++) {
             TiledSHEdge edge = down_edges[j];
-            int curr_len = dist[edge.from];
-            int new_len = curr_len + edge.weight;
-            if (dist[edge.to] > new_len) {
-                dist[edge.to] = new_len;
+            auto curr_flag = flags[edge.from];
+            int new_len = curr_flag.dist + edge.weight;
+            if (new_len > max_range) {
+                continue;
+            }
+            auto& other_flag = flags[edge.to];
+            if (other_flag._counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.dist > new_len) {
+                other_flag.dist = new_len;
             }
         }
     }
