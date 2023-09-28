@@ -44,36 +44,43 @@ void benchmark_range_search(IGraph* graph, ICHGraph* ch_graph)
         // get current test value
         int range = counts[i];
 
+        auto flags = DistFlagArray(graph->nodeCount());
+
         // run benchmakrs
         auto bench = nanobench::Bench();
         bench.run("Range-Dijkstra", [&] {
             for (int i = 0; i < N; i++) {
                 int start = start_nodes[i];
-                calcAllDijkstra(graph, start, range);
+                flags.soft_reset();
+                calcAllDijkstra(graph, start, flags);
             }
         });
         bench.run("PHAST", [&] {
             for (int i = 0; i < N; i++) {
                 int start = start_nodes[i];
-                calcPHAST(ch_graph, start);
+                flags.soft_reset();
+                calcPHAST(ch_graph, start, flags);
             }
         });
         bench.run("Range-PHAST", [&] {
             for (int i = 0; i < N; i++) {
                 int start = start_nodes[i];
-                calcRangePHAST(ch_graph, start, range);
+                flags.soft_reset();
+                calcRangePHAST(ch_graph, start, flags, range);
             }
         });
         bench.run("Range-PHAST2", [&] {
             for (int i = 0; i < N; i++) {
                 int start = start_nodes[i];
-                calcRangePHAST4(ch_graph, start, range);
+                flags.soft_reset();
+                calcRangePHAST4(ch_graph, start, flags, range);
             }
         });
-        bench.run("Range-PHAST3", [&] {
+        bench.run("Range-PHAST2", [&] {
             for (int i = 0; i < N; i++) {
                 int start = start_nodes[i];
-                calcRangePHAST3(ch_graph, start, range);
+                flags.soft_reset();
+                calcRangePHAST2(ch_graph, start, flags, range);
             }
         });
 

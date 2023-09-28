@@ -6,21 +6,12 @@
 #include <vector>
 
 #include "../graph/graph.h"
-#include "./pq_item.h"
+#include "./util.h"
 
-std::vector<int> calcRestrictedDijkstra(IGraph* g, int start, std::vector<bool>& targets)
+// computes dijkstra forward search until all targets are found
+void calcRestrictedDijkstra(IGraph* g, int start, DistFlagArray& flags, std::vector<bool>& targets, int target_count)
 {
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    int target_count;
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-        if (targets[i]) {
-            target_count += 1;
-        }
-    }
-    dist[start] = 0;
+    flags.set_start(start);
 
     auto explorer = g->getGraphExplorer();
 
@@ -34,31 +25,80 @@ std::vector<int> calcRestrictedDijkstra(IGraph* g, int start, std::vector<bool>&
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
+        curr_flag.visited = true;
         if (targets[curr_id]) {
             found_count += 1;
             if (found_count == target_count) {
                 break;
             }
         }
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&dist, &visited, &explorer, &heap, &curr_id](EdgeRef ref) {
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
     }
+}
 
-    return dist;
+// computes dijkstra forward search until "max_range" is reached or all targets are found
+void calcRestrictedRangeDijkstra(IGraph* g, int start, DistFlagArray& flags, int max_range, std::vector<bool>& targets, int target_count)
+{
+    flags.set_start(start);
+
+    auto explorer = g->getGraphExplorer();
+
+    std::priority_queue<pq_item> heap;
+    heap.push({start, 0});
+    int found_count = 0;
+    while (true) {
+        if (heap.empty()) {
+            break;
+        }
+        auto item = heap.top();
+        int curr_id = item.node;
+        heap.pop();
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
+            continue;
+        }
+        curr_flag.visited = true;
+        if (targets[curr_id]) {
+            found_count += 1;
+            if (found_count == target_count) {
+                break;
+            }
+        }
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
+            if (ref.isShortcut()) {
+                return;
+            }
+            int other_id = ref.other_id;
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
+                return;
+            }
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (new_length > max_range) {
+                return;
+            }
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
+                heap.push({other_id, new_length});
+            }
+        });
+    }
 }

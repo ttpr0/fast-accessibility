@@ -6,9 +6,11 @@
 #include <tuple>
 #include <vector>
 
-#include "../algorithm/pq_item.h"
+#include "../algorithm/grasp.h"
+#include "../algorithm/util.h"
 #include "../graph/graph.h"
 
+// 2sfca using tiled-graph only descending into active cells
 std::vector<float> calcTiled2SFCA(ITiledGraph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
                                   int max_range)
 {
@@ -123,8 +125,9 @@ std::vector<float> calcTiled2SFCA(ITiledGraph* g, std::vector<Coord>& dem_points
     return access;
 }
 
-std::vector<float> calcTiled2SFCA2(ITiledGraph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
-                                   int max_range)
+// 2sfca using combination of reGRASP and isoGRASP
+std::vector<float> calcGRASP2SFCA(ITiledGraph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
+                                  int max_range)
 {
     // get closest node for every demand point
     IGraphIndex& index = g->getIndex();
@@ -147,11 +150,10 @@ std::vector<float> calcTiled2SFCA2(ITiledGraph* g, std::vector<Coord>& dem_point
         access[i] = 0;
     }
 
-    std::vector<bool> visited(g->nodeCount());
-    std::vector<int> dist(g->nodeCount());
+    auto flags = DistFlagArray(g->nodeCount());
     std::vector<bool> found_tiles(tilecount);
     std::mutex m;
-#pragma omp parallel for firstprivate(visited, dist, found_tiles)
+#pragma omp parallel for firstprivate(flags, found_tiles)
     for (int i = 0; i < sup_points.size(); i++) {
         // get supply information
         int s_id = index.getClosestNode(sup_points[i]);
@@ -161,69 +163,12 @@ std::vector<float> calcTiled2SFCA2(ITiledGraph* g, std::vector<Coord>& dem_point
         int s_weight = sup_weights[i];
         short s_tile = g->getNodeTile(s_id);
 
-        // init routing components
-        auto explorer = g->getGraphExplorer();
-        std::priority_queue<pq_item> heap;
-
-        // clear for routing
-        heap.push({s_id, 0});
-        for (int i = 0; i < visited.size(); i++) {
-            visited[i] = false;
-            dist[i] = 1000000000;
-        }
+        // compute distances
         for (int i = 0; i < tilecount; i++) {
             found_tiles[i] = false;
         }
-        dist[s_id] = 0;
-
-        // routing loop
-        while (true) {
-            if (heap.empty()) {
-                break;
-            }
-            auto item = heap.top();
-            int curr_id = item.node;
-            heap.pop();
-            if (visited[curr_id]) {
-                continue;
-            }
-            visited[curr_id] = true;
-            short curr_tile = g->getNodeTile(curr_id);
-            auto handler = [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
-                int other_id = ref.other_id;
-                if (visited[other_id]) {
-                    return;
-                }
-                int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-                if (new_length > max_range) {
-                    return;
-                }
-                if (dist[other_id] > new_length) {
-                    dist[other_id] = new_length;
-                    heap.push({other_id, new_length});
-                }
-            };
-            if (curr_tile == s_tile) {
-                explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, handler);
-            } else {
-                found_tiles[curr_tile] = true;
-                explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_SKIP, handler);
-            }
-        }
-        for (int i = 0; i < tilecount; i++) {
-            if (!active_tiles[i] || !found_tiles[i]) {
-                continue;
-            }
-            auto& down_edges = g->getIndexEdges(i, Direction::FORWARD);
-            for (int j = 0; j < down_edges.size(); j++) {
-                TiledSHEdge edge = down_edges[j];
-                int curr_len = dist[edge.from];
-                int new_len = curr_len + edge.weight;
-                if (dist[edge.to] > new_len) {
-                    dist[edge.to] = new_len;
-                }
-            }
-        }
+        flags.soft_reset();
+        calcGRASP(g, s_id, flags, max_range, active_tiles, found_tiles);
 
         // compute R-value for facility
         float demand_sum = 0.0;
@@ -232,10 +177,11 @@ std::vector<float> calcTiled2SFCA2(ITiledGraph* g, std::vector<Coord>& dem_point
             if (d_node == -1) {
                 continue;
             }
-            if (!visited[d_node]) {
+            auto d_flag = flags[d_node];
+            if (!d_flag.visited) {
                 continue;
             }
-            float distance_decay = 1 - dist[d_node] / (float)max_range;
+            float distance_decay = 1 - d_flag.dist / (float)max_range;
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -245,10 +191,11 @@ std::vector<float> calcTiled2SFCA2(ITiledGraph* g, std::vector<Coord>& dem_point
             if (d_node == -1) {
                 continue;
             }
-            if (!visited[d_node]) {
+            auto d_flag = flags[d_node];
+            if (!d_flag.visited) {
                 continue;
             }
-            float distance_decay = 1 - dist[d_node] / (float)max_range;
+            float distance_decay = 1 - d_flag.dist / (float)max_range;
             m.lock();
             access[i] += R * distance_decay;
             m.unlock();

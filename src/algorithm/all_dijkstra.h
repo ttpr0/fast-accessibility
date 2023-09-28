@@ -6,17 +6,12 @@
 #include <vector>
 
 #include "../graph/graph.h"
-#include "./pq_item.h"
+#include "./util.h"
 
-std::vector<int> calcAllDijkstra(IGraph* g, int start, int max_range)
+// computes one-to-all distances using forward-dijkstra
+void calcAllDijkstra(IGraph* g, int start, DistFlagArray& flags)
 {
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
+    flags.set_start(start);
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -30,28 +25,25 @@ std::vector<int> calcAllDijkstra(IGraph* g, int start, int max_range)
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-            if (new_length > max_range) {
-                return;
-            }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
     }
-
-    return dist;
 }

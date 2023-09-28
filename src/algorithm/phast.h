@@ -6,17 +6,12 @@
 #include <vector>
 
 #include "../graph/graph.h"
-#include "./pq_item.h"
+#include "./util.h"
 
-std::vector<int> calcPHAST(ICHGraph* g, int start)
+// simple phast
+void calcPHAST(ICHGraph* g, int start, DistFlagArray& flags)
 {
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
+    flags.set_start(start);
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -30,18 +25,20 @@ std::vector<int> calcPHAST(ICHGraph* g, int start)
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -51,12 +48,71 @@ std::vector<int> calcPHAST(ICHGraph* g, int start)
     int length = down_edges.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        auto& curr_flag = flags[edge.from];
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
+}
 
-    return dist;
+// test
+void calcPHAST2(ICHGraph* g, int start, DistFlagArray& flags_)
+{
+    auto& flags = flags_.get_flags();
+    short counter = flags_.get_counter();
+
+    flags[start] = {0, false, counter};
+
+    auto explorer = g->getGraphExplorer();
+
+    std::priority_queue<pq_item> heap;
+    heap.push({start, 0});
+    while (true) {
+        if (heap.empty()) {
+            break;
+        }
+        auto item = heap.top();
+        int curr_id = item.node;
+        heap.pop();
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
+            continue;
+        }
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag](EdgeRef ref) {
+            int other_id = ref.other_id;
+            auto& other_flag = flags[other_id];
+            if (other_flag._flag_counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
+                return;
+            }
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
+                heap.push({other_id, new_length});
+            }
+        });
+    }
+
+    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
+    int length = down_edges.size();
+    for (int i = 0; i < length; i++) {
+        auto edge = down_edges[i];
+        auto curr_flag = flags[edge.from];
+        if (curr_flag._flag_counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag._flag_counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
+        }
+    }
 }

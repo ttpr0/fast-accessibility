@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "../accessibility/dijkstra_e2sfca.h"
+#include "../accessibility/other_e2sfca.h"
 #include "../accessibility/phast_e2sfca.h"
 #include "../algorithm/all_dijkstra.h"
 #include "../algorithm/phast.h"
@@ -35,7 +36,7 @@ void benchmark_supply_count(IGraph* graph, ICHGraph* ch_graph)
     auto [sup_points, sup_weights] = read_points(sup_file);
 
     // create random benchmark data
-    const int N = 5;
+    const int N = 1;
     std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>> view_subsets;
     for (auto sup_count : sup_counts) {
         std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
@@ -44,7 +45,7 @@ void benchmark_supply_count(IGraph* graph, ICHGraph* ch_graph)
             auto [d_p, d_w] = select_random(dem_points, dem_weights, dem_count);
             views.push_back(std::make_tuple(std::move(d_p), std::move(d_w), std::move(s_p), std::move(s_w)));
         }
-        view_subsets[dem_count] = views;
+        view_subsets[sup_count] = views;
     }
 
     // init results
@@ -56,11 +57,17 @@ void benchmark_supply_count(IGraph* graph, ICHGraph* ch_graph)
     for (int i = 0; i < sup_counts.size(); i++) {
         // get current test value
         int sup_count = sup_counts[i];
-        auto& views = view_subsets[dem_count];
+        auto& views = view_subsets[sup_count];
 
         // run benchmakrs
         auto bench = nanobench::Bench();
         bench.run("Range-Dijkstra", [&] {
+            for (int i = 0; i < N; i++) {
+                auto& [d_p, d_w, s_p, s_w] = views[i];
+                _calcDijkstra2SFCA(graph, d_p, d_w, s_p, s_w, MAX_RANGE);
+            }
+        });
+        bench.run("Range-Dijkstra2", [&] {
             for (int i = 0; i < N; i++) {
                 auto& [d_p, d_w, s_p, s_w] = views[i];
                 calcDijkstra2SFCA(graph, d_p, d_w, s_p, s_w, MAX_RANGE);

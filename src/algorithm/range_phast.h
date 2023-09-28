@@ -7,17 +7,11 @@
 
 #include "../graph/ch_graph.h"
 #include "../graph/graph.h"
-#include "./pq_item.h"
+#include "./util.h"
 
-std::vector<int> calcRangePHAST(ICHGraph* g, int start, int max_range)
+void calcRangePHAST(ICHGraph* g, int start, DistFlagArray& flags, int max_range)
 {
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
+    flags.set_start(start);
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -31,21 +25,23 @@ std::vector<int> calcRangePHAST(ICHGraph* g, int start, int max_range)
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -55,28 +51,21 @@ std::vector<int> calcRangePHAST(ICHGraph* g, int start, int max_range)
     int length = down_edges.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        if (curr_len > max_range) {
+        auto& curr_flag = flags[edge.from];
+        if (curr_flag.dist > max_range) {
             continue;
         }
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
-
-    return dist;
 }
 
-std::vector<int> calcRangePHAST2(ICHGraph* g, int start, int max_range)
+void calcRangePHAST2(ICHGraph* g, int start, DistFlagArray& flags, int max_range)
 {
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
+    flags.set_start(start);
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -90,21 +79,23 @@ std::vector<int> calcRangePHAST2(ICHGraph* g, int start, int max_range)
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -114,29 +105,22 @@ std::vector<int> calcRangePHAST2(ICHGraph* g, int start, int max_range)
     int length = down_edges.size();
     for (int i = 0; i < length; ++i) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        if (curr_len > max_range) {
+        auto& curr_flag = flags[edge.from];
+        if (curr_flag.dist > max_range) {
             i += edge.count - 1;
             continue;
         }
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
-
-    return dist;
 }
 
-std::vector<int> calcRangePHAST3(ICHGraph* g, int start, int max_range)
+void calcRangePHAST4(ICHGraph* g, int start, DistFlagArray& flags, int max_range)
 {
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
+    flags.set_start(start);
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -150,96 +134,23 @@ std::vector<int> calcRangePHAST3(ICHGraph* g, int start, int max_range)
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
-                heap.push({other_id, new_length});
-            }
-        });
-    }
-
-    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
-    bool skip = false;
-    int count = 0;
-    int i = 0;
-    int length = down_edges.size();
-    while (i < length) {
-        if (skip) {
-            count -= 1;
-            if (count == 0) {
-                skip = false;
-                i -= 1;
-            }
-            i += 1;
-            continue;
-        }
-        auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        if (curr_len > max_range) {
-            count = edge.count;
-            skip = true;
-            i += 1;
-            continue;
-        }
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
-        }
-        i += 1;
-    }
-
-    return dist;
-}
-
-std::vector<int> calcRangePHAST4(ICHGraph* g, int start, int max_range)
-{
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
-
-    std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
-
-    auto explorer = g->getGraphExplorer();
-
-    while (true) {
-        if (heap.empty()) {
-            break;
-        }
-        auto item = heap.top();
-        int curr_id = item.node;
-        heap.pop();
-        if (visited[curr_id]) {
-            continue;
-        }
-        visited[curr_id] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
-            int other_id = ref.other_id;
-            if (visited[other_id]) {
-                return;
-            }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-            if (new_length > max_range) {
-                return;
-            }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
@@ -250,51 +161,43 @@ std::vector<int> calcRangePHAST4(ICHGraph* g, int start, int max_range)
     int length = down_edges.size();
     for (int i = 0; i < length_1; ++i) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        if (curr_len > max_range) {
+        auto& curr_flag = flags[edge.from];
+        if (curr_flag.dist > max_range) {
             i += edge.count - 1;
             continue;
         }
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
     for (int i = length_1; i < length; ++i) {
         auto edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        if (curr_len > max_range) {
+        auto& curr_flag = flags[edge.from];
+        if (curr_flag.dist > max_range) {
             continue;
         }
-        int new_len = curr_len + edge.weight;
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
+        int new_len = curr_flag.dist + edge.weight;
+        auto& other_flag = flags[edge.to];
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
         }
     }
-
-    return dist;
 }
 
-std::vector<int> calcRangePHAST5(CHGraph2* g, int start, int max_range)
+// PHAST with simple range restriction
+void calcRangePHAST5(ICHGraph* g, int start, DistFlagArray& flags_, int max_range)
 {
-    int tile_count = g->tileCount();
-    std::vector<bool> active_tiles(tile_count);
-    for (int i = 0; i < tile_count; i++) {
-        active_tiles[i] = false;
-    }
-    std::vector<int> dist(g->nodeCount());
-    std::vector<bool> visited(g->nodeCount());
-    for (int i = 0; i < g->nodeCount(); i++) {
-        dist[i] = 1000000000;
-        visited[i] = false;
-    }
-    dist[start] = 0;
+    auto& flags = flags_.get_flags();
+    short counter = flags_.get_counter();
 
-    std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    flags[start] = {0, false, counter};
 
     auto explorer = g->getGraphExplorer();
 
+    std::priority_queue<pq_item> heap;
+    heap.push({start, 0});
     while (true) {
         if (heap.empty()) {
             break;
@@ -302,65 +205,50 @@ std::vector<int> calcRangePHAST5(CHGraph2* g, int start, int max_range)
         auto item = heap.top();
         int curr_id = item.node;
         heap.pop();
-        if (visited[curr_id]) {
+        auto& curr_flag = flags[curr_id];
+        if (curr_flag.visited) {
             continue;
         }
-        visited[curr_id] = true;
-        short curr_tile = g->getNodeTile(curr_id);
-        active_tiles[curr_tile] = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
+        curr_flag.visited = true;
+        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
-            if (visited[other_id]) {
+            auto& other_flag = flags[other_id];
+            if (other_flag._flag_counter != counter) {
+                other_flag = {1000000000, false, counter};
+            }
+            if (other_flag.visited) {
                 return;
             }
-            int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
-            if (dist[other_id] > new_length) {
-                dist[other_id] = new_length;
+            if (other_flag.dist > new_length) {
+                other_flag.dist = new_length;
                 heap.push({other_id, new_length});
             }
         });
     }
-    // iterative down-sweep
-    const std::vector<CHEdge4>& down_edges = g->getDownEdges4(Direction::FORWARD);
-    CHEdge4 overlay_dummy = down_edges[0];
-    int overlay_start = 1;
-    int overlay_end = 1 + overlay_dummy.to;
-    for (int i = overlay_start; i < overlay_end; i++) {
-        CHEdge4 edge = down_edges[i];
-        int curr_len = dist[edge.from];
-        int new_len = curr_len + edge.weight;
+
+    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
+    int length = down_edges.size();
+    for (int i = 0; i < length; i++) {
+        auto edge = down_edges[i];
+        auto& curr_flag = flags[edge.from];
+        if (curr_flag._flag_counter != counter) {
+            continue;
+        }
+        int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
             continue;
         }
-        if (dist[edge.to] > new_len) {
-            dist[edge.to] = new_len;
-            active_tiles[edge.to_tile] = true;
+        auto& other_flag = flags[edge.to];
+        if (other_flag._flag_counter != counter) {
+            other_flag = {1000000000, false, counter};
+        }
+        if (other_flag.dist > new_len) {
+            other_flag.dist = new_len;
+            other_flag.visited = true;
         }
     }
-    for (int i = overlay_end; i < down_edges.size(); i++) {
-        CHEdge4 curr_dummy = down_edges[i];
-        int curr_tile = curr_dummy.to_tile;
-        int curr_count = curr_dummy.to;
-        if (active_tiles[curr_tile]) {
-            int tile_start = i + 1;
-            int tile_end = i + 1 + curr_count;
-            for (int j = tile_start; j < tile_end; j++) {
-                CHEdge4 edge = down_edges[j];
-                int curr_len = dist[edge.from];
-                int new_len = curr_len + edge.weight;
-                if (new_len > max_range) {
-                    continue;
-                }
-                if (dist[edge.to] > new_len) {
-                    dist[edge.to] = new_len;
-                }
-            }
-        }
-        i += curr_count;
-    }
-
-    return dist;
 }

@@ -6,9 +6,11 @@
 #include <tuple>
 #include <vector>
 
-#include "../algorithm/pq_item.h"
+#include "../algorithm/range_dijkstra.h"
+#include "../algorithm/util.h"
 #include "../graph/graph.h"
 
+// 2sfca using range-dijkstra
 std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
                                      int max_range)
 {
@@ -27,10 +29,9 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
         access[i] = 0;
     }
 
-    std::vector<bool> visited(g->nodeCount());
-    std::vector<int> dist(g->nodeCount());
+    auto flags = DistFlagArray(g->nodeCount());
     std::mutex m;
-#pragma omp parallel for firstprivate(visited, dist)
+#pragma omp parallel for firstprivate(flags)
     for (int i = 0; i < sup_points.size(); i++) {
         // get supply information
         int s_id = index.getClosestNode(sup_points[i]);
@@ -39,45 +40,9 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
         }
         int s_weight = sup_weights[i];
 
-        // init routing components
-        auto explorer = g->getGraphExplorer();
-        std::priority_queue<pq_item> heap;
-
-        // clear for routing
-        heap.push({s_id, 0});
-        for (int i = 0; i < visited.size(); i++) {
-            visited[i] = false;
-            dist[i] = 1000000000;
-        }
-        dist[s_id] = 0;
-
-        // routing loop
-        while (true) {
-            if (heap.empty()) {
-                break;
-            }
-            auto item = heap.top();
-            int curr_id = item.node;
-            heap.pop();
-            if (visited[curr_id]) {
-                continue;
-            }
-            visited[curr_id] = true;
-            explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&dist, &visited, &explorer, &heap, &max_range, &curr_id](EdgeRef ref) {
-                int other_id = ref.other_id;
-                if (visited[other_id]) {
-                    return;
-                }
-                int new_length = dist[curr_id] + explorer->getEdgeWeight(ref);
-                if (new_length > max_range) {
-                    return;
-                }
-                if (dist[other_id] > new_length) {
-                    dist[other_id] = new_length;
-                    heap.push({other_id, new_length});
-                }
-            });
-        }
+        // compute distances
+        flags.soft_reset();
+        calcRangeDijkstra(g, s_id, flags, max_range);
 
         // compute R-value for facility
         float demand_sum = 0.0;
@@ -86,10 +51,11 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
             if (d_node == -1) {
                 continue;
             }
-            if (!visited[d_node]) {
+            auto d_flag = flags[d_node];
+            if (!d_flag.visited) {
                 continue;
             }
-            float distance_decay = 1 - dist[d_node] / (float)max_range;
+            float distance_decay = 1 - d_flag.dist / (float)max_range;
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -99,10 +65,11 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
             if (d_node == -1) {
                 continue;
             }
-            if (!visited[d_node]) {
+            auto d_flag = flags[d_node];
+            if (!d_flag.visited) {
                 continue;
             }
-            float distance_decay = 1 - dist[d_node] / (float)max_range;
+            float distance_decay = 1 - d_flag.dist / (float)max_range;
             m.lock();
             access[i] += R * distance_decay;
             m.unlock();

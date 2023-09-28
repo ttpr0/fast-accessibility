@@ -63,6 +63,9 @@ def load_tiled_graph(path: str) -> TiledGraph:
 def calc_dijkstra_2sfca(graph: IGraph, dem_points: CoordVector, dem_weights: IntVector, sup_points: CoordVector, sup_weights: IntVector, max_range: int) -> FloatVector:
     ...
 
+def calc_dijkstra_2sfca_2(graph: IGraph, dem_points: CoordVector, dem_weights: IntVector, sup_points: CoordVector, sup_weights: IntVector, max_range: int) -> FloatVector:
+    ...
+
 
 def calc_range_phast_2sfca(graph: ICHGraph, dem_points: CoordVector, dem_weights: IntVector, sup_points: CoordVector, sup_weights: IntVector, max_range: int) -> FloatVector:
     ...
