@@ -80,6 +80,7 @@ void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, 
         }
         if (other_flag.dist > new_len) {
             other_flag.dist = new_len;
+            other_flag.visited = true;
             active_tiles[edge.to_tile] = true;
         }
     }
@@ -106,6 +107,7 @@ void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, 
                 }
                 if (other_flag.dist > new_len) {
                     other_flag.dist = new_len;
+                    other_flag.visited = true;
                 }
             }
         }

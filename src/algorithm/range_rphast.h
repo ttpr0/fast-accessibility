@@ -55,7 +55,7 @@ void calcRangeRPHAST(ICHGraph* g, int start, DistFlagArray& flags_, int max_rang
     int length = down_edges_subset.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges_subset[i];
-        auto curr_flag = flags[edge.from];
+        auto& curr_flag = flags[edge.from];
         if (curr_flag._flag_counter != counter) {
             continue;
         }

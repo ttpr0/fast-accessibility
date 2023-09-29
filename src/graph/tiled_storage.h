@@ -28,7 +28,7 @@ public:
                 max = tile;
             }
         }
-        return max - 1;
+        return max + 1;
     }
     int shortcutCount() { return this->shortcuts.size(); }
     Shortcut getShortcut(int shc) { return this->shortcuts[shc]; }

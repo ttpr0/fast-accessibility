@@ -9,6 +9,7 @@
 #include "../graph/graph.h"
 #include "./util.h"
 
+// simple range-PHAST
 void calcRangePHAST(ICHGraph* g, int start, DistFlagArray& flags, int max_range)
 {
     flags.set_start(start);

@@ -43,6 +43,7 @@ NB_MODULE(_pyaccess_ext, m)
     m.def("load_chgraph_2", &loadCHGraph2);
     m.def("load_tiled_graph", &loadTiledGraph);
 
+    // 2sfca functions
     m.def("calc_dijkstra_2sfca", &calcDijkstra2SFCA);
     m.def("calc_dijkstra_2sfca_2", &_calcDijkstra2SFCA);
     m.def("calc_range_phast_2sfca", &calcRangePHAST2SFCA);
@@ -51,7 +52,13 @@ NB_MODULE(_pyaccess_ext, m)
     m.def("calc_range_rphast_2sfca3", &calcRangeRPHAST2SFCA3);
     m.def("calc_tiled_2sfca", &calcTiled2SFCA);
     m.def("calc_tiled_2sfca2", &_calcGRASP2SFCA);
+
+    // range query functions
     m.def("calc_range_dijkstra", &calcDijkstraRangeQuery);
-    m.def("calc_range_phast", &calcPHASTRangeQuery);
-    m.def("calc_range_phast_2", &calcRPHASTRangeQuery);
+    m.def("calc_range_phast", &calcRangePHASTRangeQuery);
+    m.def("calc_range_rphast", &calcRPHASTRangeQuery);
+    m.def("calc_range_rphast_2", &calcRangeRPHASTRangeQuery);
+    m.def("calc_gs_phast", &calcGSPHASTRangeQuery);
+    m.def("calc_gs_rphast", &calcGSRPHASTRangeQuery);
+    m.def("calc_grasp", &calcGRASPRangeQuery);
 }

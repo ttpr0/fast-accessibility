@@ -70,6 +70,9 @@ void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, 
         for (int j = 0; j < down_edges.size(); j++) {
             TiledSHEdge edge = down_edges[j];
             auto curr_flag = flags[edge.from];
+            if (curr_flag._flag_counter != counter) {
+                continue;
+            }
             int new_len = curr_flag.dist + edge.weight;
             if (new_len > max_range) {
                 continue;
@@ -80,6 +83,7 @@ void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, 
             }
             if (other_flag.dist > new_len) {
                 other_flag.dist = new_len;
+                other_flag.visited = true;
             }
         }
     }
