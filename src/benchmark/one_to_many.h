@@ -78,10 +78,10 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
 
     // create random benchmark data
     const int N = 5;
-    const int N2 = 5;
-    const int N3 = 5;
+    const int N2 = 3;
+    const int N3 = 3;
     const int RANGE = 2400;
-    const int B = std::pow(2, 20);
+    const int B = std::pow(2, 14);
     const int T = std::pow(2, 14);
     std::vector<std::vector<int>> start_nodes;
     std::vector<std::vector<std::vector<bool>>> target_nodes;
@@ -200,7 +200,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 // benchmark range-dijkstra
                 bench.run("Range-Dijkstra", [&] {
                     flags.soft_reset();
-                    calcRangeDijkstra2(ch_graph, start_ch, flags, RANGE);
+                    calcRangeDijkstra(ch_graph, start_ch, flags, RANGE);
                 });
 
                 // benchmark phast
@@ -218,7 +218,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 // benchmark range-phast
                 bench.run("RangePHAST", [&] {
                     flags.soft_reset();
-                    calcRangePHAST(ch_graph, start_ch, flags, RANGE);
+                    calcRangePHAST5(ch_graph, start_ch, flags, RANGE);
                 });
 
                 // benchmark range-rphast with normal preprocessing
@@ -236,7 +236,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 // benchmark GS+PHAST
                 bench.run("GSPHAST", [&] {
                     flags.soft_reset();
-                    calcGSPHAST2(ch_graph_2, start_ch_2, flags, RANGE);
+                    calcGSPHAST(ch_graph_2, start_ch_2, flags, RANGE);
                 });
 
                 // benchmark GS+RPHAST

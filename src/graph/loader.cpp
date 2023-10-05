@@ -1,3 +1,7 @@
+#define _FILE_OFFSET_BITS 64
+#define _LARGE_FILE_SOURCE 1
+
+#include <iterator>
 
 #include "./loader.h"
 
@@ -6,6 +10,27 @@
 //*******************************************
 
 std::vector<char> readAllFile(std::string filename)
+{
+    std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file");
+    }
+    file.unsetf(std::ios::skipws);
+    file.seekg(0, std::ios::end);
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    // create vector
+    std::vector<char> arr;
+    arr.reserve(size);
+
+    //read file
+    arr.insert(arr.begin(), std::istream_iterator<char>(file), std::istream_iterator<char>());
+
+    return arr;
+}
+
+std::vector<char> _readAllFile(std::string filename)
 {
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
@@ -370,11 +395,15 @@ std::unique_ptr<TiledGraph> loadTiledGraph(const std::string& path)
     int edgecount = edges.size();
     auto node_geoms = loadGraphGeom(path + "-geom", nodecount, edgecount);
 
+    std::cout << "1" << std::endl;
+
     // load topology
     auto [node_entries, fwd_entries, bwd_entries] = loadTopology(path + "-graph", nodecount);
 
     // load weights
     auto weights = loadEdgeWeights(path + "-fastest_weighting", edgecount);
+
+    std::cout << "2" << std::endl;
 
     // load ch-topology
     auto [skip_node_entries, skip_fwd_entries, skip_bwd_entries] = loadTypedTopology(path + "-skip_topology", nodecount);
@@ -384,7 +413,11 @@ std::unique_ptr<TiledGraph> loadTiledGraph(const std::string& path)
     auto node_tiles = loadNodeTiles(path + "-tiles", nodecount);
     auto edge_types = loadEdgeTypes(path + "-tiles_types", edgecount);
 
+    std::cout << "3" << std::endl;
+
     auto [tile_ranges, index_edges] = loadTileRanges(path + "-tileranges");
+
+    std::cout << "4" << std::endl;
 
     auto store = GraphStore(nodes, edges, node_geoms);
     auto topology = TopologyStore(node_entries, fwd_entries, bwd_entries);

@@ -11,6 +11,7 @@
 
 #include "../accessibility/dijkstra_e2sfca.h"
 #include "../accessibility/phast_e2sfca.h"
+#include "../accessibility/tiled_e2sfca.h"
 #include "../algorithm/all_dijkstra.h"
 #include "../algorithm/phast.h"
 #include "../algorithm/range_phast.h"
@@ -22,13 +23,13 @@
 #include <nanobench.h>
 namespace nanobench = ankerl::nanobench;
 
-void benchmark_demand_count(IGraph* graph, ICHGraph* ch_graph)
+void benchmark_demand_count(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* tiled_graph)
 {
-    const std::string dem_file = "./data/population_wittmund.txt";
-    const std::string sup_file = "./data/physicians_wittmund.txt";
-    const int sup_count = 10000;
-    const std::vector<int> dem_counts = {10, 30, 50, 100, 150, 200};
-    const int MAX_RANGE = 1800;
+    const std::string dem_file = "./data/point_files/population_region_hannover.txt";
+    const std::string sup_file = "./data/point_files/physicians_region_hannover.txt";
+    const int sup_count = 150;
+    const std::vector<int> dem_counts = {10000, 30000, 50000, 55000, 60000, 65000, 70000, 79343};
+    const int MAX_RANGE = 2400;
 
     // load demand and supply
     auto [dem_points, dem_weights] = read_points(dem_file);
@@ -62,31 +63,31 @@ void benchmark_demand_count(IGraph* graph, ICHGraph* ch_graph)
         bench.run("Range-Dijkstra", [&] {
             for (int i = 0; i < N; i++) {
                 auto& [d_p, d_w, s_p, s_w] = views[i];
-                calcDijkstra2SFCA(graph, d_p, d_w, s_p, s_w, MAX_RANGE);
+                calcDijkstra2SFCA(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
             }
         });
-        bench.run("Range-PHAST", [&] {
+        bench.run("RPHAST", [&] {
             for (int i = 0; i < N; i++) {
                 auto& [d_p, d_w, s_p, s_w] = views[i];
-                calcRangePHAST2SFCA(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
+                calcRPHAST2SFCA(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
             }
         });
         bench.run("Range-RPHAST", [&] {
             for (int i = 0; i < N; i++) {
                 auto& [d_p, d_w, s_p, s_w] = views[i];
-                calcRangeRPHAST2SFCA(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
-            }
-        });
-        bench.run("Range-RPHAST2", [&] {
-            for (int i = 0; i < N; i++) {
-                auto& [d_p, d_w, s_p, s_w] = views[i];
                 calcRangeRPHAST2SFCA2(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
             }
         });
-        bench.run("Range-RPHAST3", [&] {
+        bench.run("GS-RPHAST", [&] {
             for (int i = 0; i < N; i++) {
                 auto& [d_p, d_w, s_p, s_w] = views[i];
-                calcRangeRPHAST2SFCA3(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
+                calcGSRPHAST2SFCA(ch_graph_2, d_p, d_w, s_p, s_w, MAX_RANGE);
+            }
+        });
+        bench.run("isoPHAST", [&] {
+            for (int i = 0; i < N; i++) {
+                auto& [d_p, d_w, s_p, s_w] = views[i];
+                calcGRASP2SFCA(tiled_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
             }
         });
 
