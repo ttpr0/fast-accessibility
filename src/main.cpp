@@ -4,98 +4,98 @@
 #include <iostream>
 #include <vector>
 
-#include "./benchmark.h"
 #include "algorithm/all_dijkstra.h"
 #include "algorithm/phast.h"
 #include "algorithm/range_phast.h"
-#include "benchmark.h"
+#include "benchmark/benchmark.h"
 #include "graph/graph.h"
 #include "graph/loader.h"
 
 using namespace std;
 
-// #define PRINT_RESULT
-
 int main()
 {
-    auto graph = loadGraph("./graphs/bench_ch");
-    auto ch_graph = loadCHGraph("./graphs/bench_ch");
+    // auto graph = loadGraph("./graphs/germany_ch");
+    // auto ch_graph_1 = loadCHGraph("D:/Routing_Graphen/niedersachsen/niedersachsen_ch_reordered");
+    // auto ch_graph_2 = loadCHGraph2("D:/Routing_Graphen/niedersachsen/niedersachsen_ch_tiled_1000");
+    // auto tiled_graph_1 = loadTiledGraph("D:/Routing_Graphen/niedersachsen/niedersachsen_tiled_1000_grasp");
+    // auto tiled_graph_2 = loadTiledGraph("D:/Routing_Graphen/niedersachsen/niedersachsen_tiled_1000_phast");
 
-    const std::vector<CHEdge>& down_edges = ch_graph->getDownEdges(Direction::FORWARD);
-    int length = down_edges.size();
-    int count = 0;
-    int sum = 0;
-    for (int i = 0; i < length; ++i) {
-        auto edge = down_edges[i];
-        sum += edge.count;
-        count += 1;
-        if (count == 10000) {
-            int avg = sum / count;
-            if (avg == 2) {
-                cout << i << endl;
-            }
-            sum = 0;
-            count = 0;
-        }
-        i += edge.count - 1;
-    }
+    cout << "start loading graphs..." << endl;
+    // auto tiled_graph_1 = loadTiledGraph("D:/Routing_Graphen/germany/germany_tiled_10000_grasp");
+    // cout << "finished loading tiled-graph..." << endl;
+    auto ch_graph_1 = loadCHGraph("D:/Routing_Graphen/germany/germany_ch_reordered");
+    cout << "finished loading ch-graph..." << endl;
+    auto ch_graph_2 = loadCHGraph2("D:/Routing_Graphen/germany/germany_ch_tiled_10000");
+    cout << "finished loading ch-graph 2..." << endl;
+    auto tiled_graph_2 = loadTiledGraph("D:/Routing_Graphen/germany/germany_tiled_10000_phast");
+    cout << "finished loading tiled-graph 2..." << endl;
 
     // benchmark_range_search(graph.get(), ch_graph.get());
-    benchmark_supply_count(graph.get(), ch_graph.get());
+    // benchmark_supply_count(graph.get(), ch_graph.get());
+    // benchmark_one_to_many(ch_graph_1.get(), ch_graph_2.get(), tiled_graph_1.get(), tiled_graph_2.get());
+    // benchmark_catchment_range(ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    // benchmark_supply_count(ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    // benchmark_demand_count(ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    // benchmark_study_area(ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 
-    // auto [dem_points, dem_weights] = read_points("./data/population_wittmund.txt");
-    // auto [sup_points, sup_weights] = read_points("./data/physicians_wittmund.txt");
+    // benchmark hausarzt
+    benchmark_2sfca_run("./data/physician/mittelbereiche/physicians_munster_hausarzt.txt", "./data/points/mittelbereiche/population_munster.txt", 1930,
+                        "results_2sfca_munster_hausarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/mittelbereiche/physicians_westerstede_hausarzt.txt", "./data/points/mittelbereiche/population_westerstede.txt", 1930,
+                        "results_2sfca_westerstede_hausarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/mittelbereiche/physicians_hildesheim_hausarzt.txt", "./data/points/mittelbereiche/population_hildesheim.txt", 1930,
+                        "results_2sfca_hildesheim_hausarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/physicians_niedersachsen_hausarzt.txt", "./data/points/population_niedersachsen.txt", 1930, "results_2sfca_niedersachsen_hausarzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 
-    // calcDijkstra2SFCA(graph.get(), dem_points, dem_weights, sup_points, sup_weights, 1800);
+    // benchmark augenarzt
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_emden_augenarzt.txt", "./data/points/landkreise/population_emden.txt", 2413, "results_2sfca_emden_augenarzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_braunschweig_augenarzt.txt", "./data/points/landkreise/population_braunschweig.txt", 2413,
+                        "results_2sfca_braunschweig_augenarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_region_hannover_augenarzt.txt", "./data/points/landkreise/population_region_hannover.txt", 2413,
+                        "results_2sfca_region_hannover_augenarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/physicians_niedersachsen_augenarzt.txt", "./data/points/population_niedersachsen.txt", 2413, "results_2sfca_niedersachsen_augenarzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 
-    // int start = 100;
-    // int range = 1800;
-    // int n = 10023;
+    // benchmark frauenarzt
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_emden_frauenarzt.txt", "./data/points/landkreise/population_emden.txt", 2550, "results_2sfca_emden_frauenarzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_braunschweig_frauenarzt.txt", "./data/points/landkreise/population_braunschweig.txt", 2550,
+                        "results_2sfca_braunschweig_frauenarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_region_hannover_frauenarzt.txt", "./data/points/landkreise/population_region_hannover.txt", 2550,
+                        "results_2sfca_region_hannover_frauenarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/physicians_niedersachsen_frauenarzt.txt", "./data/points/population_niedersachsen.txt", 2550,
+                        "results_2sfca_niedersachsen_frauenarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 
-    // auto dist = calcAllDijkstra(ch_graph.get(), start, range);
-    // cout << "Dijkstra: " << dist[n] << endl;
-    // auto dist = calcPHAST(ch_graph.get(), start);
-    // cout << "PHAST: " << dist[n] << endl;
-    // auto dist = calcRangePHAST(ch_graph.get(), start, range);
-    // cout << "RangePHAST: " << dist[n] << endl;
-    // auto dist = calcRangePHAST2(ch_graph.get(), start, range);
-    // cout << "RangePHAST2: " << dist[n] << endl;
-    // auto dist = calcRangePHAST3(ch_graph.get(), start, range);
-    // cout << "RangePHAST3: " << dist[n] << endl;
+    // benchmark hautarzt
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_emden_hautarzt.txt", "./data/points/landkreise/population_emden.txt", 2802, "results_2sfca_emden_hautarzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_braunschweig_hautarzt.txt", "./data/points/landkreise/population_braunschweig.txt", 2802,
+                        "results_2sfca_braunschweig_hautarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_region_hannover_hautarzt.txt", "./data/points/landkreise/population_region_hannover.txt", 2802,
+                        "results_2sfca_region_hannover_hautarzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/physicians_niedersachsen_hautarzt.txt", "./data/points/population_niedersachsen.txt", 2802, "results_2sfca_niedersachsen_hautarzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 
-    // auto t1 = std::chrono::high_resolution_clock::now();
-    // for (int i = 0; i < N; i++) {
-    //     int start = start_nodes[i];
-    //     calcAllDijkstra(graph.get(), start, range);
-    // }
-    // auto t2 = std::chrono::high_resolution_clock::now();
-    // auto dt1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    // cout << "time: " << dt1.count() / N << endl;
+    // benchmark hno_arzt
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_emden_hno_arzt.txt", "./data/points/landkreise/population_emden.txt", 2477, "results_2sfca_emden_hno_arzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_braunschweig_hno_arzt.txt", "./data/points/landkreise/population_braunschweig.txt", 2477,
+                        "results_2sfca_braunschweig_hno_arzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_region_hannover_hno_arzt.txt", "./data/points/landkreise/population_region_hannover.txt", 2477,
+                        "results_2sfca_region_hannover_hno_arzt.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/physicians_niedersachsen_hno_arzt.txt", "./data/points/population_niedersachsen.txt", 2477, "results_2sfca_niedersachsen_hno_arzt.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 
-    // t1 = std::chrono::high_resolution_clock::now();
-    // for (int i = 0; i < N; i++) {
-    //     int start = start_nodes[i];
-    //     calcPHAST(ch_graph.get(), start, range);
-    // }
-    // t2 = std::chrono::high_resolution_clock::now();
-    // auto dt2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    // cout << "time: " << dt2.count() / N << endl;
-
-    // t1 = std::chrono::high_resolution_clock::now();
-    // for (int i = 0; i < N; i++) {
-    //     int start = start_nodes[i];
-    //     calcPHAST2(ch_graph.get(), start, range);
-    // }
-    // t2 = std::chrono::high_resolution_clock::now();
-    // auto dt3 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    // cout << "time: " << dt3.count() / N << endl;
-
-    // t1 = std::chrono::high_resolution_clock::now();
-    // for (int i = 0; i < N; i++) {
-    //     int start = start_nodes[i];
-    //     calcPHAST3(ch_graph.get(), start, range);
-    // }
-    // t2 = std::chrono::high_resolution_clock::now();
-    // auto dt4 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    // cout << "time: " << dt4.count() / N << endl;
+    // benchmark orthopade
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_emden_orthopade.txt", "./data/points/landkreise/population_emden.txt", 3076, "results_2sfca_emden_orthopade.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_braunschweig_orthopade.txt", "./data/points/landkreise/population_braunschweig.txt", 3076,
+                        "results_2sfca_braunschweig_orthopade.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/landkreise/physicians_region_hannover_orthopade.txt", "./data/points/landkreise/population_region_hannover.txt", 3076,
+                        "results_2sfca_region_hannover_orthopade.csv", ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
+    benchmark_2sfca_run("./data/physician/physicians_niedersachsen_orthopade.txt", "./data/points/population_niedersachsen.txt", 3076, "results_2sfca_niedersachsen_orthopade.csv",
+                        ch_graph_1.get(), ch_graph_2.get(), tiled_graph_2.get());
 }

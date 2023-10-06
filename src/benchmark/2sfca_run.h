@@ -23,26 +23,12 @@
 #include <nanobench.h>
 namespace nanobench = ankerl::nanobench;
 
-void benchmark_2sfca_run(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* tiled_graph)
+void benchmark_2sfca_run(std::string sup_file, std::string dem_file, int max_range, std::string out_name, ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* tiled_graph)
 {
-    const std::string dem_file = "./data/population_wittmund.txt";
-    const std::string sup_file = "./data/physicians_wittmund.txt";
-    const int sup_count = 10;
-    const int dem_count = 10000;
-    const int MAX_RANGE = 1800;
-
     // load demand and supply
     auto [dem_points, dem_weights] = read_points(dem_file);
     auto [sup_points, sup_weights] = read_points(sup_file);
-
-    // create random benchmark data
-    const int N = 5;
-    std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
-    for (int i = 0; i < N; i++) {
-        auto [s_p, s_w] = select_random(sup_points, sup_weights, sup_count);
-        auto [d_p, d_w] = select_random(dem_points, dem_weights, dem_count);
-        views.push_back(std::make_tuple(std::move(d_p), std::move(d_w), std::move(s_p), std::move(s_w)));
-    }
+    std::cout << "finished reading " << dem_points.size() << " demand and " << sup_points.size() << " supply points" << std::endl;
 
     // init results
     std::vector<std::tuple<int, std::vector<int>>> results;
@@ -50,36 +36,11 @@ void benchmark_2sfca_run(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* 
 
     // compute benchmarks
     auto bench = nanobench::Bench();
-    bench.run("Range-Dijkstra", [&] {
-        for (int i = 0; i < N; i++) {
-            auto& [d_p, d_w, s_p, s_w] = views[i];
-            calcDijkstra2SFCA(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
-        }
-    });
-    bench.run("RPHAST", [&] {
-        for (int i = 0; i < N; i++) {
-            auto& [d_p, d_w, s_p, s_w] = views[i];
-            calcRPHAST2SFCA(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
-        }
-    });
-    bench.run("Range-RPHAST", [&] {
-        for (int i = 0; i < N; i++) {
-            auto& [d_p, d_w, s_p, s_w] = views[i];
-            calcRangeRPHAST2SFCA2(ch_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
-        }
-    });
-    bench.run("GS-RPHAST", [&] {
-        for (int i = 0; i < N; i++) {
-            auto& [d_p, d_w, s_p, s_w] = views[i];
-            calcGSRPHAST2SFCA(ch_graph_2, d_p, d_w, s_p, s_w, MAX_RANGE);
-        }
-    });
-    bench.run("isoPHAST", [&] {
-        for (int i = 0; i < N; i++) {
-            auto& [d_p, d_w, s_p, s_w] = views[i];
-            calcGRASP2SFCA(tiled_graph, d_p, d_w, s_p, s_w, MAX_RANGE);
-        }
-    });
+    bench.run("Range-Dijkstra", [&] { calcDijkstra2SFCA(ch_graph, dem_points, dem_weights, sup_points, sup_weights, max_range); });
+    bench.run("RPHAST", [&] { calcRPHAST2SFCA(ch_graph, dem_points, dem_weights, sup_points, sup_weights, max_range); });
+    bench.run("Range-RPHAST", [&] { calcRangeRPHAST2SFCA2(ch_graph, dem_points, dem_weights, sup_points, sup_weights, max_range); });
+    bench.run("GS-RPHAST", [&] { calcGSRPHAST2SFCA(ch_graph_2, dem_points, dem_weights, sup_points, sup_weights, max_range); });
+    bench.run("isoPHAST", [&] { calcGRASP2SFCA(tiled_graph, dem_points, dem_weights, sup_points, sup_weights, max_range); });
 
     // gather results
     std::vector<int> times;
@@ -87,10 +48,10 @@ void benchmark_2sfca_run(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* 
         auto name = result.config().mBenchmarkName;
         headers.push_back(name);
         double time = result.average(nanobench::Result::Measure::elapsed);
-        times.push_back(time * 1000 / N);
+        times.push_back(time * 1000);
     }
     results.push_back(make_tuple(0, times));
 
     // write results to file
-    write_results("results_2sfca_run.csv", results, headers);
+    write_results(out_name, results, headers);
 }
