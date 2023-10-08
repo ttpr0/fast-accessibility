@@ -1,6 +1,7 @@
 #pragma once
 
 #include <time.h>
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -53,33 +54,21 @@ void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& 
     }
 }
 
-void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* tiled_graph_1, ITiledGraph* tiled_graph_2)
+void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_1000, CHGraph2* ch_graph_5000, CHGraph2* ch_graph_10000, ITiledGraph* grasp_graph_1000,
+                           ITiledGraph* grasp_graph_5000, ITiledGraph* grasp_graph_10000, ITiledGraph* isophast_graph_1000, ITiledGraph* isophast_graph_5000,
+                           ITiledGraph* isophast_graph_10000)
 {
     std::cout << "start one-to-many benchmark:" << std::endl;
     // init results
     std::vector<std::tuple<int, std::vector<int>>> results;
-    std::vector<std::string> headers = {"Iteration",
-                                        "RPHAST-Preprocessing",
-                                        "RangeRPHAST-Preprocessing",
-                                        "GSRPHAST-Preprocessing",
-                                        "RangeDijkstra",
-                                        "PHAST",
-                                        "RPHAST",
-                                        "RangePHAST",
-                                        "RangeRPHAST",
-                                        "RangeRPHAST2",
-                                        "GSPHAST",
-                                        "GSRPHAST",
-                                        "GRASP",
-                                        "isoPHAST"};
-    const int BENCH_COUNT = 13;
+    std::vector<std::string> benchmarks = {};
 
     std::cout << "create benchmark data..." << std::endl;
 
     // create random benchmark data
-    const int N = 5;
-    const int N2 = 3;
-    const int N3 = 3;
+    const int N = 1;
+    const int N2 = 1;
+    const int N3 = 1;
     const int RANGE = 2400;
     const int B = std::pow(2, 14);
     const int T = std::pow(2, 14);
@@ -126,76 +115,149 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
 
     // compute benchmarks for every value
     for (int i = 0; i < N; i++) {
+        // create benchmark instance
+        auto bench = nanobench::Bench();
+
         // get current test value
         std::vector<int>& starts_list = start_nodes[i];
         std::vector<std::vector<bool>>& targets_list = target_nodes[i];
 
-        // run benchmakrs
-        std::vector<double> times(BENCH_COUNT);
-        for (int j = 0; j < BENCH_COUNT; j++) {
-            times[j] = 0;
-        }
         std::vector<bool> targets_ch(ch_graph->nodeCount());
-        std::vector<bool> targets_ch_2(ch_graph_2->nodeCount());
-        std::vector<bool> targets_tiled_1(tiled_graph_1->nodeCount());
-        std::vector<bool> targets_tiled_2(tiled_graph_2->nodeCount());
+        std::vector<bool> targets_ch_1000(ch_graph_1000->nodeCount());
+        std::vector<bool> targets_ch_5000(ch_graph_5000->nodeCount());
+        std::vector<bool> targets_ch_10000(ch_graph_10000->nodeCount());
+        std::vector<bool> targets_grasp_1000(grasp_graph_1000->nodeCount());
+        std::vector<bool> targets_grasp_5000(grasp_graph_5000->nodeCount());
+        std::vector<bool> targets_grasp_10000(grasp_graph_10000->nodeCount());
+        std::vector<bool> targets_isophast_1000(isophast_graph_1000->nodeCount());
+        std::vector<bool> targets_isophast_5000(isophast_graph_5000->nodeCount());
+        std::vector<bool> targets_isophast_10000(isophast_graph_10000->nodeCount());
+        std::vector<bool> found_tiles(100000);
+        std::vector<bool> active_tiles(100000);
         for (int k = 0; k < N2; k++) {
             // get targets for different graphs
             targets_ch = targets_list[k];
-            convert_targets(START_GRAPH, ch_graph_2, targets_list[k], targets_ch_2);
-            convert_targets(START_GRAPH, tiled_graph_1, targets_list[k], targets_tiled_1);
-            convert_targets(START_GRAPH, tiled_graph_2, targets_list[k], targets_tiled_2);
+            convert_targets(START_GRAPH, ch_graph_1000, targets_list[k], targets_ch_1000);
+            convert_targets(START_GRAPH, ch_graph_5000, targets_list[k], targets_ch_5000);
+            convert_targets(START_GRAPH, ch_graph_10000, targets_list[k], targets_ch_10000);
+            convert_targets(START_GRAPH, grasp_graph_1000, targets_list[k], targets_grasp_1000);
+            convert_targets(START_GRAPH, grasp_graph_5000, targets_list[k], targets_grasp_5000);
+            convert_targets(START_GRAPH, grasp_graph_10000, targets_list[k], targets_grasp_10000);
+            convert_targets(START_GRAPH, isophast_graph_1000, targets_list[k], targets_isophast_1000);
+            convert_targets(START_GRAPH, isophast_graph_5000, targets_list[k], targets_isophast_5000);
+            convert_targets(START_GRAPH, isophast_graph_10000, targets_list[k], targets_isophast_10000);
+
+            // benchmark rphast preprocessing
+            std::vector<CHEdge> down_edges_subset;
+            bench.run("RPHAST-Preprocessing", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge> subset = preprocessRPHAST(ch_graph, std::move(node_queue));
+                down_edges_subset = std::move(subset);
+            });
+
+            // benchmark range-rphast preprocessing
+            std::vector<CHEdge> down_edges_subset_range;
+            bench.run("RangeRPHAST-Preprocessing", [&] {
+                std::priority_queue<pq_item> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch[i]) {
+                        node_queue.push({i, 0});
+                    }
+                }
+                std::vector<CHEdge> subset = preprocessRangeRPHAST(ch_graph, std::move(node_queue), RANGE);
+                down_edges_subset_range = std::move(subset);
+            });
+
+            // benchmark rphast+gs preprocessing
+            std::vector<CHEdge4> down_edges_subset_gs_1000;
+            bench.run("GSRPHAST-Preprocessing (1000)", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch_1000[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_1000, std::move(node_queue));
+                down_edges_subset_gs_1000 = std::move(subset);
+            });
+            std::vector<CHEdge4> down_edges_subset_gs_5000;
+            bench.run("GSRPHAST-Preprocessing (5000)", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch_5000[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_5000, std::move(node_queue));
+                down_edges_subset_gs_5000 = std::move(subset);
+            });
+            std::vector<CHEdge4> down_edges_subset_gs_10000;
+            bench.run("GSRPHAST-Preprocessing (10000)", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch_10000[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_10000, std::move(node_queue));
+                down_edges_subset_gs_10000 = std::move(subset);
+            });
+
+            // benchmark range-rphast+gs preprocessing
+            std::vector<CHEdge4> down_edges_subset_gs_1000_range;
+            bench.run("RangeGSRPHAST-Preprocessing (1000)", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch_1000[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_1000, std::move(node_queue));
+                down_edges_subset_gs_1000 = std::move(subset);
+            });
+            std::vector<CHEdge4> down_edges_subset_gs_5000_range;
+            bench.run("RangeGSRPHAST-Preprocessing (5000)", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch_5000[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_5000, std::move(node_queue));
+                down_edges_subset_gs_5000 = std::move(subset);
+            });
+            std::vector<CHEdge4> down_edges_subset_gs_10000_range;
+            bench.run("RangeGSRPHAST-Preprocessing (10000)", [&] {
+                std::queue<int> node_queue;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_ch_10000[i]) {
+                        node_queue.push(i);
+                    }
+                }
+                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_10000, std::move(node_queue));
+                down_edges_subset_gs_10000 = std::move(subset);
+            });
+
             for (int j = 0; j < N3; j++) {
                 // get start for different graphs
                 int start = starts_list[j];
                 int start_ch = start;
-                int start_ch_2 = convert_start(START_GRAPH, ch_graph_2, start);
-                int start_tiled_1 = convert_start(START_GRAPH, tiled_graph_1, start);
-                int start_tiled_2 = convert_start(START_GRAPH, tiled_graph_2, start);
-
-                // create benchmark instance
-                auto bench = nanobench::Bench();
+                int start_ch_1000 = convert_start(START_GRAPH, ch_graph_1000, start);
+                int start_ch_5000 = convert_start(START_GRAPH, ch_graph_5000, start);
+                int start_ch_10000 = convert_start(START_GRAPH, ch_graph_10000, start);
+                int start_grasp_1000 = convert_start(START_GRAPH, grasp_graph_1000, start);
+                int start_grasp_5000 = convert_start(START_GRAPH, grasp_graph_5000, start);
+                int start_grasp_10000 = convert_start(START_GRAPH, grasp_graph_10000, start);
+                int start_isophast_1000 = convert_start(START_GRAPH, isophast_graph_1000, start);
+                int start_isophast_5000 = convert_start(START_GRAPH, isophast_graph_5000, start);
+                int start_isophast_10000 = convert_start(START_GRAPH, isophast_graph_10000, start);
 
                 DistFlagArray flags(START_GRAPH->nodeCount());
-
-                // benchmark rphast preprocessing
-                std::vector<CHEdge> down_edges_subset;
-                bench.run("RPHAST-Preprocessing", [&] {
-                    std::queue<int> node_queue;
-                    for (int i = 0; i < ch_graph->nodeCount(); i++) {
-                        if (targets_ch[i]) {
-                            node_queue.push(i);
-                        }
-                    }
-                    std::vector<CHEdge> subset = preprocessRPHAST(ch_graph, std::move(node_queue));
-                    down_edges_subset = std::move(subset);
-                });
-
-                // benchmark range-rphast preprocessing
-                std::vector<CHEdge> down_edges_subset_2;
-                bench.run("RangeRPHAST-Preprocessing", [&] {
-                    std::priority_queue<pq_item> node_queue;
-                    for (int i = 0; i < ch_graph->nodeCount(); i++) {
-                        if (targets_ch[i]) {
-                            node_queue.push({i, 0});
-                        }
-                    }
-                    std::vector<CHEdge> subset = preprocessRangeRPHAST(ch_graph, std::move(node_queue), RANGE);
-                    down_edges_subset_2 = std::move(subset);
-                });
-
-                // benchmark range-rphast2 preprocessing
-                std::vector<CHEdge4> down_edges_subset_3;
-                bench.run("GSRPHAST-Preprocessing", [&] {
-                    std::queue<int> node_queue;
-                    for (int i = 0; i < ch_graph->nodeCount(); i++) {
-                        if (targets_ch_2[i]) {
-                            node_queue.push(i);
-                        }
-                    }
-                    std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_2, std::move(node_queue));
-                    down_edges_subset_3 = std::move(subset);
-                });
 
                 // benchmark range-dijkstra
                 bench.run("Range-Dijkstra", [&] {
@@ -230,87 +292,197 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 // benchmark range-rphast with range preprocessing
                 bench.run("RangeRPHAST (prio-queue)", [&] {
                     flags.soft_reset();
-                    calcRangeRPHAST(ch_graph, start_ch, flags, RANGE, down_edges_subset_2);
+                    calcRangeRPHAST(ch_graph, start_ch, flags, RANGE, down_edges_subset_range);
                 });
 
                 // benchmark GS+PHAST
-                bench.run("GSPHAST", [&] {
+                bench.run("GSPHAST (1000)", [&] {
                     flags.soft_reset();
-                    calcGSPHAST(ch_graph_2, start_ch_2, flags, RANGE);
+                    calcGSPHAST(ch_graph_1000, start_ch_1000, flags, RANGE);
+                });
+                bench.run("GSPHAST (5000)", [&] {
+                    flags.soft_reset();
+                    calcGSPHAST(ch_graph_5000, start_ch_5000, flags, RANGE);
+                });
+                bench.run("GSPHAST (10000)", [&] {
+                    flags.soft_reset();
+                    calcGSPHAST(ch_graph_10000, start_ch_10000, flags, RANGE);
                 });
 
                 // benchmark GS+RPHAST
-                bench.run("GSRPHAST", [&] {
+                bench.run("GSRPHAST (1000)", [&] {
                     flags.soft_reset();
-                    calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_3);
+                    calcGSRPHAST(ch_graph_1000, start_ch_1000, flags, RANGE, down_edges_subset_gs_1000);
+                });
+                bench.run("GSRPHAST (5000)", [&] {
+                    flags.soft_reset();
+                    calcGSRPHAST(ch_graph_5000, start_ch_5000, flags, RANGE, down_edges_subset_gs_5000);
+                });
+                bench.run("GSRPHAST (10000)", [&] {
+                    flags.soft_reset();
+                    calcGSRPHAST(ch_graph_10000, start_ch_10000, flags, RANGE, down_edges_subset_gs_10000);
                 });
 
-                // GRASP-Preprocessing
-                int tile_count = tiled_graph_1->tileCount();
-                std::vector<bool> found_tiles(tile_count);
-                std::vector<bool> active_tiles(tile_count);
+                // benchmark GS+RPHAST (with priotity queue)
+                bench.run("GSRPHAST (1000, prio)", [&] {
+                    flags.soft_reset();
+                    calcGSRPHAST(ch_graph_1000, start_ch_1000, flags, RANGE, down_edges_subset_gs_1000_range);
+                });
+                bench.run("GSRPHAST (5000, prio)", [&] {
+                    flags.soft_reset();
+                    calcGSRPHAST(ch_graph_5000, start_ch_5000, flags, RANGE, down_edges_subset_gs_5000_range);
+                });
+                bench.run("GSRPHAST (10000, prio)", [&] {
+                    flags.soft_reset();
+                    calcGSRPHAST(ch_graph_10000, start_ch_10000, flags, RANGE, down_edges_subset_gs_10000_range);
+                });
+
+                // benchmark GRASP
+                int tile_count = grasp_graph_1000->tileCount();
                 for (int i = 0; i < tile_count; i++) {
                     active_tiles[i] = false;
                 }
                 for (int i = 0; i < ch_graph->nodeCount(); i++) {
-                    if (targets_tiled_1[i]) {
-                        short tile = tiled_graph_1->getNodeTile(i);
+                    if (targets_grasp_1000[i]) {
+                        short tile = grasp_graph_1000->getNodeTile(i);
                         active_tiles[tile] = true;
                     }
                 }
-
-                // benchmark GRASP
-                bench.run("GRASP", [&] {
+                bench.run("GRASP (1000)", [&] {
                     for (int i = 0; i < tile_count; i++) {
                         found_tiles[i] = false;
                     }
                     flags.soft_reset();
-                    calcGRASP(tiled_graph_1, start, flags, RANGE, active_tiles, found_tiles);
+                    calcGRASP(grasp_graph_1000, start_grasp_1000, flags, RANGE, active_tiles, found_tiles);
                 });
-
-                // isoPHAST-Preprocessing
-                int tile_count_2 = tiled_graph_2->tileCount();
-                std::vector<bool> found_tiles_2(tile_count_2);
-                std::vector<bool> active_tiles_2(tile_count_2);
-                for (int i = 0; i < tile_count_2; i++) {
-                    active_tiles_2[i] = false;
+                tile_count = grasp_graph_5000->tileCount();
+                for (int i = 0; i < tile_count; i++) {
+                    active_tiles[i] = false;
                 }
-                for (int i = 0; i < tiled_graph_2->nodeCount(); i++) {
-                    if (targets_tiled_2[i]) {
-                        short tile = tiled_graph_2->getNodeTile(i);
-                        active_tiles_2[tile] = true;
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_grasp_5000[i]) {
+                        short tile = grasp_graph_5000->getNodeTile(i);
+                        active_tiles[tile] = true;
                     }
                 }
-
-                // benchmark isoPHAST
-                bench.run("isoPHAST", [&] {
-                    for (int i = 0; i < tile_count_2; i++) {
-                        found_tiles_2[i] = false;
+                bench.run("GRASP (5000)", [&] {
+                    for (int i = 0; i < tile_count; i++) {
+                        found_tiles[i] = false;
                     }
                     flags.soft_reset();
-                    calcGRASP(tiled_graph_2, start_tiled_2, flags, RANGE, active_tiles_2, found_tiles_2);
+                    calcGRASP(grasp_graph_5000, start_grasp_5000, flags, RANGE, active_tiles, found_tiles);
+                });
+                tile_count = grasp_graph_10000->tileCount();
+                for (int i = 0; i < tile_count; i++) {
+                    active_tiles[i] = false;
+                }
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_grasp_10000[i]) {
+                        short tile = grasp_graph_10000->getNodeTile(i);
+                        active_tiles[tile] = true;
+                    }
+                }
+                bench.run("GRASP (10000)", [&] {
+                    for (int i = 0; i < tile_count; i++) {
+                        found_tiles[i] = false;
+                    }
+                    flags.soft_reset();
+                    calcGRASP(grasp_graph_10000, start_grasp_10000, flags, RANGE, active_tiles, found_tiles);
                 });
 
-                auto& results_list = bench.results();
-                for (int l = 0; l < results_list.size(); l++) {
-                    auto result = results_list[l];
-                    double time = result.average(nanobench::Result::Measure::elapsed);
-                    times[l] += time;
+                // benchmark isoPHAST
+                tile_count = isophast_graph_1000->tileCount();
+                for (int i = 0; i < tile_count; i++) {
+                    active_tiles[i] = false;
                 }
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_isophast_1000[i]) {
+                        short tile = isophast_graph_1000->getNodeTile(i);
+                        active_tiles[tile] = true;
+                    }
+                }
+                bench.run("isoPHAST (1000)", [&] {
+                    for (int i = 0; i < tile_count; i++) {
+                        found_tiles[i] = false;
+                    }
+                    flags.soft_reset();
+                    calcGRASP(isophast_graph_1000, start_isophast_1000, flags, RANGE, active_tiles, found_tiles);
+                });
+                tile_count = isophast_graph_5000->tileCount();
+                for (int i = 0; i < tile_count; i++) {
+                    active_tiles[i] = false;
+                }
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_isophast_5000[i]) {
+                        short tile = isophast_graph_5000->getNodeTile(i);
+                        active_tiles[tile] = true;
+                    }
+                }
+                bench.run("isoPHAST (5000)", [&] {
+                    for (int i = 0; i < tile_count; i++) {
+                        found_tiles[i] = false;
+                    }
+                    flags.soft_reset();
+                    calcGRASP(isophast_graph_5000, start_isophast_5000, flags, RANGE, active_tiles, found_tiles);
+                });
+                tile_count = isophast_graph_10000->tileCount();
+                for (int i = 0; i < tile_count; i++) {
+                    active_tiles[i] = false;
+                }
+                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                    if (targets_isophast_10000[i]) {
+                        short tile = isophast_graph_10000->getNodeTile(i);
+                        active_tiles[tile] = true;
+                    }
+                }
+                bench.run("isoPHAST (10000)", [&] {
+                    for (int i = 0; i < tile_count; i++) {
+                        found_tiles[i] = false;
+                    }
+                    flags.soft_reset();
+                    calcGRASP(isophast_graph_10000, start_isophast_10000, flags, RANGE, active_tiles, found_tiles);
+                });
+            }
+        }
+        // get times
+        std::unordered_map<std::string, std::tuple<double, int>> times;
+        auto& results_list = bench.results();
+        for (int l = 0; l < results_list.size(); l++) {
+            auto result = results_list[l];
+            auto name = result.config().mBenchmarkName;
+            // add benchmark names to benchmarks list
+            if (std::find(benchmarks.begin(), benchmarks.end(), name) == benchmarks.end()) {
+                benchmarks.push_back(name);
+            }
+            double time = result.average(nanobench::Result::Measure::elapsed);
+            if (times.contains(name)) {
+                auto [t, c] = times[name];
+                t += time;
+                c += 1;
+                times[name] = std::make_tuple(t, c);
+            } else {
+                times[name] = std::make_tuple(time, 1);
             }
         }
 
         std::cout << "start writing results..." << std::endl;
 
         // gather results
-        std::vector<int> result_times(BENCH_COUNT);
-        for (int j = 0; j < BENCH_COUNT; j++) {
-            result_times[j] = times[j] * 1000000 / (N2 * N3);
+        std::vector<int> result_times(benchmarks.size());
+        for (int j = 0; j < benchmarks.size(); j++) {
+            auto& bench_name = benchmarks[j];
+            auto [time, count] = times[bench_name];
+            result_times[j] = time * 1000000 / count;
         }
         results.push_back(make_tuple(i, result_times));
     }
 
     // write results to file
+    std::vector<std::string> headers = {"Iteration"};
+    for (int j = 0; j < benchmarks.size(); j++) {
+        auto& bench_name = benchmarks[j];
+        headers.push_back(bench_name);
+    }
     write_results("results_one_to_many.csv", results, headers);
 
     std::cout << "finished successfully!" << std::endl;
