@@ -151,3 +151,65 @@ std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queu
 
     return std::move(down_edges_subset);
 }
+
+// Range-RPHAST preprocessing (including updates on dummy edges)
+std::vector<CHEdge4> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq_item>&& node_queue, int max_range)
+{
+    auto explorer = g->getGraphExplorer();
+    std::vector<bool> graph_subset(g->nodeCount());
+    for (int i = 0; i < g->nodeCount(); i++) {
+        graph_subset[i] = false;
+    }
+    while (true) {
+        if (node_queue.size() == 0) {
+            break;
+        }
+        auto item = node_queue.top();
+        int node = item.node;
+        int node_len = item.dist;
+        node_queue.pop();
+        if (graph_subset[node]) {
+            continue;
+        }
+        graph_subset[node] = true;
+        explorer->forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &explorer, &node_len, &max_range, &node_queue](EdgeRef ref) {
+            if (graph_subset[ref.other_id]) {
+                return;
+            }
+            int new_len = node_len + explorer->getEdgeWeight(ref);
+            if (new_len > max_range) {
+                return;
+            }
+            node_queue.push({ref.other_id, new_len});
+        });
+    }
+    // selecting subset of downward edges for linear sweep
+    std::vector<CHEdge4> down_edges_subset;
+    const std::vector<CHEdge4>& down_edges = g->getDownEdges4(Direction::FORWARD);
+    int curr_id = 0;
+    int curr_count = 0;
+    down_edges_subset.push_back(down_edges[0]);
+    for (int i = 0; i < down_edges.size(); i++) {
+        auto edge = down_edges[i];
+        if (edge.is_dummy) {
+            if (curr_count == 0) {
+                down_edges_subset[curr_id] = edge;
+                curr_count = 0;
+                continue;
+            }
+            down_edges_subset[curr_id].to = curr_count;
+            curr_id = down_edges_subset.size();
+            curr_count = 0;
+            down_edges_subset.push_back(edge);
+            continue;
+        }
+        if (!graph_subset[edge.from]) {
+            continue;
+        }
+        down_edges_subset.push_back(edge);
+        curr_count += 1;
+    }
+    down_edges_subset[curr_id].to = curr_count;
+
+    return std::move(down_edges_subset);
+}

@@ -177,7 +177,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_1000, CHGraph2
             std::vector<CHEdge4> down_edges_subset_gs_1000;
             bench.run("GSRPHAST-Preprocessing (1000)", [&] {
                 std::queue<int> node_queue;
-                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                for (int i = 0; i < ch_graph_1000->nodeCount(); i++) {
                     if (targets_ch_1000[i]) {
                         node_queue.push(i);
                     }
@@ -188,7 +188,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_1000, CHGraph2
             std::vector<CHEdge4> down_edges_subset_gs_5000;
             bench.run("GSRPHAST-Preprocessing (5000)", [&] {
                 std::queue<int> node_queue;
-                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                for (int i = 0; i < ch_graph_5000->nodeCount(); i++) {
                     if (targets_ch_5000[i]) {
                         node_queue.push(i);
                     }
@@ -199,7 +199,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_1000, CHGraph2
             std::vector<CHEdge4> down_edges_subset_gs_10000;
             bench.run("GSRPHAST-Preprocessing (10000)", [&] {
                 std::queue<int> node_queue;
-                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                for (int i = 0; i < ch_graph_10000->nodeCount(); i++) {
                     if (targets_ch_10000[i]) {
                         node_queue.push(i);
                     }
@@ -211,36 +211,36 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_1000, CHGraph2
             // benchmark range-rphast+gs preprocessing
             std::vector<CHEdge4> down_edges_subset_gs_1000_range;
             bench.run("RangeGSRPHAST-Preprocessing (1000)", [&] {
-                std::queue<int> node_queue;
-                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                std::priority_queue<pq_item> node_queue;
+                for (int i = 0; i < ch_graph_1000->nodeCount(); i++) {
                     if (targets_ch_1000[i]) {
-                        node_queue.push(i);
+                        node_queue.push({i, 0});
                     }
                 }
-                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_1000, std::move(node_queue));
-                down_edges_subset_gs_1000 = std::move(subset);
+                std::vector<CHEdge4> subset = preprocessRangeGSRPHAST(ch_graph_1000, std::move(node_queue), RANGE);
+                down_edges_subset_gs_1000_range = std::move(subset);
             });
             std::vector<CHEdge4> down_edges_subset_gs_5000_range;
             bench.run("RangeGSRPHAST-Preprocessing (5000)", [&] {
-                std::queue<int> node_queue;
-                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                std::priority_queue<pq_item> node_queue;
+                for (int i = 0; i < ch_graph_5000->nodeCount(); i++) {
                     if (targets_ch_5000[i]) {
-                        node_queue.push(i);
+                        node_queue.push({i, 0});
                     }
                 }
-                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_5000, std::move(node_queue));
-                down_edges_subset_gs_5000 = std::move(subset);
+                std::vector<CHEdge4> subset = preprocessRangeGSRPHAST(ch_graph_5000, std::move(node_queue), RANGE);
+                down_edges_subset_gs_5000_range = std::move(subset);
             });
             std::vector<CHEdge4> down_edges_subset_gs_10000_range;
             bench.run("RangeGSRPHAST-Preprocessing (10000)", [&] {
-                std::queue<int> node_queue;
-                for (int i = 0; i < ch_graph->nodeCount(); i++) {
+                std::priority_queue<pq_item> node_queue;
+                for (int i = 0; i < ch_graph_10000->nodeCount(); i++) {
                     if (targets_ch_10000[i]) {
-                        node_queue.push(i);
+                        node_queue.push({i, 0});
                     }
                 }
-                std::vector<CHEdge4> subset = preprocessGSRPHAST(ch_graph_10000, std::move(node_queue));
-                down_edges_subset_gs_10000 = std::move(subset);
+                std::vector<CHEdge4> subset = preprocessRangeGSRPHAST(ch_graph_10000, std::move(node_queue), RANGE);
+                down_edges_subset_gs_10000_range = std::move(subset);
             });
 
             for (int j = 0; j < N3; j++) {
