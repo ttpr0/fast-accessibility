@@ -13,6 +13,7 @@
 #include "../algorithm/rphast_preprocess.h"
 #include "../algorithm/util.h"
 #include "../graph/graph.h"
+#include "../util.h"
 
 // 2sfca using range-PHAST
 std::vector<float> calcRangePHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
@@ -142,6 +143,7 @@ std::vector<float> calcRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_points, 
         }
         float R = s_weight / demand_sum;
         // add new access to reachable demand points
+        m.lock();
         for (int i = 0; i < dem_nodes.size(); i++) {
             int d_node = dem_nodes[i];
             if (d_node == -1) {
@@ -153,10 +155,9 @@ std::vector<float> calcRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_points, 
                 continue;
             }
             float distance_decay = 1 - d_dist / (float)max_range;
-            m.lock();
             access[i] += R * distance_decay;
-            m.unlock();
         }
+        m.unlock();
     }
     return access;
 }
@@ -296,6 +297,7 @@ std::vector<float> calcRangeRPHAST2SFCA2(ICHGraph* g, std::vector<Coord>& dem_po
         }
         float R = s_weight / demand_sum;
         // add new access to reachable demand points
+        m.lock();
         for (int i = 0; i < dem_nodes.size(); i++) {
             int d_node = dem_nodes[i];
             if (d_node == -1) {
@@ -307,10 +309,9 @@ std::vector<float> calcRangeRPHAST2SFCA2(ICHGraph* g, std::vector<Coord>& dem_po
                 continue;
             }
             float distance_decay = 1 - d_dist / (float)max_range;
-            m.lock();
             access[i] += R * distance_decay;
-            m.unlock();
         }
+        m.unlock();
     }
     return access;
 }
@@ -540,6 +541,7 @@ std::vector<float> calcGSRPHAST2SFCA(CHGraph2* g, std::vector<Coord>& dem_points
         }
         float R = s_weight / demand_sum;
         // add new access to reachable demand points
+        m.lock();
         for (int i = 0; i < dem_nodes.size(); i++) {
             int d_node = dem_nodes[i];
             if (d_node == -1) {
@@ -551,10 +553,9 @@ std::vector<float> calcGSRPHAST2SFCA(CHGraph2* g, std::vector<Coord>& dem_points
                 continue;
             }
             float distance_decay = 1 - d_dist / (float)max_range;
-            m.lock();
             access[i] += R * distance_decay;
-            m.unlock();
         }
+        m.unlock();
     }
     return access;
 }

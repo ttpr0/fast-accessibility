@@ -25,8 +25,7 @@ namespace nanobench = ankerl::nanobench;
 void benchmark_range_search(IGraph* graph, ICHGraph* ch_graph)
 {
     // init results
-    std::vector<std::tuple<int, std::vector<int>>> results;
-    std::vector<std::string> headers = {"Range"};
+    Results results("Range");
 
     // create random benchmark data
     const int N = 10;
@@ -85,18 +84,14 @@ void benchmark_range_search(IGraph* graph, ICHGraph* ch_graph)
         });
 
         // gather results
-        std::vector<int> times;
         for (auto result : bench.results()) {
             auto name = result.config().mBenchmarkName;
-            if (i == 0) {
-                headers.push_back(name);
-            }
+
             double time = result.average(nanobench::Result::Measure::elapsed);
-            times.push_back(time * 1000 / N);
+            results.addResult(range, name, time * 1000 / N);
         }
-        results.push_back(make_tuple(range, times));
     }
 
     // write results to file
-    write_results("results.csv", results, headers);
+    write_results("results.csv", results);
 }

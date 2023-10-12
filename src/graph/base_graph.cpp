@@ -100,13 +100,23 @@ int BaseGraphIndex::getClosestNode(Coord point)
     return closest;
 }
 
+// KDTreeIndex::KDTreeIndex(std::vector<Coord>& node_geoms)
+// {
+//     this->tree = KDTree();
+//     for (int i = 0; i < node_geoms.size(); i++) {
+//         auto coord = node_geoms[i];
+//         this->tree.insert(coord.lon, coord.lat, i);
+//     }
+// }
 KDTreeIndex::KDTreeIndex(std::vector<Coord>& node_geoms)
 {
     this->tree = KDTree();
+    std::vector<TreeValue> values(node_geoms.size());
     for (int i = 0; i < node_geoms.size(); i++) {
         auto coord = node_geoms[i];
-        this->tree.insert(coord.lon, coord.lat, i);
+        values[i] = {{coord.lon, coord.lat}, i};
     }
+    this->tree.create_balanced(values);
 }
 
 int KDTreeIndex::getClosestNode(Coord point)

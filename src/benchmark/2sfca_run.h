@@ -31,8 +31,7 @@ void benchmark_2sfca_run(std::string sup_file, std::string dem_file, int max_ran
     std::cout << "finished reading " << dem_points.size() << " demand and " << sup_points.size() << " supply points" << std::endl;
 
     // init results
-    std::vector<std::tuple<int, std::vector<int>>> results;
-    std::vector<std::string> headers = {"2SFCA Run"};
+    Results results("2SFCA Run");
 
     // compute benchmarks
     auto bench = nanobench::Bench();
@@ -43,15 +42,12 @@ void benchmark_2sfca_run(std::string sup_file, std::string dem_file, int max_ran
     bench.run("isoPHAST", [&] { calcGRASP2SFCA(tiled_graph, dem_points, dem_weights, sup_points, sup_weights, max_range); });
 
     // gather results
-    std::vector<int> times;
     for (auto result : bench.results()) {
         auto name = result.config().mBenchmarkName;
-        headers.push_back(name);
         double time = result.average(nanobench::Result::Measure::elapsed);
-        times.push_back(time * 1000);
+        results.addResult(0, name, time * 1000);
     }
-    results.push_back(make_tuple(0, times));
 
     // write results to file
-    write_results(out_name, results, headers);
+    write_results(out_name, results);
 }

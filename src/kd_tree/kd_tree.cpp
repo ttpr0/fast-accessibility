@@ -36,6 +36,42 @@ void insert_node(KDNode& node, std::unique_ptr<KDNode> new_node, int dim)
     }
 }
 
+std::unique_ptr<KDNode> insert_nodes_balanced(std::span<TreeValue> values, int dim)
+{
+    int len = values.size();
+    if (len < 1) {
+        return nullptr;
+    }
+    if (len == 1) {
+        auto value = values[0];
+        return std::make_unique<KDNode>(value.coords[0], value.coords[1], value.value);
+    }
+
+    std::sort(values.begin(), values.end(), [&dim](const TreeValue& v1, const TreeValue& v2) { return v1.coords[dim] < v2.coords[dim]; });
+
+    int mid = len / 2;
+    auto value = values[mid];
+    auto new_node = std::make_unique<KDNode>(value.coords[0], value.coords[1], value.value);
+
+    int new_dim;
+    switch (dim) {
+        case 0:
+            new_dim = 1;
+            break;
+        case 1:
+            new_dim = 0;
+            break;
+        default:
+            return nullptr;
+    }
+    auto left_half = std::span(values.data(), mid);
+    new_node->less = insert_nodes_balanced(left_half, new_dim);
+    auto right_half = std::span(&values.data()[mid + 1], len - mid);
+    new_node->more = insert_nodes_balanced(right_half, new_dim);
+
+    return new_node;
+}
+
 std::tuple<std::optional<KDNode*>, double> get_closest_node(KDNode& node, int dim, float x, float y, float max_dist)
 {
     KDNode* closest = &node;
@@ -123,4 +159,9 @@ void KDTree::insert(float x, float y, int value)
         auto new_node = std::make_unique<KDNode>(x, y, value);
         insert_node(*this->root, std::move(new_node), 0);
     }
+}
+
+void KDTree::create_balanced(std::vector<TreeValue>& values)
+{
+    this->root = insert_nodes_balanced(values, 0);
 }

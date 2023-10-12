@@ -63,7 +63,7 @@ void benchmark_study_area(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph*
     std::cout << "start benchmark with: " << sup_count << " supply points and " << dem_count << " demand points" << std::endl;
 
     // create random benchmark data
-    const int N = 10;
+    const int N = 1;
     std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>> view_subsets;
     for (auto [area, _] : study_areas) {
         std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
@@ -78,8 +78,7 @@ void benchmark_study_area(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph*
     }
 
     // init results
-    std::vector<std::tuple<int, std::vector<int>>> results;
-    std::vector<std::string> headers = {"Study Area"};
+    Results results("Study Area");
 
     // compute benchmarks for every value
     for (int i = 0; i < study_areas.size(); i++) {
@@ -121,18 +120,13 @@ void benchmark_study_area(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph*
         });
 
         // gather results
-        std::vector<int> times;
         for (auto result : bench.results()) {
             auto name = result.config().mBenchmarkName;
-            if (i == 0) {
-                headers.push_back(name);
-            }
             double time = result.average(nanobench::Result::Measure::elapsed);
-            times.push_back(time * 1000 / N);
+            results.addResult(area, name, time * 1000 / N);
         }
-        results.push_back(make_tuple(area, times));
     }
 
     // write results to file
-    write_results("results_study_area.csv", results, headers);
+    write_results("results_study_area.csv", results);
 }

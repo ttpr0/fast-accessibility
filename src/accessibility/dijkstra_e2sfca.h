@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+#include <chrono>
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -60,6 +62,7 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
         }
         float R = s_weight / demand_sum;
         // add new access to reachable demand points
+        m.lock();
         for (int i = 0; i < dem_nodes.size(); i++) {
             int d_node = dem_nodes[i];
             if (d_node == -1) {
@@ -70,10 +73,9 @@ std::vector<float> calcDijkstra2SFCA(IGraph* g, std::vector<Coord>& dem_points, 
                 continue;
             }
             float distance_decay = 1 - d_flag.dist / (float)max_range;
-            m.lock();
             access[i] += R * distance_decay;
-            m.unlock();
         }
+        m.unlock();
     }
     return access;
 }

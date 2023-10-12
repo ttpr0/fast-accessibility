@@ -38,7 +38,7 @@ void benchmark_catchment_range(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledG
     auto [sup_points, sup_weights] = read_points(sup_file);
 
     // create random benchmark data
-    const int N = 5;
+    const int N = 1;
     std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>> view_subsets;
     for (auto range : ranges) {
         std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
@@ -51,8 +51,7 @@ void benchmark_catchment_range(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledG
     }
 
     // init results
-    std::vector<std::tuple<int, std::vector<int>>> results;
-    std::vector<std::string> headers = {"Catchment Range"};
+    Results results("Catchment Range");
 
     // compute benchmarks for every value
     for (int i = 0; i < ranges.size(); i++) {
@@ -94,18 +93,13 @@ void benchmark_catchment_range(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledG
         });
 
         // gather results
-        std::vector<int> times;
         for (auto result : bench.results()) {
             auto name = result.config().mBenchmarkName;
-            if (i == 0) {
-                headers.push_back(name);
-            }
             double time = result.average(nanobench::Result::Measure::elapsed);
-            times.push_back(time * 1000 / N);
+            results.addResult(range, name, time * 1000 / N);
         }
-        results.push_back(make_tuple(range, times));
     }
 
     // write results to file
-    write_results("results_catchment_range.csv", results, headers);
+    write_results("results_catchment_range.csv", results);
 }

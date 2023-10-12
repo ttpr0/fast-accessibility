@@ -1,9 +1,12 @@
 #pragma once
 
 #include <math.h>
+#include <algorithm>
 #include <memory>
 #include <optional>
+#include <span>
 #include <tuple>
+#include <vector>
 
 //***********************************************************
 // declarations
@@ -22,6 +25,12 @@ public:
     KDNode(float x, float y, int value);
 };
 
+struct TreeValue
+{
+    float coords[2];
+    int value;
+};
+
 class KDTree
 {
 public:
@@ -32,4 +41,6 @@ public:
     std::tuple<int, bool> get_closest(float x, float y, float max_dist);
 
     void insert(float x, float y, int value);
+
+    void create_balanced(std::vector<TreeValue>& values);
 };
