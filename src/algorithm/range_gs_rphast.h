@@ -9,7 +9,7 @@
 #include "../graph/graph.h"
 #include "./util.h"
 
-// RPHAST with graph-partitioning
+// RangeRPHAST with graph-partitioning
 void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, std::vector<CHEdge4>& down_edges_subset)
 {
     auto& flags = flags_.get_flags();
@@ -18,9 +18,9 @@ void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, 
     flags[start] = {0, false, counter};
 
     int tile_count = g->tileCount();
-    std::vector<bool> active_tiles(tile_count);
+    std::vector<bool> is_found(tile_count);
     for (int i = 0; i < tile_count; i++) {
-        active_tiles[i] = false;
+        is_found[i] = false;
     }
 
     auto explorer = g->getGraphExplorer();
@@ -40,7 +40,7 @@ void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, 
         }
         curr_flag.visited = true;
         short curr_tile = g->getNodeTile(curr_id);
-        active_tiles[curr_tile] = true;
+        is_found[curr_tile] = true;
         explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
@@ -81,14 +81,14 @@ void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, 
         if (other_flag.dist > new_len) {
             other_flag.dist = new_len;
             other_flag.visited = true;
-            active_tiles[edge.to_tile] = true;
+            is_found[edge.to_tile] = true;
         }
     }
     for (int i = overlay_end; i < down_edges_subset.size(); i++) {
         CHEdge4 curr_dummy = down_edges_subset[i];
         int curr_tile = curr_dummy.to_tile;
         int curr_count = curr_dummy.to;
-        if (active_tiles[curr_tile]) {
+        if (is_found[curr_tile]) {
             int tile_start = i + 1;
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {

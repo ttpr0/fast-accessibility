@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "../accessibility/dijkstra_e2sfca.h"
-#include "../accessibility/other_e2sfca.h"
 #include "../accessibility/phast_e2sfca.h"
 #include "../accessibility/tiled_e2sfca.h"
 #include "../algorithm/all_dijkstra.h"

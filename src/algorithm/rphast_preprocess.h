@@ -8,7 +8,7 @@
 #include "../graph/graph.h"
 #include "./util.h"
 
-// RPHAST subset selection
+// standard RPHAST subset selection
 std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
 {
     auto explorer = g->getGraphExplorer();
@@ -48,7 +48,7 @@ std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
     return std::move(down_edges_subset);
 }
 
-// RPHAST subset selection using priority queue
+// RPHAST subset selection using priority queue (RTS)
 std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_item>&& node_queue, int max_range)
 {
     std::vector<bool> graph_subset(g->nodeCount());

@@ -234,7 +234,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 // benchmark phast
                 bench.run("PHAST", [&] {
                     flags.soft_reset();
-                    calcPHAST2(ch_graph, start_ch, flags);
+                    calcPHAST(ch_graph, start_ch, flags);
                 });
 
                 // benchmark rphast
@@ -246,7 +246,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 // benchmark range-phast
                 bench.run("RangePHAST", [&] {
                     flags.soft_reset();
-                    calcRangePHAST5(ch_graph, start_ch, flags, RANGE);
+                    calcRangePHAST(ch_graph, start_ch, flags, RANGE);
                 });
 
                 // benchmark range-rphast with normal preprocessing

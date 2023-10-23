@@ -63,7 +63,7 @@ std::vector<int> calcRangePHASTRangeQuery(ICHGraph* g, Coord start_point, std::v
     auto flags = DistFlagArray(g->nodeCount());
 
     // compute dist
-    calcRangePHAST5(g, start_node, flags, max_range);
+    calcRangePHAST(g, start_node, flags, max_range);
 
     // create array containing accessibility results
     std::vector<int> ranges(target_nodes.size());

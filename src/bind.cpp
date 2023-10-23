@@ -7,7 +7,6 @@
 #include <nanobind/stl/unique_ptr.h>
 
 #include "accessibility/dijkstra_e2sfca.h"
-#include "accessibility/other_e2sfca.h"
 #include "accessibility/phast_e2sfca.h"
 #include "accessibility/range_query.h"
 #include "accessibility/tiled_e2sfca.h"
@@ -45,13 +44,10 @@ NB_MODULE(_pyaccess_ext, m)
 
     // 2sfca functions
     m.def("calc_dijkstra_2sfca", &calcDijkstra2SFCA);
-    m.def("calc_dijkstra_2sfca_2", &_calcDijkstra2SFCA);
     m.def("calc_range_phast_2sfca", &calcRangePHAST2SFCA);
     m.def("calc_range_rphast_2sfca", &calcRangeRPHAST2SFCA);
     m.def("calc_range_rphast_2sfca2", &calcRangeRPHAST2SFCA2);
-    m.def("calc_range_rphast_2sfca3", &calcRangeRPHAST2SFCA3);
     m.def("calc_tiled_2sfca", &calcTiled2SFCA);
-    m.def("calc_tiled_2sfca2", &_calcGRASP2SFCA);
 
     // range query functions
     m.def("calc_range_dijkstra", &calcDijkstraRangeQuery);

@@ -8,7 +8,8 @@
 #include "../graph/graph.h"
 #include "./util.h"
 
-void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, std::vector<bool>& active_tiles, std::vector<bool>& found_tiles)
+// reGRASP and isoGRASP combination
+void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
 {
     auto& flags = flags_.get_flags();
     short counter = flags_.get_counter();
@@ -16,7 +17,7 @@ void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, 
     flags[start] = {0, false, counter};
 
     short start_tile = g->getNodeTile(start);
-    found_tiles[start_tile] = true;
+    is_found[start_tile] = true;
 
     auto explorer = g->getGraphExplorer();
 
@@ -58,12 +59,12 @@ void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, 
         if (curr_tile == start_tile) {
             explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, handler);
         } else {
-            found_tiles[curr_tile] = true;
+            is_found[curr_tile] = true;
             explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_SKIP, handler);
         }
     }
-    for (int i = 0; i < active_tiles.size(); i++) {
-        if (!active_tiles[i] || !found_tiles[i]) {
+    for (int i = 0; i < contains_targets.size(); i++) {
+        if (!contains_targets[i] || !is_found[i]) {
             continue;
         }
         auto& down_edges = g->getIndexEdges(i, Direction::FORWARD);
