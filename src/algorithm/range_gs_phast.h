@@ -10,15 +10,9 @@
 #include "./util.h"
 
 // RangePHAST with graph-partitioning
-void calcGSPHAST(CHGraph2* g, int start, DistFlagArray& flags, int max_range)
+void calcGSPHAST(CHGraph2* g, int start, DistFlagArray& flags, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
 {
     flags.set_start(start);
-
-    int tile_count = g->tileCount();
-    std::vector<bool> is_found(tile_count);
-    for (int i = 0; i < tile_count; i++) {
-        is_found[i] = false;
-    }
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -78,7 +72,7 @@ void calcGSPHAST(CHGraph2* g, int start, DistFlagArray& flags, int max_range)
         CHEdge4 curr_dummy = down_edges[i];
         int curr_tile = curr_dummy.to_tile;
         int curr_count = curr_dummy.to;
-        if (is_found[curr_tile]) {
+        if (is_found[curr_tile] && contains_targets[curr_tile]) {
             int tile_start = i + 1;
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {

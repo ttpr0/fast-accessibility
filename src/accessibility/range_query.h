@@ -172,14 +172,26 @@ std::vector<int> calcGSPHASTRangeQuery(CHGraph2* g, Coord start_point, std::vect
     IGraphIndex& index = g->getIndex();
     int start_node = index.getClosestNode(start_point);
     std::vector<int> target_nodes(target_points.size());
+    int tile_count = g->tileCount();
+    std::vector<bool> found_tiles(tile_count);
+    std::vector<bool> active_tiles(tile_count);
+    for (int i = 0; i < tile_count; i++) {
+        found_tiles[i] = false;
+        active_tiles[i] = false;
+    }
     for (int i = 0; i < target_points.size(); i++) {
-        target_nodes[i] = index.getClosestNode(target_points[i]);
+        int node = index.getClosestNode(target_points[i]);
+        target_nodes[i] = node;
+        if (node >= 0) {
+            short tile = g->getNodeTile(node);
+            active_tiles[tile] = true;
+        }
     }
 
     auto flags = DistFlagArray(g->nodeCount());
 
     // compute dist
-    calcGSPHAST(g, start_node, flags, max_range);
+    calcGSPHAST(g, start_node, flags, max_range, active_tiles, found_tiles);
 
     // create array containing accessibility results
     std::vector<int> ranges(target_nodes.size());
@@ -206,12 +218,21 @@ std::vector<int> calcGSRPHASTRangeQuery(CHGraph2* g, Coord start_point, std::vec
     IGraphIndex& index = g->getIndex();
     int start_node = index.getClosestNode(start_point);
     std::vector<int> target_nodes(target_points.size());
+    int tile_count = g->tileCount();
+    std::vector<bool> found_tiles(tile_count);
+    std::vector<bool> active_tiles(tile_count);
+    for (int i = 0; i < tile_count; i++) {
+        found_tiles[i] = false;
+        active_tiles[i] = false;
+    }
     std::queue<int> node_queue;
     for (int i = 0; i < target_points.size(); i++) {
         int node = index.getClosestNode(target_points[i]);
         target_nodes[i] = node;
         if (node >= 0) {
             node_queue.push(node);
+            short tile = g->getNodeTile(node);
+            active_tiles[tile] = true;
         }
     }
 
@@ -220,7 +241,7 @@ std::vector<int> calcGSRPHASTRangeQuery(CHGraph2* g, Coord start_point, std::vec
     std::vector<CHEdge4> subset = preprocessGSRPHAST(g, std::move(node_queue));
 
     // compute dist
-    calcGSRPHAST(g, start_node, flags, max_range, subset);
+    calcGSRPHAST(g, start_node, flags, max_range, subset, active_tiles, found_tiles);
 
     // create array containing accessibility results
     std::vector<int> ranges(target_nodes.size());

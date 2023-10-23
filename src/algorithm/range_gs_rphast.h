@@ -10,18 +10,13 @@
 #include "./util.h"
 
 // RangeRPHAST with graph-partitioning
-void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, std::vector<CHEdge4>& down_edges_subset)
+void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, std::vector<CHEdge4>& down_edges_subset, std::vector<bool>& contains_targets,
+                  std::vector<bool>& is_found)
 {
     auto& flags = flags_.get_flags();
     short counter = flags_.get_counter();
 
     flags[start] = {0, false, counter};
-
-    int tile_count = g->tileCount();
-    std::vector<bool> is_found(tile_count);
-    for (int i = 0; i < tile_count; i++) {
-        is_found[i] = false;
-    }
 
     auto explorer = g->getGraphExplorer();
 
@@ -88,7 +83,7 @@ void calcGSRPHAST(CHGraph2* g, int start, DistFlagArray& flags_, int max_range, 
         CHEdge4 curr_dummy = down_edges_subset[i];
         int curr_tile = curr_dummy.to_tile;
         int curr_count = curr_dummy.to;
-        if (is_found[curr_tile]) {
+        if (is_found[curr_tile] && contains_targets[curr_tile]) {
             int tile_start = i + 1;
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {

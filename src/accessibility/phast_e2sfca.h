@@ -324,12 +324,16 @@ std::vector<float> calcGSRPHAST2SFCA(CHGraph2* g, std::vector<Coord>& dem_points
     std::queue<int> node_queue;
     IGraphIndex& index = g->getIndex();
     std::vector<int> dem_nodes(dem_points.size());
+    short tilecount = g->tileCount() + 2;
+    std::vector<bool> active_tiles(tilecount);
     for (int i = 0; i < dem_points.size(); i++) {
         auto loc = dem_points[i];
         auto id = index.getClosestNode(loc);
         dem_nodes[i] = id;
         if (id >= 0) {
             node_queue.push(id);
+            short tile = g->getNodeTile(id);
+            active_tiles[tile] = true;
         }
     }
 
@@ -343,8 +347,9 @@ std::vector<float> calcGSRPHAST2SFCA(CHGraph2* g, std::vector<Coord>& dem_points
     }
 
     auto flags = DistFlagArray(g->nodeCount());
+    std::vector<bool> found_tiles(tilecount);
     std::mutex m;
-#pragma omp parallel for firstprivate(flags)
+#pragma omp parallel for firstprivate(flags, found_tiles)
     for (int i = 0; i < sup_points.size(); i++) {
         // get supply information
         int s_id = index.getClosestNode(sup_points[i]);
@@ -354,8 +359,11 @@ std::vector<float> calcGSRPHAST2SFCA(CHGraph2* g, std::vector<Coord>& dem_points
         int s_weight = sup_weights[i];
 
         // compute distances
+        for (int i = 0; i < tilecount; i++) {
+            found_tiles[i] = false;
+        }
         flags.soft_reset();
-        calcGSRPHAST(g, s_id, flags, max_range, down_edges_subset);
+        calcGSRPHAST(g, s_id, flags, max_range, down_edges_subset, active_tiles, found_tiles);
 
         // compute R-value for facility
         float demand_sum = 0.0;

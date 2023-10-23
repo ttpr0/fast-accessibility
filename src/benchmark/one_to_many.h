@@ -262,22 +262,41 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                 });
 
                 if (ch_graph_2 != nullptr) {
+                    int tile_count = ch_graph_2->tileCount();
+                    for (int i = 0; i < tile_count; i++) {
+                        active_tiles[i] = false;
+                    }
+                    for (int i = 0; i < ch_graph_2->nodeCount(); i++) {
+                        if (targets_ch_2[i]) {
+                            short tile = ch_graph_2->getNodeTile(i);
+                            active_tiles[tile] = true;
+                        }
+                    }
                     // benchmark GS+PHAST
                     bench.run("GSPHAST", [&] {
+                        for (int i = 0; i < tile_count; i++) {
+                            found_tiles[i] = false;
+                        }
                         flags.soft_reset();
-                        calcGSPHAST(ch_graph_2, start_ch_2, flags, RANGE);
+                        calcGSPHAST(ch_graph_2, start_ch_2, flags, RANGE, active_tiles, found_tiles);
                     });
 
                     // benchmark GS+RPHAST
                     bench.run("GSRPHAST", [&] {
+                        for (int i = 0; i < tile_count; i++) {
+                            found_tiles[i] = false;
+                        }
                         flags.soft_reset();
-                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs);
+                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs, active_tiles, found_tiles);
                     });
 
                     // benchmark GS+RPHAST (with priotity queue)
                     bench.run("GSRPHAST (prio)", [&] {
+                        for (int i = 0; i < tile_count; i++) {
+                            found_tiles[i] = false;
+                        }
                         flags.soft_reset();
-                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs_range);
+                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs_range, active_tiles, found_tiles);
                     });
                 }
 
