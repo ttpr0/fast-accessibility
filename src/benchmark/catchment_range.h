@@ -17,7 +17,6 @@
 #include "../algorithm/range_phast.h"
 #include "../graph/ch_graph.h"
 #include "../graph/graph.h"
-#include "../graph/loader.h"
 #include "../graph/tiled_graph.h"
 #include "./benchmark_util.h"
 
@@ -39,7 +38,9 @@ void benchmark_catchment_range(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledG
 
     // create random benchmark data
     const int N = 1;
-    std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>> view_subsets;
+    std::unordered_map<
+        int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>>
+        view_subsets;
     for (auto range : ranges) {
         std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
         for (int i = 0; i < N; i++) {

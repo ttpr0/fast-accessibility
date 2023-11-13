@@ -23,7 +23,6 @@
 #include "../algorithm/rphast_preprocess.h"
 #include "../algorithm/special_dijkstra.h"
 #include "../graph/graph.h"
-#include "../graph/loader.h"
 #include "../util.h"
 #include "./benchmark_util.h"
 
@@ -38,7 +37,8 @@ int convert_start(IGraph* base_graph, IGraph* this_graph, int start)
     return this_start;
 }
 
-void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& base_targets, std::vector<bool>& this_targets)
+void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& base_targets,
+                     std::vector<bool>& this_targets)
 {
     auto& index = this_graph->getIndex();
     for (int i = 0; i < this_graph->nodeCount(); i++) {
@@ -55,7 +55,8 @@ void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& 
     }
 }
 
-void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* grasp_graph, ITiledGraph* isophast_graph, int b, int t, int tilecount)
+void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* grasp_graph,
+                           ITiledGraph* isophast_graph, int b, int t, int tilecount)
 {
     std::cout << "start one-to-many benchmark:" << std::endl;
     // init results
@@ -287,7 +288,8 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                             found_tiles[i] = false;
                         }
                         flags.soft_reset();
-                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs, active_tiles, found_tiles);
+                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs, active_tiles,
+                                     found_tiles);
                     });
 
                     // benchmark GS+RPHAST (with priotity queue)
@@ -296,7 +298,8 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                             found_tiles[i] = false;
                         }
                         flags.soft_reset();
-                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs_range, active_tiles, found_tiles);
+                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs_range, active_tiles,
+                                     found_tiles);
                     });
                 }
 
@@ -355,7 +358,9 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
 
     // write results to file
     std::cout << "start writing results..." << std::endl;
-    write_results("results_one_to_many_" + std::to_string(tilecount) + "_" + std::to_string(b) + "_" + std::to_string(t) + ".csv", results);
+    write_results(
+        "results_one_to_many_" + std::to_string(tilecount) + "_" + std::to_string(b) + "_" + std::to_string(t) + ".csv",
+        results);
 
     std::cout << "finished successfully!" << std::endl;
 }

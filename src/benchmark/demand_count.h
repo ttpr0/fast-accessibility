@@ -16,7 +16,6 @@
 #include "../algorithm/phast.h"
 #include "../algorithm/range_phast.h"
 #include "../graph/graph.h"
-#include "../graph/loader.h"
 #include "./benchmark_util.h"
 
 #define ANKERL_NANOBENCH_IMPLEMENT
@@ -37,7 +36,9 @@ void benchmark_demand_count(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGrap
 
     // create random benchmark data
     const int N = 1;
-    std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>> view_subsets;
+    std::unordered_map<
+        int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>>
+        view_subsets;
     for (auto dem_count : dem_counts) {
         std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
         for (int i = 0; i < N; i++) {

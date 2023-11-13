@@ -16,7 +16,6 @@
 #include "../algorithm/phast.h"
 #include "../algorithm/range_phast.h"
 #include "../graph/graph.h"
-#include "../graph/loader.h"
 #include "./benchmark_util.h"
 
 #define ANKERL_NANOBENCH_IMPLEMENT
@@ -40,7 +39,8 @@ void benchmark_study_area(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph*
     study_areas.push_back({6165, "celle"});
     study_areas.push_back({6447, "diepholz"});
     study_areas.push_back({7779, "region_hannover"});
-    std::unordered_map<int, std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> study_area_points;
+    std::unordered_map<int, std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>
+        study_area_points;
     int min_dem_count = 100000000;
     int min_sup_count = 100000000;
     for (auto [area, name] : study_areas) {
@@ -60,11 +60,14 @@ void benchmark_study_area(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph*
     int sup_count = min_sup_count;
     int dem_count = min_dem_count;
     const int MAX_RANGE = 2400;
-    std::cout << "start benchmark with: " << sup_count << " supply points and " << dem_count << " demand points" << std::endl;
+    std::cout << "start benchmark with: " << sup_count << " supply points and " << dem_count << " demand points"
+              << std::endl;
 
     // create random benchmark data
     const int N = 1;
-    std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>> view_subsets;
+    std::unordered_map<
+        int, std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>>>
+        view_subsets;
     for (auto [area, _] : study_areas) {
         std::vector<std::tuple<std::vector<Coord>, std::vector<int>, std::vector<Coord>, std::vector<int>>> views;
         // get demand and supply

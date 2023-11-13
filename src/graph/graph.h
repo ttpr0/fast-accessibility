@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "../util.h"
-#include "./geom.h"
-#include "./structs.h"
+#include "./structs/geom.h"
+#include "./structs/structs.h"
 
 //*******************************************
 // graph interfaces
@@ -53,7 +53,7 @@ public:
 
     virtual short getNodeLevel(int node) = 0;
     virtual int shortcutCount() = 0;
-    virtual CHShortcut getShortcut(int shortcut) = 0;
+    virtual Shortcut getShortcut(int shortcut) = 0;
     virtual const std::vector<CHEdge>& getDownEdges(Direction dir) = 0;
 };
 
@@ -66,5 +66,5 @@ public:
     virtual short tileCount() = 0;
     virtual int shortcutCount() = 0;
     virtual Shortcut getShortcut(int shortcut) = 0;
-    virtual const std::span<TiledSHEdge> getIndexEdges(short tile, Direction dir) = 0;
+    virtual const std::span<Shortcut> getIndexEdges(short tile, Direction dir) = 0;
 };

@@ -1,20 +1,28 @@
 
+#include <array>
+
+#include "./comps/graph_index.h"
 #include "./tiled_graph.h"
 
 //*******************************************
-// base-graph
+// tiled-graph
 //******************************************
 
-TiledGraph::TiledGraph(GraphStore store, TopologyStore topology, std::vector<int> weights, TiledStore skip_store, TypedTopologyStore skip_topology,
-                       std::unordered_map<short, std::tuple<int, int>> tile_ranges, std::vector<TiledSHEdge> index_edges)
-    : store(store), topology(topology), edge_weights(weights), skip_store(skip_store), skip_topology(skip_topology), tile_ranges(tile_ranges), index_edges(index_edges)
+TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
+                             std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
+                             std::shared_ptr<_CellIndex> index)
 {
-    this->index = build_kdtree_index(store.node_geoms);
+    return {std::move(base),
+            std::move(weights),
+            std::make_unique<MappedKDTreeIndex>(base->getKDTree(), tiled->id_mapping),
+            std::move(partition),
+            std::move(tiled),
+            std::move(index)};
 }
 
 std::unique_ptr<IGraphExplorer> TiledGraph::getGraphExplorer()
 {
-    return std::make_unique<TiledGraphExplorer>(this, this->topology.getAccessor(), this->skip_topology.getAccessor(), this->edge_weights, this->skip_store.sh_weights);
+    return std::make_unique<TiledGraphExplorer>(*this->base, *this->weights, *this->tiled);
 }
 IGraphIndex& TiledGraph::getIndex()
 {
@@ -22,45 +30,56 @@ IGraphIndex& TiledGraph::getIndex()
 }
 int TiledGraph::nodeCount()
 {
-    return this->store.nodeCount();
+    return this->base->nodeCount();
 }
 int TiledGraph::edgeCount()
 {
-    return this->store.edgeCount();
+    return this->base->edgeCount();
 }
 Node TiledGraph::getNode(int node)
 {
-    return this->store.getNode(node);
+    int m_node = this->tiled->id_mapping.get_source(node);
+    return this->base->getNode(m_node);
 }
 Edge TiledGraph::getEdge(int edge)
 {
-    return this->store.getEdge(edge);
+    Edge e = this->base->getEdge(edge);
+    e.nodeA = this->tiled->id_mapping.get_target(e.nodeA);
+    e.nodeB = this->tiled->id_mapping.get_target(e.nodeB);
+    return e;
 }
 Coord TiledGraph::getNodeGeom(int node)
 {
-    return this->store.getNodeGeom(node);
+    int m_node = this->tiled->id_mapping.get_source(node);
+    return this->base->getNodeGeom(m_node);
 }
 
 short TiledGraph::getNodeTile(int node)
 {
-    return this->skip_store.getNodeTile(node);
+    int m_node = this->tiled->id_mapping.get_source(node);
+    return this->partition->get_node_tile(m_node);
 }
 short TiledGraph::tileCount()
 {
-    return this->skip_store.tileCount();
+    return this->partition->tile_count();
 }
 int TiledGraph::shortcutCount()
 {
-    return this->skip_store.shortcutCount();
+    return this->tiled->shortcutCount();
 }
 Shortcut TiledGraph::getShortcut(int shortcut)
 {
-    return this->skip_store.getShortcut(shortcut);
+    return this->tiled->getShortcut(shortcut);
 }
-const std::span<TiledSHEdge> TiledGraph::getIndexEdges(short tile, Direction dir)
+const std::span<Shortcut> TiledGraph::getIndexEdges(short tile, Direction dir)
 {
-    auto [s, c] = this->tile_ranges[tile];
-    return std::span<TiledSHEdge>(&this->index_edges[s], c);
+    if (dir == Direction::FORWARD) {
+        auto& edges = this->cell_index->get_fwd_index(tile);
+        return std::span<Shortcut>(edges.data(), edges.size());
+    } else {
+        auto& edges = this->cell_index->get_bwd_index(tile);
+        return std::span<Shortcut>(edges.data(), edges.size());
+    }
 }
 
 //*******************************************
@@ -70,20 +89,22 @@ const std::span<TiledSHEdge> TiledGraph::getIndexEdges(short tile, Direction dir
 void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
 {
     if (typ == ADJACENT_SKIP) {
-        this->skip_accessor.setBaseNode(node, dir);
-        while (this->skip_accessor.next()) {
-            int edge_id = this->skip_accessor.getEdgeID();
-            int other_id = this->skip_accessor.getOtherID();
-            char typ = this->skip_accessor.getType();
-            func({edge_id, other_id, typ});
+        auto skip_accessor = this->tiled.topology.getNeighbours(node, dir);
+        while (skip_accessor.next()) {
+            int edge_id = skip_accessor.getEdgeID();
+            int other_id = skip_accessor.getOtherID();
+            std::array<char, 8> data = skip_accessor.getData();
+            func({edge_id, other_id, data[0]});
         }
     } else if (typ == ADJACENT_ALL || typ == ADJACENT_EDGES) {
-        this->accessor.setBaseNode(node, dir);
-        while (this->accessor.next()) {
-            int edge_id = this->accessor.getEdgeID();
-            int other_id = this->accessor.getOtherID();
-            char typ = this->graph->skip_store.edge_types[edge_id];
-            func({edge_id, other_id, typ});
+        int m_node = this->tiled.id_mapping.get_source(node);
+        auto accessor = this->base.adjacency.getNeighbours(m_node, dir);
+        while (accessor.next()) {
+            int edge_id = accessor.getEdgeID();
+            int other_id = accessor.getOtherID();
+            int m_other_id = this->tiled.id_mapping.get_target(node);
+            char typ = this->tiled.edge_types[edge_id];
+            func({edge_id, m_other_id, typ});
         }
     } else {
         throw 1;
@@ -93,9 +114,10 @@ void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ
 int TiledGraphExplorer::getEdgeWeight(EdgeRef edge)
 {
     if (edge.isShortcut()) {
-        return this->sh_weights[edge.edge_id];
+        auto shc = this->tiled.getShortcut(edge.edge_id);
+        return shc.weight;
     } else {
-        return this->edge_weights[edge.edge_id];
+        return this->weights.get_edge_weight(edge.edge_id);
     }
 }
 int TiledGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to)
@@ -105,21 +127,23 @@ int TiledGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to)
 int TiledGraphExplorer::getOtherNode(EdgeRef edge, int node)
 {
     if (edge.isShortcut()) {
-        auto e = this->graph->getShortcut(edge.edge_id);
-        if (node == e.nodeA) {
-            return e.nodeB;
+        auto e = this->tiled.getShortcut(edge.edge_id);
+        if (node == e.from) {
+            return e.to;
         }
-        if (node == e.nodeB) {
-            return e.nodeA;
+        if (node == e.to) {
+            return e.from;
         }
         return -1;
     } else {
-        auto e = this->graph->getEdge(edge.edge_id);
-        if (node == e.nodeA) {
-            return e.nodeB;
+        auto e = this->base.getEdge(edge.edge_id);
+        int m_node_a = this->tiled.id_mapping.get_target(e.nodeA);
+        int m_node_b = this->tiled.id_mapping.get_target(e.nodeB);
+        if (node == m_node_a) {
+            return m_node_b;
         }
-        if (node == e.nodeB) {
-            return e.nodeA;
+        if (node == m_node_b) {
+            return m_node_a;
         }
         return -1;
     }

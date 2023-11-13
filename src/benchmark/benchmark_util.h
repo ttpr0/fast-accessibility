@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "../graph/graph.h"
-#include "../graph/loader.h"
 
 std::tuple<std::vector<Coord>, std::vector<int>> read_points(const std::string& filename)
 {
@@ -36,7 +35,8 @@ std::tuple<std::vector<Coord>, std::vector<int>> read_points(const std::string& 
     return std::make_tuple(std::move(points), std::move(weights));
 }
 
-std::tuple<std::vector<Coord>, std::vector<int>> select_random(std::vector<Coord>& points, std::vector<int>& weights, int count)
+std::tuple<std::vector<Coord>, std::vector<int>> select_random(std::vector<Coord>& points, std::vector<int>& weights,
+                                                               int count)
 {
     std::vector<Coord> new_locs(count);
     std::vector<int> new_weights(count);
@@ -47,7 +47,8 @@ std::tuple<std::vector<Coord>, std::vector<int>> select_random(std::vector<Coord
     for (int i = 0; i < length; i++) {
         perm[i] = std::make_tuple(i, rng.rand());
     }
-    std::sort(perm.begin(), perm.end(), [](std::tuple<int, int> a, std::tuple<int, int> b) { return std::get<1>(a) < std::get<1>(b); });
+    std::sort(perm.begin(), perm.end(),
+              [](std::tuple<int, int> a, std::tuple<int, int> b) { return std::get<1>(a) < std::get<1>(b); });
     for (int i = 0; i < count; i++) {
         int index = std::get<0>(perm[i]);
         new_locs[i] = points[index];
@@ -149,7 +150,8 @@ std::vector<int> select_random_subset(std::vector<int>& nodes, int count)
     for (int i = 0; i < length; i++) {
         perm[i] = std::make_tuple(i, rng.rand());
     }
-    std::sort(perm.begin(), perm.end(), [](std::tuple<int, int> a, std::tuple<int, int> b) { return std::get<1>(a) < std::get<1>(b); });
+    std::sort(perm.begin(), perm.end(),
+              [](std::tuple<int, int> a, std::tuple<int, int> b) { return std::get<1>(a) < std::get<1>(b); });
     for (int i = 0; i < count; i++) {
         int index = std::get<0>(perm[i]);
         new_nodes[i] = nodes[index];

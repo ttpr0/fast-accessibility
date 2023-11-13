@@ -5,32 +5,36 @@
 #include <vector>
 
 #include "./base_graph.h"
-#include "./ch_storage.h"
+#include "./comps/ch_data.h"
+#include "./comps/ch_index.h"
+#include "./comps/partition.h"
 #include "./graph.h"
-#include "./graph_storage.h"
-#include "./topology_storage.h"
+#include "./structs/adjacency.h"
 
 //*******************************************
 // ch-graph
-//******************************************
+//*******************************************
 
 class CHGraph : public ICHGraph
 {
 public:
-    GraphStore store;
-    TopologyStore topology;
-    std::vector<int> edge_weights;
+    std::shared_ptr<GraphBase> base;
+    std::shared_ptr<Weighting> weights;
     std::unique_ptr<IGraphIndex> index;
 
-    // additional ch components
-    CHStore ch_store;
-    TopologyStore ch_topology;
-    // stores all fowwards-down edges
-    std::vector<CHEdge> fwd_down_edges;
-    // stores all backwards-down edges
-    std::vector<CHEdge> bwd_down_edges;
+    // additional components
+    std::shared_ptr<CHData> ch;
+    // ch-index
+    std::shared_ptr<_CHIndex> ch_index;
 
-    CHGraph(GraphStore store, TopologyStore topology, std::vector<int> weights, CHStore ch_store, TopologyStore ch_topology);
+    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index,
+            std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
+        : base(std::move(base)),
+          weights(std::move(weights)),
+          index(std::move(index)),
+          ch(std::move(ch)),
+          ch_index(std::move(ch_index))
+    {}
 
     std::unique_ptr<IGraphExplorer> getGraphExplorer();
     IGraphIndex& getIndex();
@@ -42,23 +46,32 @@ public:
 
     short getNodeLevel(int node);
     int shortcutCount();
-    CHShortcut getShortcut(int shortcut);
+    Shortcut getShortcut(int shortcut);
     const std::vector<CHEdge>& getDownEdges(Direction dir);
 };
 
-class CHGraph2 : public ICHGraph
+class CHGraph2 : public IGraph
 {
 public:
-    CHGraph ch_graph;
+    std::shared_ptr<GraphBase> base;
+    std::shared_ptr<Weighting> weights;
+    std::unique_ptr<IGraphIndex> index;
+    std::shared_ptr<Partition> partition;
 
-    // tile of every node
-    std::vector<short> node_tiles;
-    // stores all fowwards-down edges
-    std::vector<CHEdge4> fwd_down_edges;
-    // stores all backwards-down edges
-    std::vector<CHEdge4> bwd_down_edges;
+    // additional components
+    std::shared_ptr<CHData> ch;
+    // ch-index
+    std::shared_ptr<_CHIndex2> ch_index;
 
-    CHGraph2(GraphStore store, TopologyStore topology, std::vector<int> weights, CHStore ch_store, TopologyStore ch_topology, std::vector<short> node_tiles);
+    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index,
+             std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index)
+        : base(std::move(base)),
+          weights(std::move(weights)),
+          index(std::move(index)),
+          partition(std::move(partition)),
+          ch(std::move(ch)),
+          ch_index(std::move(ch_index))
+    {}
 
     std::unique_ptr<IGraphExplorer> getGraphExplorer();
     IGraphIndex& getIndex();
@@ -70,36 +83,37 @@ public:
 
     short getNodeLevel(int node);
     int shortcutCount();
-    CHShortcut getShortcut(int shortcut);
-    const std::vector<CHEdge>& getDownEdges(Direction dir);
+    Shortcut getShortcut(int shortcut);
+    const std::vector<CHEdge4>& getDownEdges4(Direction dir);
     short getNodeTile(int node);
     int tileCount();
-    const std::vector<CHEdge4>& getDownEdges4(Direction dir);
 };
 
 //*******************************************
 // ch-graph explorer
-//******************************************
+//*******************************************
 
 class CHGraphExplorer : public IGraphExplorer
 {
 public:
-    CHGraph* graph;
-    TopologyAccessor accessor;
-    TopologyAccessor sh_accessor;
-    std::vector<int>& edge_weights;
-    std::vector<int>& sh_weights;
-    std::vector<short>& node_levels;
+    GraphBase& base;
+    Weighting& weights;
+    CHData& ch;
 
-    CHGraphExplorer(CHGraph* graph, TopologyAccessor accessor, TopologyAccessor sh_accessor, std::vector<int>& edge_weights, std::vector<int>& sh_weights,
-                    std::vector<short>& node_levels)
-        : accessor(accessor), sh_accessor(sh_accessor), edge_weights(edge_weights), sh_weights(sh_weights), node_levels(node_levels)
-    {
-        this->graph = graph;
-    }
+    CHGraphExplorer(GraphBase& base, Weighting& weights, CHData& ch) : base(base), weights(weights), ch(ch) {}
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
     int getTurnCost(EdgeRef from, int via, EdgeRef to);
     int getOtherNode(EdgeRef edge, int node);
 };
+
+//*******************************************
+// build  ch-graph
+//*******************************************
+
+CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch,
+                       std::shared_ptr<_CHIndex> ch_index);
+CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
+                          std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
+                          std::shared_ptr<_CHIndex2> ch_index);

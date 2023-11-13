@@ -9,7 +9,8 @@
 #include "./util.h"
 
 // reGRASP and isoGRASP combination
-void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
+void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, std::vector<bool>& contains_targets,
+               std::vector<bool>& is_found)
 {
     auto& flags = flags_.get_flags();
     short counter = flags_.get_counter();
@@ -69,7 +70,7 @@ void calcGRASP(ITiledGraph* g, int start, DistFlagArray& flags_, int max_range, 
         }
         auto& down_edges = g->getIndexEdges(i, Direction::FORWARD);
         for (int j = 0; j < down_edges.size(); j++) {
-            TiledSHEdge edge = down_edges[j];
+            auto edge = down_edges[j];
             auto curr_flag = flags[edge.from];
             if (curr_flag._flag_counter != counter) {
                 continue;

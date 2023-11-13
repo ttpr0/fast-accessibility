@@ -5,33 +5,41 @@
 #include <vector>
 
 #include "./base_graph.h"
-#include "./ch_storage.h"
+#include "./comps/cell_index.h"
+#include "./comps/ch_data.h"
+#include "./comps/graph_base.h"
+#include "./comps/partition.h"
+#include "./comps/tiled_data.h"
 #include "./graph.h"
-#include "./graph_storage.h"
-#include "./tiled_storage.h"
-#include "./topology_storage.h"
+#include "./structs/adjacency.h"
 
 //*******************************************
-// base-graph
-//******************************************
+// tiled-graph
+//*******************************************
 
 class TiledGraph : public ITiledGraph
 {
 public:
-    GraphStore store;
-    TopologyStore topology;
-    std::vector<int> edge_weights;
+    std::shared_ptr<GraphBase> base;
+    std::shared_ptr<Weighting> weights;
     std::unique_ptr<IGraphIndex> index;
+    std::shared_ptr<Partition> partition;
 
     // additional components
-    TiledStore skip_store;
-    TypedTopologyStore skip_topology;
+    std::shared_ptr<TiledData> tiled;
     // cell-index
-    std::unordered_map<short, std::tuple<int, int>> tile_ranges;
-    std::vector<TiledSHEdge> index_edges;
+    std::shared_ptr<_CellIndex> cell_index;
 
-    TiledGraph(GraphStore store, TopologyStore topology, std::vector<int> weights, TiledStore skip_store, TypedTopologyStore skip_topology,
-               std::unordered_map<short, std::tuple<int, int>> tile_ranges, std::vector<TiledSHEdge> index_edges);
+    TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index,
+               std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
+               std::shared_ptr<_CellIndex> cell_index)
+        : base(std::move(base)),
+          weights(std::move(weights)),
+          index(std::move(index)),
+          partition(std::move(partition)),
+          tiled(std::move(tiled)),
+          cell_index(std::move(cell_index))
+    {}
 
     std::unique_ptr<IGraphExplorer> getGraphExplorer();
     IGraphIndex& getIndex();
@@ -45,30 +53,34 @@ public:
     short tileCount();
     int shortcutCount();
     Shortcut getShortcut(int shortcut);
-    const std::span<TiledSHEdge> getIndexEdges(short tile, Direction dir);
+    const std::span<Shortcut> getIndexEdges(short tile, Direction dir);
 };
 
 //*******************************************
-// ch-graph explorer
-//******************************************
+// tiled-graph explorer
+//*******************************************
 
 class TiledGraphExplorer : public IGraphExplorer
 {
 public:
-    TiledGraph* graph;
-    TopologyAccessor accessor;
-    TypedTopologyAccessor skip_accessor;
-    std::vector<int>& edge_weights;
-    std::vector<int>& sh_weights;
+    GraphBase& base;
+    Weighting& weights;
+    TiledData& tiled;
 
-    TiledGraphExplorer(TiledGraph* graph, TopologyAccessor accessor, TypedTopologyAccessor skip_accessor, std::vector<int>& edge_weights, std::vector<int>& sh_weights)
-        : accessor(accessor), skip_accessor(skip_accessor), edge_weights(edge_weights), sh_weights(sh_weights)
-    {
-        this->graph = graph;
-    }
+    TiledGraphExplorer(GraphBase& base, Weighting& weights, TiledData& tiled)
+        : base(base), weights(weights), tiled(tiled)
+    {}
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
     int getTurnCost(EdgeRef from, int via, EdgeRef to);
     int getOtherNode(EdgeRef edge, int node);
 };
+
+//*******************************************
+// build tiled-graph
+//*******************************************
+
+TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
+                             std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
+                             std::shared_ptr<_CellIndex> index);

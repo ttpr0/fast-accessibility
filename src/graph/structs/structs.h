@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <tuple>
 
 #include "./enums.h"
@@ -21,17 +22,22 @@ struct Node
 
 struct Shortcut
 {
-    int nodeA;
-    int nodeB;
-    int edgeref_start;
-    int edgeref_count;
-};
+    int from;
+    int to;
+    int weight;
+    std::array<char, 4> payload;
 
-struct CHShortcut
-{
-    int nodeA;
-    int nodeB;
-    std::tuple<int, char> edges[2];
+    template <class T>
+    void set(T value, int pos)
+    {
+        *(static_cast<T*>(this->payload[pos])) = value;
+    }
+
+    template <class T>
+    T get(int pos)
+    {
+        return *(static_cast<T*>(this->payload[pos]));
+    }
 };
 
 struct EdgeRef

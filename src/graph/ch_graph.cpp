@@ -1,62 +1,33 @@
 
 #include "./ch_graph.h"
+#include "./comps/graph_index.h"
 
 //*******************************************
 // base-graph
-//******************************************
+//*******************************************
 
-CHGraph::CHGraph(GraphStore store, TopologyStore topology, std::vector<int> weights, CHStore ch_store, TopologyStore ch_topology)
-    : store(store), topology(topology), edge_weights(weights), ch_store(ch_store), ch_topology(ch_topology)
+CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch,
+                       std::shared_ptr<_CHIndex> ch_index)
 {
-    std::vector<CHEdge> fwd_down_edges;
-    std::vector<CHEdge> bwd_down_edges;
+    return {std::move(base), std::move(weights), std::make_unique<MappedKDTreeIndex>(base->getKDTree(), ch->id_mapping),
+            std::move(ch), std::move(ch_index)};
+}
 
-    auto explorer = this->getGraphExplorer();
-    for (int i = 0; i < this->nodeCount(); i++) {
-        int this_id = i;
-        int count = 0;
-        explorer->forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &fwd_down_edges, &count, &this_id](EdgeRef ref) {
-            int other_id = ref.other_id;
-            int weight = explorer->getEdgeWeight(ref);
-            fwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
-            count += 1;
-        });
-        if (count > 16) {
-            for (int j = fwd_down_edges.size() - count; j < fwd_down_edges.size(); j++) {
-                auto ch_edge = fwd_down_edges[j];
-                ch_edge.count = count;
-                ch_edge.skip = true;
-                fwd_down_edges[j] = ch_edge;
-            }
-        }
-
-        count = 0;
-        explorer->forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &bwd_down_edges, &count, &this_id](EdgeRef ref) {
-            int other_id = ref.other_id;
-            int weight = explorer->getEdgeWeight(ref);
-            bwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
-            count += 1;
-        });
-        if (count > 16) {
-            for (int j = bwd_down_edges.size() - count; j < bwd_down_edges.size(); j++) {
-                auto ch_edge = bwd_down_edges[j];
-                ch_edge.count = count;
-                ch_edge.skip = true;
-                bwd_down_edges[j] = ch_edge;
-            }
-        }
-    }
-
-    this->fwd_down_edges = fwd_down_edges;
-    this->bwd_down_edges = bwd_down_edges;
-
-    this->index = build_kdtree_index(store.node_geoms);
+CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
+                          std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
+                          std::shared_ptr<_CHIndex2> ch_index)
+{
+    return {std::move(base),
+            std::move(weights),
+            std::make_unique<MappedKDTreeIndex>(base->getKDTree(), ch->id_mapping),
+            std::move(partition),
+            std::move(ch),
+            std::move(ch_index)};
 }
 
 std::unique_ptr<IGraphExplorer> CHGraph::getGraphExplorer()
 {
-    return std::make_unique<CHGraphExplorer>(this, this->topology.getAccessor(), this->ch_topology.getAccessor(), this->edge_weights, this->ch_store.sh_weights,
-                                             this->ch_store.node_levels);
+    return std::make_unique<CHGraphExplorer>(*this->base, *this->weights, *this->ch);
 }
 IGraphIndex& CHGraph::getIndex()
 {
@@ -64,43 +35,48 @@ IGraphIndex& CHGraph::getIndex()
 }
 int CHGraph::nodeCount()
 {
-    return this->store.nodeCount();
+    return this->base->nodeCount();
 }
 int CHGraph::edgeCount()
 {
-    return this->store.edgeCount();
+    return this->base->edgeCount();
 }
 Node CHGraph::getNode(int node)
 {
-    return this->store.getNode(node);
+    int m_node = this->ch->id_mapping.get_source(node);
+    return this->base->getNode(m_node);
 }
 Edge CHGraph::getEdge(int edge)
 {
-    return this->store.getEdge(edge);
+    Edge e = this->base->getEdge(edge);
+    e.nodeA = this->ch->id_mapping.get_target(e.nodeA);
+    e.nodeB = this->ch->id_mapping.get_target(e.nodeB);
+    return e;
 }
 Coord CHGraph::getNodeGeom(int node)
 {
-    return this->store.getNodeGeom(node);
+    int m_node = this->ch->id_mapping.get_source(node);
+    return this->base->getNodeGeom(m_node);
 }
 
 short CHGraph::getNodeLevel(int node)
 {
-    return this->ch_store.getNodeLevel(node);
+    return this->ch->getNodeLevel(node);
 }
 int CHGraph::shortcutCount()
 {
-    return this->ch_store.shortcutCount();
+    return this->ch->shortcutCount();
 }
-CHShortcut CHGraph::getShortcut(int shortcut)
+Shortcut CHGraph::getShortcut(int shortcut)
 {
-    return this->ch_store.getShortcut(shortcut);
+    return this->ch->getShortcut(shortcut);
 }
 const std::vector<CHEdge>& CHGraph::getDownEdges(Direction dir)
 {
     if (dir == Direction::FORWARD) {
-        return this->fwd_down_edges;
+        return this->ch_index->fwd_down_edges;
     } else {
-        return this->bwd_down_edges;
+        return this->ch_index->bwd_down_edges;
     }
 }
 
@@ -111,68 +87,76 @@ const std::vector<CHEdge>& CHGraph::getDownEdges(Direction dir)
 void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
 {
     if (typ == Adjacency::ADJACENT_ALL) {
-        this->accessor.setBaseNode(node, dir);
-        this->sh_accessor.setBaseNode(node, dir);
-        while (this->accessor.next()) {
-            int edge_id = this->accessor.getEdgeID();
-            int other_id = this->accessor.getOtherID();
-            func(EdgeRef{edge_id, other_id, 0});
+        int m_node = this->ch.id_mapping.get_source(node);
+        auto accessor = this->base.adjacency.getNeighbours(m_node, dir);
+        auto sh_accessor = this->ch.topology.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int edge_id = accessor.getEdgeID();
+            int other_id = accessor.getOtherID();
+            int m_other_id = this->ch.id_mapping.get_target(other_id);
+            func(EdgeRef{edge_id, m_other_id, 0});
         }
-        while (this->sh_accessor.next()) {
-            int edge_id = this->sh_accessor.getEdgeID();
-            int other_id = this->sh_accessor.getOtherID();
+        while (sh_accessor.next()) {
+            int edge_id = sh_accessor.getEdgeID();
+            int other_id = sh_accessor.getOtherID();
             func(EdgeRef{edge_id, other_id, 100});
         }
     } else if (typ == Adjacency::ADJACENT_EDGES) {
-        this->accessor.setBaseNode(node, dir);
-        while (this->accessor.next()) {
-            int edge_id = this->accessor.getEdgeID();
-            int other_id = this->accessor.getOtherID();
-            func(EdgeRef{edge_id, other_id, 0});
+        int m_node = this->ch.id_mapping.get_source(node);
+        auto accessor = this->base.adjacency.getNeighbours(m_node, dir);
+        while (accessor.next()) {
+            int edge_id = accessor.getEdgeID();
+            int other_id = accessor.getOtherID();
+            int m_other_id = this->ch.id_mapping.get_target(other_id);
+            func(EdgeRef{edge_id, m_other_id, 0});
         }
     } else if (typ == Adjacency::ADJACENT_SHORTCUTS) {
-        this->sh_accessor.setBaseNode(node, dir);
-        while (this->sh_accessor.next()) {
-            int edge_id = this->sh_accessor.getEdgeID();
-            int other_id = this->sh_accessor.getOtherID();
+        auto sh_accessor = this->ch.topology.getNeighbours(node, dir);
+        while (sh_accessor.next()) {
+            int edge_id = sh_accessor.getEdgeID();
+            int other_id = sh_accessor.getOtherID();
             func(EdgeRef{edge_id, other_id, 0});
         }
     } else if (typ == Adjacency::ADJACENT_UPWARDS) {
-        this->accessor.setBaseNode(node, dir);
-        this->sh_accessor.setBaseNode(node, dir);
-        while (this->accessor.next()) {
-            int other_id = this->accessor.getOtherID();
-            if (this->node_levels[node] >= this->node_levels[other_id]) {
+        int m_node = this->ch.id_mapping.get_source(node);
+        auto accessor = this->base.adjacency.getNeighbours(m_node, dir);
+        auto sh_accessor = this->ch.topology.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int other_id = accessor.getOtherID();
+            int m_other_id = this->ch.id_mapping.get_target(other_id);
+            if (this->ch.node_levels[node] >= this->ch.node_levels[m_other_id]) {
                 continue;
             }
-            int edge_id = this->accessor.getEdgeID();
-            func(EdgeRef{edge_id, other_id, 0});
+            int edge_id = accessor.getEdgeID();
+            func(EdgeRef{edge_id, m_other_id, 0});
         }
-        while (this->sh_accessor.next()) {
-            int other_id = this->sh_accessor.getOtherID();
-            if (this->node_levels[node] >= this->node_levels[other_id]) {
+        while (sh_accessor.next()) {
+            int other_id = sh_accessor.getOtherID();
+            if (this->ch.node_levels[node] >= this->ch.node_levels[other_id]) {
                 continue;
             }
-            int edge_id = this->sh_accessor.getEdgeID();
+            int edge_id = sh_accessor.getEdgeID();
             func(EdgeRef{edge_id, other_id, 100});
         }
     } else if (typ == Adjacency::ADJACENT_DOWNWARDS) {
-        this->accessor.setBaseNode(node, dir);
-        this->sh_accessor.setBaseNode(node, dir);
-        while (this->accessor.next()) {
-            int other_id = this->accessor.getOtherID();
-            if (this->node_levels[node] <= this->node_levels[other_id]) {
+        int m_node = this->ch.id_mapping.get_source(node);
+        auto accessor = this->base.adjacency.getNeighbours(m_node, dir);
+        auto sh_accessor = this->ch.topology.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int other_id = accessor.getOtherID();
+            int m_other_id = this->ch.id_mapping.get_target(other_id);
+            if (this->ch.node_levels[node] <= this->ch.node_levels[m_other_id]) {
                 continue;
             }
-            int edge_id = this->accessor.getEdgeID();
-            func(EdgeRef{edge_id, other_id, 0});
+            int edge_id = accessor.getEdgeID();
+            func(EdgeRef{edge_id, m_other_id, 0});
         }
-        while (this->sh_accessor.next()) {
-            int other_id = this->sh_accessor.getOtherID();
-            if (this->node_levels[node] <= this->node_levels[other_id]) {
+        while (sh_accessor.next()) {
+            int other_id = sh_accessor.getOtherID();
+            if (this->ch.node_levels[node] <= this->ch.node_levels[other_id]) {
                 continue;
             }
-            int edge_id = this->sh_accessor.getEdgeID();
+            int edge_id = sh_accessor.getEdgeID();
             func(EdgeRef{edge_id, other_id, 100});
         }
     } else {
@@ -183,9 +167,10 @@ void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, s
 int CHGraphExplorer::getEdgeWeight(EdgeRef edge)
 {
     if (edge.isCHShortcut()) {
-        return this->sh_weights[edge.edge_id];
+        auto shc = this->ch.getShortcut(edge.edge_id);
+        return shc.weight;
     } else {
-        return this->edge_weights[edge.edge_id];
+        return this->weights.get_edge_weight(edge.edge_id);
     }
 }
 int CHGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to)
@@ -195,21 +180,23 @@ int CHGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to)
 int CHGraphExplorer::getOtherNode(EdgeRef edge, int node)
 {
     if (edge.isShortcut()) {
-        auto e = this->graph->getShortcut(edge.edge_id);
-        if (node == e.nodeA) {
-            return e.nodeB;
+        auto e = this->ch.getShortcut(edge.edge_id);
+        if (node == e.from) {
+            return e.to;
         }
-        if (node == e.nodeB) {
-            return e.nodeA;
+        if (node == e.to) {
+            return e.from;
         }
         return -1;
     } else {
-        auto e = this->graph->getEdge(edge.edge_id);
-        if (node == e.nodeA) {
-            return e.nodeB;
+        auto e = this->base.getEdge(edge.edge_id);
+        int m_node_a = this->ch.id_mapping.get_target(e.nodeA);
+        int m_node_b = this->ch.id_mapping.get_target(e.nodeB);
+        if (node == m_node_a) {
+            return m_node_b;
         }
-        if (node == e.nodeB) {
-            return e.nodeA;
+        if (node == m_node_b) {
+            return m_node_a;
         }
         return -1;
     }
