@@ -16,7 +16,7 @@
 class GRASP
 {
 public:
-    typedef TiledGraph Graph;
+    typedef ITiledGraph Graph;
     class Builder
     {
     private:
@@ -40,12 +40,10 @@ private:
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
-    GRASP(Graph* graph, int max_range, std::vector<bool> active_tiles)
-        : graph(graph), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size())
-    {}
+    GRASP(Graph* graph, int max_range, std::vector<bool> active_tiles) : graph(graph), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size()) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags)
+    void compute(int s_id, Flags<DistFlag>& flags)
     {
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;

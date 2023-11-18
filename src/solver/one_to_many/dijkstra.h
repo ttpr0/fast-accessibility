@@ -36,5 +36,5 @@ private:
     RangeDijkstra(Graph* graph, int max_range) : graph(graph), max_range(max_range) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags) { calcRangeDijkstra(this->graph, s_id, flags, this->max_range); }
+    void compute(int s_id, Flags<DistFlag>& flags) { calcRangeDijkstra(this->graph, s_id, flags, this->max_range); }
 };

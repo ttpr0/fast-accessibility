@@ -9,11 +9,12 @@
 #include "./util.h"
 
 // computes ball around start until "count" nodes are visited
-void calcCountDijkstra(IGraph* g, int start, DistFlagArray& flags, int count)
+void calcCountDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int count)
 {
-    flags.set_start(start);
+    auto& start_flag = flags[start];
+    start_flag.dist = 0;
 
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -34,7 +35,7 @@ void calcCountDijkstra(IGraph* g, int start, DistFlagArray& flags, int count)
         if (found_count == count) {
             break;
         }
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
+        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -43,7 +44,7 @@ void calcCountDijkstra(IGraph* g, int start, DistFlagArray& flags, int count)
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
             if (other_flag.dist > new_length) {
                 other_flag.dist = new_length;
                 heap.push({other_id, new_length});

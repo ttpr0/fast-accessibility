@@ -18,7 +18,7 @@
 class PHAST
 {
 public:
-    typedef CHGraph Graph;
+    typedef ICHGraph Graph;
     class Builder
     {
     private:
@@ -36,14 +36,14 @@ private:
     PHAST(Graph* graph) : graph(graph) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags) { calcPHAST(this->graph, s_id, flags); }
+    void compute(int s_id, Flags<DistFlag>& flags) { calcPHAST(this->graph, s_id, flags); }
 };
 
 // RangePHAST
 class RangePHAST
 {
 public:
-    typedef CHGraph Graph;
+    typedef ICHGraph Graph;
     class Builder
     {
     private:
@@ -63,7 +63,7 @@ private:
     RangePHAST(Graph* graph, int max_range) : graph(graph), max_range(max_range) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags) { calcRangePHAST(this->graph, s_id, flags, this->max_range); }
+    void compute(int s_id, Flags<DistFlag>& flags) { calcRangePHAST(this->graph, s_id, flags, this->max_range); }
 };
 
 // RangePHAST+GS
@@ -94,12 +94,10 @@ private:
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
-    RangePHASTGS(Graph* graph, int max_range, std::vector<bool> active_tiles)
-        : graph(graph), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size())
-    {}
+    RangePHASTGS(Graph* graph, int max_range, std::vector<bool> active_tiles) : graph(graph), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size()) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags)
+    void compute(int s_id, Flags<DistFlag>& flags)
     {
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;

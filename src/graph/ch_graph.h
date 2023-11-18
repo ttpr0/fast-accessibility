@@ -20,6 +20,7 @@ class CHGraph : public ICHGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
+    std::unique_ptr<IGraphExplorer> explorer;
     std::unique_ptr<IGraphIndex> index;
 
     // additional components
@@ -27,16 +28,10 @@ public:
     // ch-index
     std::shared_ptr<_CHIndex> ch_index;
 
-    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index,
-            std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
-        : base(std::move(base)),
-          weights(std::move(weights)),
-          index(std::move(index)),
-          ch(std::move(ch)),
-          ch_index(std::move(ch_index))
-    {}
+    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<CHData> ch,
+            std::shared_ptr<_CHIndex> ch_index);
 
-    std::unique_ptr<IGraphExplorer> getGraphExplorer();
+    IGraphExplorer& getGraphExplorer();
     IGraphIndex& getIndex();
     int nodeCount();
     int edgeCount();
@@ -55,6 +50,7 @@ class CHGraph2 : public IGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
+    std::unique_ptr<IGraphExplorer> explorer;
     std::unique_ptr<IGraphIndex> index;
     std::shared_ptr<Partition> partition;
 
@@ -63,17 +59,10 @@ public:
     // ch-index
     std::shared_ptr<_CHIndex2> ch_index;
 
-    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index,
-             std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index)
-        : base(std::move(base)),
-          weights(std::move(weights)),
-          index(std::move(index)),
-          partition(std::move(partition)),
-          ch(std::move(ch)),
-          ch_index(std::move(ch_index))
-    {}
+    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+             std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index);
 
-    std::unique_ptr<IGraphExplorer> getGraphExplorer();
+    IGraphExplorer& getGraphExplorer();
     IGraphIndex& getIndex();
     int nodeCount();
     int edgeCount();
@@ -112,8 +101,6 @@ public:
 // build  ch-graph
 //*******************************************
 
-CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch,
-                       std::shared_ptr<_CHIndex> ch_index);
-CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
-                          std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
+CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
+CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
                           std::shared_ptr<_CHIndex2> ch_index);

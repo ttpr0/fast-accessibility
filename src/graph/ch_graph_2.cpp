@@ -5,9 +5,16 @@
 // ch-graph
 //*******************************************
 
-std::unique_ptr<IGraphExplorer> CHGraph2::getGraphExplorer()
+CHGraph2::CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+                   std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index)
+    : base(std::move(base)), weights(std::move(weights)), index(std::move(index)), partition(std::move(partition)), ch(std::move(ch)), ch_index(std::move(ch_index))
 {
-    return std::make_unique<CHGraphExplorer>(*this->base, *this->weights, *this->ch);
+    this->explorer = std::make_unique<CHGraphExplorer>(*this->base, *this->weights, *this->ch);
+}
+
+IGraphExplorer& CHGraph2::getGraphExplorer()
+{
+    return *this->explorer;
 }
 IGraphIndex& CHGraph2::getIndex()
 {

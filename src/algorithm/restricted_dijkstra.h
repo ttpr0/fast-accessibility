@@ -9,11 +9,12 @@
 #include "./util.h"
 
 // computes dijkstra forward search until all targets are found
-void calcRestrictedDijkstra(IGraph* g, int start, DistFlagArray& flags, std::vector<bool>& targets, int target_count)
+void calcRestrictedDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, std::vector<bool>& targets, int target_count)
 {
-    flags.set_start(start);
+    auto& start_flag = flags[start];
+    start_flag.dist = 0;
 
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -36,7 +37,7 @@ void calcRestrictedDijkstra(IGraph* g, int start, DistFlagArray& flags, std::vec
                 break;
             }
         }
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
+        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -45,7 +46,7 @@ void calcRestrictedDijkstra(IGraph* g, int start, DistFlagArray& flags, std::vec
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
             if (other_flag.dist > new_length) {
                 other_flag.dist = new_length;
                 heap.push({other_id, new_length});
@@ -55,11 +56,12 @@ void calcRestrictedDijkstra(IGraph* g, int start, DistFlagArray& flags, std::vec
 }
 
 // computes dijkstra forward search until "max_range" is reached or all targets are found
-void calcRestrictedRangeDijkstra(IGraph* g, int start, DistFlagArray& flags, int max_range, std::vector<bool>& targets, int target_count)
+void calcRestrictedRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& targets, int target_count)
 {
-    flags.set_start(start);
+    auto& start_flag = flags[start];
+    start_flag.dist = 0;
 
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -82,7 +84,7 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, DistFlagArray& flags, int
                 break;
             }
         }
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
+        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -91,7 +93,7 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, DistFlagArray& flags, int
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }

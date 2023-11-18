@@ -9,14 +9,12 @@
 #include "./util.h"
 
 // RPHAST with simple range restriction
-void calcRangeRPHAST(ICHGraph* g, int start, DistFlagArray& flags_, int max_range, std::vector<CHEdge>& down_edges_subset)
+void calcRangeRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<CHEdge>& down_edges_subset)
 {
-    auto& flags = flags_.get_flags();
-    short counter = flags_.get_counter();
+    auto& start_flag = flags[start];
+    start_flag.dist = 0;
 
-    flags[start] = {0, false, counter};
-
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
@@ -32,16 +30,13 @@ void calcRangeRPHAST(ICHGraph* g, int start, DistFlagArray& flags_, int max_rang
             continue;
         }
         curr_flag.visited = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &counter, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
+        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
-            if (other_flag._flag_counter != counter) {
-                other_flag = {1000000000, false, counter};
-            }
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
@@ -56,7 +51,7 @@ void calcRangeRPHAST(ICHGraph* g, int start, DistFlagArray& flags_, int max_rang
     for (int i = 0; i < length; i++) {
         auto edge = down_edges_subset[i];
         auto& curr_flag = flags[edge.from];
-        if (curr_flag._flag_counter != counter) {
+        if (!curr_flag.visited) {
             continue;
         }
         int new_len = curr_flag.dist + edge.weight;
@@ -64,9 +59,6 @@ void calcRangeRPHAST(ICHGraph* g, int start, DistFlagArray& flags_, int max_rang
             continue;
         }
         auto& other_flag = flags[edge.to];
-        if (other_flag._flag_counter != counter) {
-            other_flag = {1000000000, false, counter};
-        }
         if (other_flag.dist > new_len) {
             other_flag.dist = new_len;
             other_flag.visited = true;

@@ -37,8 +37,7 @@ int convert_start(IGraph* base_graph, IGraph* this_graph, int start)
     return this_start;
 }
 
-void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& base_targets,
-                     std::vector<bool>& this_targets)
+void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& base_targets, std::vector<bool>& this_targets)
 {
     auto& index = this_graph->getIndex();
     for (int i = 0; i < this_graph->nodeCount(); i++) {
@@ -55,8 +54,7 @@ void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& 
     }
 }
 
-void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* grasp_graph,
-                           ITiledGraph* isophast_graph, int b, int t, int tilecount)
+void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph* grasp_graph, ITiledGraph* isophast_graph, int b, int t, int tilecount)
 {
     std::cout << "start one-to-many benchmark:" << std::endl;
     // init results
@@ -79,7 +77,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
         // get center for ball query
         int center = rng.rand();
         // compute ball query
-        auto flags = DistFlagArray(START_GRAPH->nodeCount());
+        auto flags = Flags<DistFlag>(START_GRAPH->nodeCount(), {10000000, false});
         calcCountDijkstra(START_GRAPH, center, flags, B);
         std::vector<int> nodes;
         for (int j = 0; j < START_GRAPH->nodeCount(); j++) {
@@ -224,7 +222,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                     start_isophast = convert_start(START_GRAPH, isophast_graph, start);
                 }
 
-                DistFlagArray flags(START_GRAPH->nodeCount());
+                auto flags = Flags<DistFlag>(START_GRAPH->nodeCount(), {10000000, false});
 
                 // benchmark range-dijkstra
                 bench.run("Range-Dijkstra", [&] {
@@ -288,8 +286,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                             found_tiles[i] = false;
                         }
                         flags.soft_reset();
-                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs, active_tiles,
-                                     found_tiles);
+                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs, active_tiles, found_tiles);
                     });
 
                     // benchmark GS+RPHAST (with priotity queue)
@@ -298,8 +295,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
                             found_tiles[i] = false;
                         }
                         flags.soft_reset();
-                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs_range, active_tiles,
-                                     found_tiles);
+                        calcGSRPHAST(ch_graph_2, start_ch_2, flags, RANGE, down_edges_subset_gs_range, active_tiles, found_tiles);
                     });
                 }
 
@@ -358,9 +354,7 @@ void benchmark_one_to_many(ICHGraph* ch_graph, CHGraph2* ch_graph_2, ITiledGraph
 
     // write results to file
     std::cout << "start writing results..." << std::endl;
-    write_results(
-        "results_one_to_many_" + std::to_string(tilecount) + "_" + std::to_string(b) + "_" + std::to_string(t) + ".csv",
-        results);
+    write_results("results_one_to_many_" + std::to_string(tilecount) + "_" + std::to_string(b) + "_" + std::to_string(t) + ".csv", results);
 
     std::cout << "finished successfully!" << std::endl;
 }

@@ -18,6 +18,6 @@ public:
         Solver build(); // build solver
     }
 
-    compute(int start, DistFlagArray& flags); // computes batched-shortest-paths to all targets
+    compute(int start, Flags<DistFlag>& flags); // computes batched-shortest-paths to all targets
 }
 ```

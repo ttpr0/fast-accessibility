@@ -11,7 +11,7 @@
 // standard RPHAST subset selection
 std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
 {
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
         graph_subset[i] = false;
@@ -27,7 +27,7 @@ std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
         }
         graph_subset[node] = true;
         short node_level = g->getNodeLevel(node);
-        explorer->forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &node_queue](EdgeRef ref) {
+        explorer.forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &node_queue](EdgeRef ref) {
             if (graph_subset[ref.other_id]) {
                 return;
             }
@@ -57,7 +57,7 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_it
     }
 
     // select graph subset by marking visited nodes
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
     while (true) {
         if (node_queue.empty()) {
             break;
@@ -70,11 +70,11 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_it
             continue;
         }
         graph_subset[node] = true;
-        explorer->forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &explorer, &node_len, &max_range, &node_queue](EdgeRef ref) {
+        explorer.forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &explorer, &node_len, &max_range, &node_queue](EdgeRef ref) {
             if (graph_subset[ref.other_id]) {
                 return;
             }
-            int new_len = node_len + explorer->getEdgeWeight(ref);
+            int new_len = node_len + explorer.getEdgeWeight(ref);
             if (new_len > max_range) {
                 return;
             }
@@ -98,7 +98,7 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_it
 // RPHAST preprocessing (including updates on dummy edges)
 std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queue)
 {
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
         graph_subset[i] = false;
@@ -114,7 +114,7 @@ std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queu
         }
         graph_subset[node] = true;
         short node_level = g->getNodeLevel(node);
-        explorer->forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &node_queue](EdgeRef ref) {
+        explorer.forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &node_queue](EdgeRef ref) {
             if (graph_subset[ref.other_id]) {
                 return;
             }
@@ -155,7 +155,7 @@ std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queu
 // Range-RPHAST preprocessing (including updates on dummy edges)
 std::vector<CHEdge4> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq_item>&& node_queue, int max_range)
 {
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
         graph_subset[i] = false;
@@ -172,11 +172,11 @@ std::vector<CHEdge4> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq
             continue;
         }
         graph_subset[node] = true;
-        explorer->forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &explorer, &node_len, &max_range, &node_queue](EdgeRef ref) {
+        explorer.forAdjacentEdges(node, Direction::BACKWARD, Adjacency::ADJACENT_UPWARDS, [&graph_subset, &explorer, &node_len, &max_range, &node_queue](EdgeRef ref) {
             if (graph_subset[ref.other_id]) {
                 return;
             }
-            int new_len = node_len + explorer->getEdgeWeight(ref);
+            int new_len = node_len + explorer.getEdgeWeight(ref);
             if (new_len > max_range) {
                 return;
             }

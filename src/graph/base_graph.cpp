@@ -13,9 +13,15 @@ Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weightin
     return {std::move(base), std::move(weights), std::make_unique<KDTreeIndex>(base->getKDTree())};
 }
 
-std::unique_ptr<IGraphExplorer> Graph::getGraphExplorer()
+Graph::Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index)
+    : base(std::move(base)), weights(std::move(weights)), index(std::move(index))
 {
-    return std::make_unique<BaseGraphExplorer>(*this->base, *this->weights);
+    this->explorer = std::make_unique<BaseGraphExplorer>(*this->base, *this->weights);
+}
+
+IGraphExplorer& Graph::getGraphExplorer()
+{
+    return *this->explorer;
 }
 IGraphIndex& Graph::getIndex()
 {

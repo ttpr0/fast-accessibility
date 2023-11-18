@@ -30,14 +30,12 @@ class Graph : public IGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
+    std::unique_ptr<IGraphExplorer> explorer;
     std::unique_ptr<IGraphIndex> index;
 
-    Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index)
-        : base(std::move(base)), weights(std::move(weights)), index(std::move(index))
-    {}
+    Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index);
 
-    std::unique_ptr<IGraphExplorer> getGraphExplorer();
-
+    IGraphExplorer& getGraphExplorer();
     IGraphIndex& getIndex();
 
     int nodeCount();

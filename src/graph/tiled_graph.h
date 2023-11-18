@@ -17,11 +17,14 @@
 // tiled-graph
 //*******************************************
 
+class TiledGraphExplorer;
+
 class TiledGraph : public ITiledGraph
 {
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
+    std::unique_ptr<IGraphExplorer> explorer;
     std::unique_ptr<IGraphIndex> index;
     std::shared_ptr<Partition> partition;
 
@@ -30,18 +33,10 @@ public:
     // cell-index
     std::shared_ptr<_CellIndex> cell_index;
 
-    TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index,
-               std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
-               std::shared_ptr<_CellIndex> cell_index)
-        : base(std::move(base)),
-          weights(std::move(weights)),
-          index(std::move(index)),
-          partition(std::move(partition)),
-          tiled(std::move(tiled)),
-          cell_index(std::move(cell_index))
-    {}
+    TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+               std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index);
 
-    std::unique_ptr<IGraphExplorer> getGraphExplorer();
+    IGraphExplorer& getGraphExplorer();
     IGraphIndex& getIndex();
     int nodeCount();
     int edgeCount();
@@ -67,9 +62,7 @@ public:
     Weighting& weights;
     TiledData& tiled;
 
-    TiledGraphExplorer(GraphBase& base, Weighting& weights, TiledData& tiled)
-        : base(base), weights(weights), tiled(tiled)
-    {}
+    TiledGraphExplorer(GraphBase& base, Weighting& weights, TiledData& tiled) : base(base), weights(weights), tiled(tiled) {}
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
@@ -81,6 +74,5 @@ public:
 // build tiled-graph
 //*******************************************
 
-TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
-                             std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
+TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
                              std::shared_ptr<_CellIndex> index);

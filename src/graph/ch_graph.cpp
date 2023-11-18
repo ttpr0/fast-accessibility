@@ -6,28 +6,27 @@
 // base-graph
 //*******************************************
 
-CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch,
-                       std::shared_ptr<_CHIndex> ch_index)
+CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
 {
-    return {std::move(base), std::move(weights), std::make_unique<MappedKDTreeIndex>(base->getKDTree(), ch->id_mapping),
-            std::move(ch), std::move(ch_index)};
+    return {std::move(base), std::move(weights), std::make_unique<MappedKDTreeIndex>(base->getKDTree(), ch->id_mapping), std::move(ch), std::move(ch_index)};
 }
 
-CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
-                          std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
+CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
                           std::shared_ptr<_CHIndex2> ch_index)
 {
-    return {std::move(base),
-            std::move(weights),
-            std::make_unique<MappedKDTreeIndex>(base->getKDTree(), ch->id_mapping),
-            std::move(partition),
-            std::move(ch),
-            std::move(ch_index)};
+    return {std::move(base), std::move(weights), std::make_unique<MappedKDTreeIndex>(base->getKDTree(), ch->id_mapping), std::move(partition), std::move(ch), std::move(ch_index)};
 }
 
-std::unique_ptr<IGraphExplorer> CHGraph::getGraphExplorer()
+CHGraph::CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<CHData> ch,
+                 std::shared_ptr<_CHIndex> ch_index)
+    : base(std::move(base)), weights(std::move(weights)), index(std::move(index)), ch(std::move(ch)), ch_index(std::move(ch_index))
 {
-    return std::make_unique<CHGraphExplorer>(*this->base, *this->weights, *this->ch);
+    this->explorer = std::make_unique<CHGraphExplorer>(*this->base, *this->weights, *this->ch);
+}
+
+IGraphExplorer& CHGraph::getGraphExplorer()
+{
+    return *this->explorer;
 }
 IGraphIndex& CHGraph::getIndex()
 {

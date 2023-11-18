@@ -14,13 +14,15 @@
 #include "../algorithm/util.h"
 #include "../graph/graph.h"
 #include "../util.h"
+#include "./distance_decay/decay.h"
 
-template <class A>
-std::vector<float> calc2SFCA(typename A::Graph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights,
-                             std::vector<Coord>& sup_points, std::vector<int>& sup_weights, int max_range)
+template <class S>
+std::vector<float> calc2SFCA(typename S::Graph* g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
+                             IDistanceDecay& decay)
 {
-    typename A::Builder alg_builder(g);
-    alg_builder.addMaxRange(max_range);
+    typename S::Builder alg_builder(g);
+    int max_dist = decay.get_max_distance();
+    alg_builder.addMaxRange(max_dist);
     // get closest node for every demand point
     IGraphIndex& index = g->getIndex();
     std::vector<int> dem_nodes(dem_points.size());
@@ -42,7 +44,7 @@ std::vector<float> calc2SFCA(typename A::Graph* g, std::vector<Coord>& dem_point
         access[i] = 0;
     }
 
-    auto flags = DistFlagArray(g->nodeCount());
+    auto flags = Flags<DistFlag>(g->nodeCount(), {10000000, false});
     std::mutex m;
 #pragma omp parallel for firstprivate(flags)
     for (int i = 0; i < sup_points.size(); i++) {
@@ -66,10 +68,10 @@ std::vector<float> calc2SFCA(typename A::Graph* g, std::vector<Coord>& dem_point
             }
             auto d_flag = flags[d_node];
             int d_dist = d_flag.dist;
-            if (d_dist >= max_range) {
+            if (d_dist >= max_dist) {
                 continue;
             }
-            float distance_decay = 1 - d_dist / (float)max_range;
+            float distance_decay = decay.get_distance_weight(d_dist);
             demand_sum += dem_weights[i] * distance_decay;
         }
         float R = s_weight / demand_sum;
@@ -82,10 +84,10 @@ std::vector<float> calc2SFCA(typename A::Graph* g, std::vector<Coord>& dem_point
             }
             auto d_flag = flags[d_node];
             int d_dist = d_flag.dist;
-            if (d_dist >= max_range) {
+            if (d_dist >= max_dist) {
                 continue;
             }
-            float distance_decay = 1 - d_dist / (float)max_range;
+            float distance_decay = decay.get_distance_weight(d_dist);
             access[i] += R * distance_decay;
         }
         m.unlock();

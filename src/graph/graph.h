@@ -37,7 +37,7 @@ class IGraph
 public:
     virtual ~IGraph() {}
 
-    virtual std::unique_ptr<IGraphExplorer> getGraphExplorer() = 0;
+    virtual IGraphExplorer& getGraphExplorer() = 0;
     virtual IGraphIndex& getIndex() = 0;
     virtual int nodeCount() = 0;
     virtual int edgeCount() = 0;

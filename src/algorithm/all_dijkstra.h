@@ -9,14 +9,15 @@
 #include "./util.h"
 
 // computes one-to-all distances using forward-dijkstra
-void calcAllDijkstra(IGraph* g, int start, DistFlagArray& flags)
+void calcAllDijkstra(IGraph* g, int start, Flags<DistFlag>& flags)
 {
-    flags.set_start(start);
+    auto& start_flag = flags[start];
+    start_flag.dist = 0;
 
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
 
-    auto explorer = g->getGraphExplorer();
+    auto& explorer = g->getGraphExplorer();
 
     while (true) {
         if (heap.empty()) {
@@ -30,7 +31,7 @@ void calcAllDijkstra(IGraph* g, int start, DistFlagArray& flags)
             continue;
         }
         curr_flag.visited = true;
-        explorer->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
+        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -39,7 +40,7 @@ void calcAllDijkstra(IGraph* g, int start, DistFlagArray& flags)
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
             if (other_flag.dist > new_length) {
                 other_flag.dist = new_length;
                 heap.push({other_id, new_length});

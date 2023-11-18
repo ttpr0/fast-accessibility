@@ -8,21 +8,23 @@
 // tiled-graph
 //******************************************
 
-TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
-                             std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
+TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<TiledData> tiled,
                              std::shared_ptr<_CellIndex> index)
 {
-    return {std::move(base),
-            std::move(weights),
-            std::make_unique<MappedKDTreeIndex>(base->getKDTree(), tiled->id_mapping),
-            std::move(partition),
-            std::move(tiled),
-            std::move(index)};
+    return {std::move(base),      std::move(weights), std::make_unique<MappedKDTreeIndex>(base->getKDTree(), tiled->id_mapping),
+            std::move(partition), std::move(tiled),   std::move(index)};
 }
 
-std::unique_ptr<IGraphExplorer> TiledGraph::getGraphExplorer()
+TiledGraph::TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+                       std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index)
+    : base(std::move(base)), weights(std::move(weights)), index(std::move(index)), partition(std::move(partition)), tiled(std::move(tiled)), cell_index(std::move(cell_index))
 {
-    return std::make_unique<TiledGraphExplorer>(*this->base, *this->weights, *this->tiled);
+    this->explorer = std::make_unique<TiledGraphExplorer>(*this->base, *this->weights, *this->tiled);
+}
+
+IGraphExplorer& TiledGraph::getGraphExplorer()
+{
+    return *this->explorer;
 }
 IGraphIndex& TiledGraph::getIndex()
 {

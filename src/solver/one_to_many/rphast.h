@@ -20,7 +20,7 @@
 class RPHAST
 {
 public:
-    typedef CHGraph Graph;
+    typedef ICHGraph Graph;
     class Builder
     {
     private:
@@ -43,19 +43,17 @@ private:
     Graph* graph;
     std::vector<CHEdge> down_edges_subset;
     int max_range;
-    RPHAST(Graph* graph, std::vector<CHEdge> down_edges_subset, int max_range)
-        : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range)
-    {}
+    RPHAST(Graph* graph, std::vector<CHEdge> down_edges_subset, int max_range) : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags) { calcRPHAST(this->graph, s_id, flags, this->down_edges_subset); }
+    void compute(int s_id, Flags<DistFlag>& flags) { calcRPHAST(this->graph, s_id, flags, this->down_edges_subset); }
 };
 
 // RangeRPHAST
 class RangeRPHAST
 {
 public:
-    typedef CHGraph Graph;
+    typedef ICHGraph Graph;
     class Builder
     {
     private:
@@ -78,22 +76,17 @@ private:
     Graph* graph;
     std::vector<CHEdge> down_edges_subset;
     int max_range;
-    RangeRPHAST(Graph* graph, std::vector<CHEdge> down_edges_subset, int max_range)
-        : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range)
-    {}
+    RangeRPHAST(Graph* graph, std::vector<CHEdge> down_edges_subset, int max_range) : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags)
-    {
-        calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset);
-    }
+    void compute(int s_id, Flags<DistFlag>& flags) { calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset); }
 };
 
 // RangeRPHAST (RTS)
 class RangeRPHAST2
 {
 public:
-    typedef CHGraph Graph;
+    typedef ICHGraph Graph;
     class Builder
     {
     private:
@@ -117,15 +110,10 @@ private:
     std::vector<CHEdge> down_edges_subset;
     int max_range;
 
-    RangeRPHAST2(Graph* graph, std::vector<CHEdge> down_edges_subset, int max_range)
-        : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range)
-    {}
+    RangeRPHAST2(Graph* graph, std::vector<CHEdge> down_edges_subset, int max_range) : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range) {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags)
-    {
-        calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset);
-    }
+    void compute(int s_id, Flags<DistFlag>& flags) { calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset); }
 };
 
 // RangeRPHAST+GS
@@ -153,8 +141,7 @@ public:
         RangeRPHASTGS build()
         {
             auto down_edges_subset = preprocessGSRPHAST(this->graph, std::move(this->node_queue));
-            return RangeRPHASTGS(this->graph, std::move(down_edges_subset), this->max_range,
-                                 std::move(this->active_tiles));
+            return RangeRPHASTGS(this->graph, std::move(down_edges_subset), this->max_range, std::move(this->active_tiles));
         }
     };
 
@@ -165,21 +152,16 @@ private:
     std::vector<bool> found_tiles;
     int max_range;
     RangeRPHASTGS(Graph* graph, std::vector<CHEdge4> down_edges_subset, int max_range, std::vector<bool> active_tiles)
-        : graph(graph),
-          down_edges_subset(down_edges_subset),
-          max_range(max_range),
-          active_tiles(active_tiles),
-          found_tiles(active_tiles.size())
+        : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size())
     {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags)
+    void compute(int s_id, Flags<DistFlag>& flags)
     {
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles,
-                     this->found_tiles);
+        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
     }
 };
 
@@ -208,8 +190,7 @@ public:
         RangeRPHASTGS2 build()
         {
             auto down_edges_subset = preprocessRangeGSRPHAST(this->graph, std::move(this->node_queue), this->max_range);
-            return RangeRPHASTGS2(this->graph, std::move(down_edges_subset), this->max_range,
-                                  std::move(this->active_tiles));
+            return RangeRPHASTGS2(this->graph, std::move(down_edges_subset), this->max_range, std::move(this->active_tiles));
         }
     };
 
@@ -220,20 +201,15 @@ private:
     std::vector<bool> found_tiles;
     int max_range;
     RangeRPHASTGS2(Graph* graph, std::vector<CHEdge4> down_edges_subset, int max_range, std::vector<bool> active_tiles)
-        : graph(graph),
-          down_edges_subset(down_edges_subset),
-          max_range(max_range),
-          active_tiles(active_tiles),
-          found_tiles(active_tiles.size())
+        : graph(graph), down_edges_subset(down_edges_subset), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size())
     {}
 
 public:
-    void compute(int s_id, DistFlagArray& flags)
+    void compute(int s_id, Flags<DistFlag>& flags)
     {
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles,
-                     this->found_tiles);
+        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
     }
 };

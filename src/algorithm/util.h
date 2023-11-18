@@ -17,36 +17,33 @@ struct DistFlag
 {
     int dist;
     bool visited;
-    short _flag_counter;
 };
 
-class DistFlagArray
+template <typename T>
+class Flags
 {
 private:
-    std::vector<DistFlag> flags;
-    short _counter;
+    struct Flag
+    {
+        T data;
+        unsigned short _counter;
+    };
+
+    std::vector<Flag> flags;
+    T _default;
+    unsigned short _counter;
 
 public:
-    DistFlagArray(int size)
-    {
-        this->flags = std::vector<DistFlag>(size);
-        this->_counter = 0;
-        this->hard_reset();
-    }
+    Flags(int size, T _default) : flags(size), _default(_default), _counter(0) { this->hard_reset(); }
 
-    void set_start(int start) { this->flags[start] = {0, false, this->_counter}; }
-
-    inline constexpr DistFlag& operator[](int pos) noexcept
+    inline T& operator[](int pos) noexcept
     {
-        DistFlag& flag = this->flags[pos];
-        if (flag._flag_counter != this->_counter) {
-            flag = {1000000000, false, this->_counter};
+        Flag& flag = this->flags[pos];
+        if (flag._counter != this->_counter) {
+            flag = {this->_default, this->_counter};
         }
-        return flag;
+        return flag.data;
     }
-
-    std::vector<DistFlag>& get_flags() { return this->flags; }
-    short get_counter() { return this->_counter; }
 
     void soft_reset()
     {
@@ -60,7 +57,7 @@ public:
     {
         int size = this->flags.size();
         for (int i = 0; i < size; i++) {
-            this->flags[i] = {1000000000, false, 0};
+            this->flags[i] = {this->_default, 0};
         }
         this->_counter = 0;
     }
