@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <unordered_set>
 #include <vector>
 
 #include "../structs/enums.h"
@@ -26,5 +27,22 @@ public:
             }
         }
         return max + 1;
+    }
+
+    std::vector<short> get_tiles()
+    {
+        std::unordered_set<short> tile_set;
+        for (int i = 0; i < this->node_tiles.size(); i++) {
+            short tile_id = this->node_tiles[i];
+            if (tile_set.contains(tile_id)) {
+                continue;
+            }
+            tile_set.insert(tile_id);
+        }
+        std::vector<short> tile_list;
+        for (auto tile : tile_set) {
+            tile_list.push_back(tile);
+        }
+        return tile_list;
     }
 };
