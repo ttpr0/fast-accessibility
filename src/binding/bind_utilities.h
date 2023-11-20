@@ -30,6 +30,8 @@ void bind_utilities(nanobind::module_& m)
             v.push_back(Coord{get<0>(val), get<1>(val)});
         },
         "Insert Coordinate with (lon, lat).");
+    py::bind_vector<vector<Node>>(m, "NodeVector");
+    py::bind_vector<vector<Edge>>(m, "EdgeVector");
 
     auto coord = py::class_<Coord>(m, "Coord");
     coord.def(py::init<>());

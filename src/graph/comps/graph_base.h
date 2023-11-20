@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "../../kd_tree/kd_tree.h"
@@ -22,3 +23,5 @@ struct GraphBase
     inline Coord getNodeGeom(int node) { return this->node_geoms[node]; }
     KDTree& getKDTree() { return this->tree; }
 };
+
+std::shared_ptr<GraphBase> build_graph_base(std::vector<Node> nodes, std::vector<Edge> edges, std::vector<Coord> node_geoms);
