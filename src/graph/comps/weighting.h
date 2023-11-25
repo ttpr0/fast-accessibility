@@ -35,3 +35,13 @@ static std::shared_ptr<Weighting> build_default_weighting(GraphBase& base)
 
     return std::make_shared<Weighting>(std::move(weights));
 }
+
+static std::shared_ptr<Weighting> build_equal_weighting(GraphBase& base)
+{
+    std::vector<int> weights(base.edgeCount());
+    for (int i = 0; i < base.edgeCount(); i++) {
+        weights[i] = 1;
+    }
+
+    return std::make_shared<Weighting>(std::move(weights));
+}

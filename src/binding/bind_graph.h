@@ -8,10 +8,12 @@
 #include "../graph/io/cell_index_io.h"
 #include "../graph/io/ch_data_io.h"
 #include "../graph/io/graph_base_io.h"
-#include "../graph/io/loader.h"
 #include "../graph/io/partition_io.h"
 #include "../graph/io/tiled_data_io.h"
 #include "../graph/io/weighting_io.h"
+#include "../graph/preproc/partition/partition.h"
+#include "../graph/preproc/remove_unconnected.h"
+#include "../graph/preproc/tiled/tiled.h"
 #include "../graph/structs/geom.h"
 
 void bind_graph(nanobind::module_& m)
@@ -72,12 +74,25 @@ void bind_graph(nanobind::module_& m)
     //*******************************************
 
     auto graph_base = py::class_<GraphBase>(m, "GraphBase");
+    graph_base.def("get_node", &GraphBase::getNode);
+    graph_base.def("get_node_geom", &GraphBase::getNodeGeom);
+    graph_base.def("node_count", &GraphBase::nodeCount);
+    graph_base.def("get_edge", &GraphBase::getEdge);
+    graph_base.def("edge_count", &GraphBase::edgeCount);
+
     auto weighting = py::class_<Weighting>(m, "Weighting");
+
     auto partition = py::class_<Partition>(m, "Partition");
+    partition.def("get_node_tile", &Partition::get_node_tile);
+
     auto ch_data = py::class_<CHData>(m, "CHData");
+
     auto ch_index = py::class_<_CHIndex>(m, "CHIndex");
+
     auto ch_index_2 = py::class_<_CHIndex2>(m, "CHIndex2");
+
     auto tiled_data = py::class_<TiledData>(m, "TiledData");
+
     auto cell_index = py::class_<_CellIndex>(m, "CellIndex");
 
     auto i_graph = py::class_<IGraph>(m, "IGraph");
@@ -115,4 +130,11 @@ void bind_graph(nanobind::module_& m)
     m.def("build_tiled_graph", &build_tiled_graph);
     m.def("build_ch_graph", &build_ch_graph);
     m.def("build_ch_graph_2", &build_ch_graph_2);
+
+    m.def("remove_unconnected", &remove_unconnected);
+    m.def("build_partition", &calc_partition);
+
+    m.def("prepare_tiled", &PreprocessTiledGraph3);
+    m.def("prepare_cell_index", &PrepareGRASPCellIndex2);
+    m.def("prepare_isophast", &PreprocessTiledGraph5);
 }

@@ -1,6 +1,5 @@
 
 #include "./adjacency.h"
-#include "../io/loader.h"
 
 //*******************************************
 // adjacency
@@ -49,17 +48,25 @@ short AdjacencyList::getDegree(int node, Direction dir)
 
 AdjacencyAccessor AdjacencyList::getNeighbours(int node, Direction dir)
 {
-    _DynamicNodeEntry node_entry = this->node_entries[node];
+    _DynamicNodeEntry& node_entry = this->node_entries[node];
     _EdgeEntry* edge_refs;
     int start;
     int end;
     if (dir == Direction::FORWARD) {
-        edge_refs = &(node_entry.fwd_edges[0]);
+        if (node_entry.fwd_edges.empty()) {
+            edge_refs = nullptr;
+        } else {
+            edge_refs = (&node_entry.fwd_edges[0]);
+        }
         start = 0;
         end = node_entry.fwd_edges.size();
     }
     if (dir == Direction::BACKWARD) {
-        edge_refs = &(node_entry.bwd_edges[0]);
+        if (node_entry.bwd_edges.empty()) {
+            edge_refs = nullptr;
+        } else {
+            edge_refs = (&node_entry.bwd_edges[0]);
+        }
         start = 0;
         end = node_entry.bwd_edges.size();
     }
@@ -110,15 +117,15 @@ bool AdjacencyAccessor::next()
 }
 int AdjacencyAccessor::getEdgeID()
 {
-    return this->edge_refs[this->state].edge_id;
+    return this->edge_refs[this->state - 1].edge_id;
 }
 int AdjacencyAccessor::getOtherID()
 {
-    return this->edge_refs[this->state].other_id;
+    return this->edge_refs[this->state - 1].other_id;
 }
 std::array<char, 8> AdjacencyAccessor::getData()
 {
-    return this->edge_refs[this->state].data;
+    return this->edge_refs[this->state - 1].data;
 }
 
 //*******************************************

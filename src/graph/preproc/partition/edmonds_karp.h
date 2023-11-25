@@ -6,7 +6,7 @@
 
 #include "../../graph.h"
 
-struct _Flag
+struct _Flag_EK
 {
     int prev_node;
     int prev_edge;
@@ -17,7 +17,7 @@ struct _Flag
 class EdmondsKarp
 {
 public:
-    IGraph& g;
+    IGraph* g;
     std::vector<short> node_tiles;
 
     // edge flows stored as 0 or 1;
@@ -32,18 +32,19 @@ public:
     int max_flow;
 
     std::queue<int> source_queue;
-    std::vector<_Flag> bfs_flags;
+    std::vector<_Flag_EK> bfs_flags;
     std::vector<bool> visited;
 
-    EdmondsKarp(IGraph& g, std::span<int> sources, short source_tile, std::span<int> sinks, short sink_tile,
-                std::span<int> base_nodes, short base_tile)
+    EdmondsKarp() {}
+
+    EdmondsKarp(IGraph* g, std::span<int> sources, short source_tile, std::span<int> sinks, short sink_tile, std::span<int> base_nodes, short base_tile)
         : g(g), base_tile(base_tile), source_tile(source_tile), sink_tile(sink_tile), max_flow(0)
     {
         this->source_queue = std::queue<int>();
-        this->node_tiles = std::vector<short>(g.nodeCount());
-        this->bfs_flags = std::vector<_Flag>(g.nodeCount());
-        this->visited = std::vector<bool>(g.nodeCount());
-        this->edge_flow = std::vector<std::array<char, 2>>(g.edgeCount());
+        this->node_tiles = std::vector<short>(g->nodeCount(), 0);
+        this->bfs_flags = std::vector<_Flag_EK>(g->nodeCount(), {0});
+        this->visited = std::vector<bool>(g->nodeCount(), false);
+        this->edge_flow = std::vector<std::array<char, 2>>(g->edgeCount(), {0, 0});
 
         for (auto node : base_nodes) {
             node_tiles[node] = base_tile;
@@ -72,22 +73,22 @@ public:
     void ComputeMinCut()
     {
         auto queue = this->source_queue;
-        std::vector<bool> visited(this->g.nodeCount());
+        std::vector<bool> visited(this->g->nodeCount());
 
         // clear visited
-        for (int i = 0; i < this->g.nodeCount(); i++) {
+        for (int i = 0; i < this->g->nodeCount(); i++) {
             visited[i] = false;
             if (this->node_tiles[i] == this->source_tile) {
                 visited[i] = true;
             }
         }
 
-        auto explorer = this->g.getGraphExplorer();
+        auto& explorer = this->g->getGraphExplorer();
         while (true) {
             if (queue.size() <= 0) {
                 break;
             }
-            int curr = queue.back();
+            int curr = queue.front();
             queue.pop();
             if (this->node_tiles[curr] == this->sink_tile) {
                 throw "this should not happen";
@@ -96,31 +97,29 @@ public:
                 this->node_tiles[curr] = this->source_tile;
             }
 
-            explorer->forAdjacentEdges(
-                curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
-                    if (visited[ref.other_id] || this->node_tiles[ref.other_id] != this->base_tile) {
-                        return;
-                    }
-                    auto flow = this->edge_flow[ref.edge_id];
-                    if (flow[0] == 0 || flow[1] == 1) {
-                        queue.push(ref.other_id);
-                        visited[ref.other_id] = true;
-                    }
-                });
-            explorer->forAdjacentEdges(
-                curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
-                    if (visited[ref.other_id] || this->node_tiles[ref.other_id] != this->base_tile) {
-                        return;
-                    }
-                    auto flow = this->edge_flow[ref.edge_id];
-                    if (flow[0] == 1 || flow[1] == 0) {
-                        queue.push(ref.other_id);
-                        visited[ref.other_id] = true;
-                    }
-                });
+            explorer.forAdjacentEdges(curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
+                if (visited[ref.other_id] || this->node_tiles[ref.other_id] != this->base_tile) {
+                    return;
+                }
+                auto flow = this->edge_flow[ref.edge_id];
+                if (flow[0] == 0 || flow[1] == 1) {
+                    queue.push(ref.other_id);
+                    visited[ref.other_id] = true;
+                }
+            });
+            explorer.forAdjacentEdges(curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
+                if (visited[ref.other_id] || this->node_tiles[ref.other_id] != this->base_tile) {
+                    return;
+                }
+                auto flow = this->edge_flow[ref.edge_id];
+                if (flow[0] == 1 || flow[1] == 0) {
+                    queue.push(ref.other_id);
+                    visited[ref.other_id] = true;
+                }
+            });
         }
 
-        for (int i = 0; i < this->g.nodeCount(); i++) {
+        for (int i = 0; i < this->g->nodeCount(); i++) {
             if (this->node_tiles[i] == this->base_tile) {
                 this->node_tiles[i] = this->sink_tile;
             }
@@ -145,88 +144,84 @@ public:
             }
         }
 
-        auto explorer = this->g.getGraphExplorer();
+        auto& explorer = this->g->getGraphExplorer();
 
         int end = -1;
         while (true) {
             if (queue.size() <= 0) {
                 break;
             }
-            int curr = queue.back();
+            int curr = queue.front();
             queue.pop();
             if (this->node_tiles[curr] == this->sink_tile) {
                 end = curr;
                 break;
             }
 
-            explorer->forAdjacentEdges(
-                curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES,
-                [curr, &visited, this, &flags, &queue](EdgeRef ref) {
-                    // check if edge should stil be traversed
-                    if (visited[ref.other_id]) {
-                        return;
-                    }
-                    // check if node is part of subgraph
-                    short tile = this->node_tiles[ref.other_id];
-                    if (tile != this->base_tile && tile != this->source_tile && tile != this->sink_tile) {
-                        return;
-                    }
+            explorer.forAdjacentEdges(curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [curr, &visited, this, &flags, &queue](EdgeRef ref) {
+                // check if edge should stil be traversed
+                if (visited[ref.other_id]) {
+                    return;
+                }
+                // check if node is part of subgraph
+                short tile = this->node_tiles[ref.other_id];
+                if (tile != this->base_tile && tile != this->source_tile && tile != this->sink_tile) {
+                    return;
+                }
 
-                    auto flow = this->edge_flow[ref.edge_id];
-                    if (flow[0] == 0) {
-                        auto& other_flag = flags[ref.other_id];
-                        other_flag.is_reverse = false;
-                        other_flag.is_virtual = false;
-                        other_flag.prev_edge = ref.edge_id;
-                        other_flag.prev_node = curr;
-                        flags[ref.other_id] = other_flag;
-                        queue.push(ref.other_id);
-                        visited[ref.other_id] = true;
-                    } else if (flow[1] == 1) {
-                        auto& other_flag = flags[ref.other_id];
-                        other_flag.is_reverse = true;
-                        other_flag.is_virtual = true;
-                        other_flag.prev_edge = ref.edge_id;
-                        other_flag.prev_node = curr;
-                        flags[ref.other_id] = other_flag;
-                        queue.push(ref.other_id);
-                        visited[ref.other_id] = true;
-                    }
-                });
-            explorer->forAdjacentEdges(
-                curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES,
-                [curr, &visited, this, &flags, &queue](EdgeRef ref) {
-                    // check if edge should stil be traversed
-                    if (visited[ref.other_id]) {
-                        return;
-                    }
-                    // check if node is part of subgraph
-                    short tile = this->node_tiles[ref.other_id];
-                    if (tile != this->base_tile && tile != this->source_tile && tile != this->sink_tile) {
-                        return;
-                    }
+                auto flow = this->edge_flow[ref.edge_id];
+                if (flow[0] == 0) {
+                    auto& other_flag = flags[ref.other_id];
+                    other_flag.is_reverse = false;
+                    other_flag.is_virtual = false;
+                    other_flag.prev_edge = ref.edge_id;
+                    other_flag.prev_node = curr;
+                    flags[ref.other_id] = other_flag;
+                    queue.push(ref.other_id);
+                    visited[ref.other_id] = true;
+                } else if (flow[1] == 1) {
+                    auto& other_flag = flags[ref.other_id];
+                    other_flag.is_reverse = true;
+                    other_flag.is_virtual = true;
+                    other_flag.prev_edge = ref.edge_id;
+                    other_flag.prev_node = curr;
+                    flags[ref.other_id] = other_flag;
+                    queue.push(ref.other_id);
+                    visited[ref.other_id] = true;
+                }
+            });
+            explorer.forAdjacentEdges(curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [curr, &visited, this, &flags, &queue](EdgeRef ref) {
+                // check if edge should stil be traversed
+                if (visited[ref.other_id]) {
+                    return;
+                }
+                // check if node is part of subgraph
+                short tile = this->node_tiles[ref.other_id];
+                if (tile != this->base_tile && tile != this->source_tile && tile != this->sink_tile) {
+                    return;
+                }
 
-                    auto& flow = this->edge_flow[ref.edge_id];
-                    if (flow[0] == 1) {
-                        auto& other_flag = flags[ref.other_id];
-                        other_flag.is_reverse = true;
-                        other_flag.is_virtual = false;
-                        other_flag.prev_edge = ref.edge_id;
-                        other_flag.prev_node = curr;
-                        flags[ref.other_id] = other_flag;
-                        queue.push(ref.other_id);
-                        visited[ref.other_id] = true;
-                    } else if (flow[1] == 0) {
-                        auto& other_flag = flags[ref.other_id];
-                        other_flag.is_reverse = false;
-                        other_flag.is_virtual = true;
-                        other_flag.prev_edge = ref.edge_id;
-                        other_flag.prev_node = curr;
-                        flags[ref.other_id] = other_flag;
-                        queue.push(ref.other_id);
-                        visited[ref.other_id] = true;
-                    }
-                });
+                auto& flow = this->edge_flow[ref.edge_id];
+                if (flow[0] == 1) {
+                    auto& other_flag = flags[ref.other_id];
+                    other_flag.is_reverse = true;
+                    other_flag.is_virtual = false;
+                    other_flag.prev_edge = ref.edge_id;
+                    other_flag.prev_node = curr;
+                    flags[ref.other_id] = other_flag;
+                    queue.push(ref.other_id);
+                    visited[ref.other_id] = true;
+                } else if (flow[1] == 0) {
+                    auto& other_flag = flags[ref.other_id];
+                    other_flag.is_reverse = false;
+                    other_flag.is_virtual = true;
+                    other_flag.prev_edge = ref.edge_id;
+                    other_flag.prev_node = curr;
+                    flags[ref.other_id] = other_flag;
+                    queue.push(ref.other_id);
+                    visited[ref.other_id] = true;
+                }
+            });
         }
 
         if (end == -1) {

@@ -83,6 +83,7 @@ std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> ba
 
     // init components
     std::unordered_map<short, std::vector<Shortcut>> fwd_index_edges;
+    std::unordered_map<short, std::vector<Shortcut>> bwd_index_edges;
 
     // compute cell-indices
     auto tiles = partition->get_tiles();
@@ -113,7 +114,7 @@ std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> ba
         fwd_index_edges[tile] = index_edges;
     }
 
-    return std::make_shared<_CellIndex>(fwd_index_edges, std::vector<Shortcut>());
+    return std::make_shared<_CellIndex>(fwd_index_edges, bwd_index_edges);
 }
 
 std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTiledGraph5(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
@@ -171,6 +172,7 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
 
     // init components
     std::unordered_map<short, std::vector<Shortcut>> fwd_index_edges;
+    std::unordered_map<short, std::vector<Shortcut>> bwd_index_edges;
 
     // compute cell indices
     auto& explorer = graph.getGraphExplorer();
@@ -178,7 +180,7 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
     int index = 0;
     for (auto tile : tiles) {
         index += 1;
-        printf("Process Tile: %i/%i", index + 1, tiles.size());
+        printf("Process Tile: %i/%i", index, (int)tiles.size());
         // get all down edges or shortcuts
         std::vector<Shortcut> index_edges;
         for (int i = 0; i < ch_data->shortcuts.size(); i++) {
@@ -223,7 +225,7 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
         fwd_index_edges[tile] = index_edges;
     }
 
-    auto cell_index = std::make_shared<_CellIndex>(fwd_index_edges, std::vector<Shortcut>());
+    auto cell_index = std::make_shared<_CellIndex>(fwd_index_edges, bwd_index_edges);
 
     return std::make_tuple(tiled_data, cell_index);
 }

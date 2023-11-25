@@ -42,7 +42,7 @@ bool contains(std::vector<T> vec, T item)
 // * is-contracted is used to limit search to nodes that have not been contracted yet (bool array containing every node in graph)
 //
 // * returns in-neighbours and out-neughbours
-std::tuple<std::vector<int>, std::vector<int>> _FindNeighbours(CHPreprocGraph& explorer, int id, std::vector<bool> is_contracted)
+std::tuple<std::vector<int>, std::vector<int>> _FindNeighbours(CHPreprocGraph& explorer, int id, std::vector<bool>& is_contracted)
 {
     // compute out-going neighbours
     std::vector<int> out_neigbours;
@@ -70,13 +70,13 @@ std::tuple<std::vector<int>, std::vector<int>> _FindNeighbours(CHPreprocGraph& e
         in_neigbours.push_back(other_id);
     });
 
-    return std::make_tuple(in_neigbours, out_neigbours);
+    return std::make_tuple(std::move(in_neigbours), std::move(out_neigbours));
 }
 
 // Performs a local dijkstra search from start until all targets are found or hop_limit reached.
 // Flags will be set in flags-array.
 // is_contracted contains true for every node that is already contracted (will not be used while finding shortest path).
-void _RunLocalSearch(int start, std::vector<int>& targets, CHPreprocGraph& explorer, std::priority_queue<pq_item>& heap, Flags<_FlagSH>& flags, std::vector<bool> is_contracted,
+void _RunLocalSearch(int start, std::vector<int>& targets, CHPreprocGraph& explorer, std::priority_queue<pq_item>& heap, Flags<_FlagSH>& flags, std::vector<bool>& is_contracted,
                      int hop_limit)
 {
     auto& start_flag = flags[start];
@@ -136,20 +136,20 @@ void _RunLocalSearch(int start, std::vector<int>& targets, CHPreprocGraph& explo
 
 // Returns the neccessary shortcut between from and to.
 // If no shortcut is needed false will be returned.
-std::tuple<std::array<std::tuple<int, bool>, 2>, bool> _GetShortcut(int from, int to, int via, CHPreprocGraph& explorer, Flags<_FlagSH> flags)
+std::tuple<std::array<std::tuple<int, bool>, 2>, bool> _GetShortcut(int from, int to, int via, CHPreprocGraph& explorer, Flags<_FlagSH>& flags)
 {
     std::array<std::tuple<int, bool>, 2> edges;
 
     auto to_flag = flags[to];
     // is target hasnt been found by search always add shortcut
     if (!to_flag.visited) {
-        auto [t_edge, _] = explorer.getEdgeBetween(via, to);
+        auto [t_edge, ok1] = explorer.getEdgeBetween(via, to);
         if (t_edge.isCHShortcut()) {
             edges[0] = std::make_tuple(t_edge.edge_id, true);
         } else {
             edges[0] = std::make_tuple(t_edge.edge_id, false);
         }
-        auto [f_edge, _] = explorer.getEdgeBetween(from, via);
+        auto [f_edge, ok2] = explorer.getEdgeBetween(from, via);
         if (f_edge.isCHShortcut()) {
             edges[1] = std::make_tuple(f_edge.edge_id, true);
         } else {

@@ -57,8 +57,8 @@ public:
         }
 
         int weight = 0;
-        weight += this->getWeight(std::get<0>(edges[0]), std::get<0>(edges[0]));
-        weight += this->getWeight(std::get<0>(edges[1]), std::get<0>(edges[1]));
+        weight += this->getWeight(std::get<0>(edges[0]), std::get<1>(edges[0]));
+        weight += this->getWeight(std::get<0>(edges[1]), std::get<1>(edges[1]));
         Shortcut shc = {
             .from = node_a,
             .to = node_b,
@@ -127,10 +127,10 @@ public:
                 return this->getWeight(edge_id, false);
             }
         }
-        auto accessor = this->ch_adjacency.getNeighbours(from, Direction::FORWARD);
-        while (accessor.next()) {
-            int edge_id = accessor.getEdgeID();
-            int other_id = accessor.getOtherID();
+        auto ch_accessor = this->ch_adjacency.getNeighbours(from, Direction::FORWARD);
+        while (ch_accessor.next()) {
+            int edge_id = ch_accessor.getEdgeID();
+            int other_id = ch_accessor.getOtherID();
             if (other_id == to) {
                 return this->getWeight(edge_id, false);
             }
@@ -147,10 +147,10 @@ public:
                 return std::make_tuple(EdgeRef(edge_id, other_id, 0), true);
             }
         }
-        auto accessor = this->ch_adjacency.getNeighbours(from, Direction::FORWARD);
-        while (accessor.next()) {
-            int edge_id = accessor.getEdgeID();
-            int other_id = accessor.getOtherID();
+        auto ch_accessor = this->ch_adjacency.getNeighbours(from, Direction::FORWARD);
+        while (ch_accessor.next()) {
+            int edge_id = ch_accessor.getEdgeID();
+            int other_id = ch_accessor.getOtherID();
             if (other_id == to) {
                 return std::make_tuple(EdgeRef(edge_id, other_id, 100), true);
             }

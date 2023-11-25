@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../tiled/util.h"
+#include "../util.h"
 #include "./local_search.h"
 #include "./preproc_graph.h"
 
@@ -16,19 +17,6 @@
 //*******************************************
 
 class CHOrdering;
-
-template <typename T, typename P>
-struct pq
-{
-    T val;
-    P prio;
-};
-
-template <typename T, typename P>
-bool operator<(const pq<T, P>& a, const pq<T, P>& b)
-{
-    return a.prio > b.prio;
-}
 
 template <typename T>
 T max(T a, T b)
@@ -312,12 +300,12 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
                 if (!std::get<1>(edges[0])) {
                     ec += 1;
                 } else {
-                    ec += shortcut_edgecount[(!std::get<0>(edges[0]))];
+                    ec += shortcut_edgecount[(std::get<0>(edges[0]))];
                 }
                 if (!std::get<1>(edges[1])) {
                     ec += 1;
                 } else {
-                    ec += shortcut_edgecount[(!std::get<0>(edges[1]))];
+                    ec += shortcut_edgecount[(std::get<0>(edges[1]))];
                 }
                 if (ec > 3) {
                     ec = 3;

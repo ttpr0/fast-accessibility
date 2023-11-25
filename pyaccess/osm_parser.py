@@ -232,6 +232,8 @@ def _create_graph_components(nodes: list[Node], edges: list[Edge]):
 
     for edge in edges:
         graph_edges.append(GraphEdge(edge.nodeA, edge.nodeB, edge.type, edge.length, edge.templimit))
+        if not edge.oneway:
+            graph_edges.append(GraphEdge(edge.nodeB, edge.nodeA, edge.type, edge.length, edge.templimit))
     
     return graph_nodes, graph_edges, node_geoms
 
