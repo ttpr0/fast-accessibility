@@ -528,8 +528,22 @@ class GraphBase:
     """
     None
     """
-    ...
 
+    def edge_count(self) -> int:
+        ...
+    
+    def get_edge(self, arg: int, /) -> pyaccess._pyaccess_ext.Edge:
+        ...
+    
+    def get_node(self, arg: int, /) -> pyaccess._pyaccess_ext.Node:
+        ...
+    
+    def get_node_geom(self, arg: int, /) -> pyaccess._pyaccess_ext.Coord:
+        ...
+    
+    def node_count(self) -> int:
+        ...
+    
 class HybridDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -876,28 +890,43 @@ class Partition:
     """
     None
     """
-    ...
 
+    def get_node_tile(self, arg: int, /) -> int:
+        ...
+    
 class RoadType(Enum):
     """
     <attribute '__doc__' of 'RoadType' objects>
     """
-    MOTORWAY = 1
-    MOTORWAY_LINK = 2
-    TRUNK = 3
-    TRUNK_LINK = 4
-    PRIMARY = 5
-    PRIMARY_LINK = 6
-    SECONDARY = 7
-    SECONDARY_LINK = 8
-    TERTIARY = 9
-    TERTIARY_LINK = 10
-    RESIDENTIAL = 11
-    LIVING_STREET = 12
-    UNCLASSIFIED = 13
-    ROAD = 14
-    TRACK = 15
-    ...
+    LIVING_STREET: RoadType
+    
+    MOTORWAY: RoadType
+    
+    MOTORWAY_LINK: RoadType
+    
+    PRIMARY: RoadType
+    
+    PRIMARY_LINK: RoadType
+    
+    RESIDENTIAL: RoadType
+    
+    ROAD: RoadType
+    
+    SECONDARY: RoadType
+    
+    SECONDARY_LINK: RoadType
+    
+    TERTIARY: RoadType
+    
+    TERTIARY_LINK: RoadType
+    
+    TRACK: RoadType
+    
+    TRUNK: RoadType
+    
+    TRUNK_LINK: RoadType
+    
+    UNCLASSIFIED: RoadType
     
 class Shortcut:
     """
@@ -978,6 +1007,9 @@ def build_default_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyacces
 def build_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyaccess_ext.EdgeVector, arg2: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.GraphBase:
     ...
 
+def build_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: int, /) -> pyaccess._pyaccess_ext.Partition:
+    ...
+
 def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, arg3: pyaccess._pyaccess_ext.TiledData, arg4: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
     ...
 
@@ -1042,6 +1074,18 @@ def load_node_partition(arg: str, /) -> pyaccess._pyaccess_ext.Partition:
     ...
 
 def load_tiled_data(arg0: str, arg1: int, /) -> pyaccess._pyaccess_ext.TiledData:
+    ...
+
+def prepare_cell_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.CellIndex:
+    ...
+
+def prepare_isophast(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> tuple[pyaccess._pyaccess_ext.TiledData, pyaccess._pyaccess_ext.CellIndex]:
+    ...
+
+def prepare_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.TiledData:
+    ...
+
+def remove_unconnected(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.GraphBase:
     ...
 
 def store_cell_index(arg0: pyaccess._pyaccess_ext.CellIndex, arg1: str, /) -> None:
