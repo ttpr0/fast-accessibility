@@ -13,37 +13,21 @@
 // graph interfaces
 //*******************************************
 
-class IGraphExplorer
-{
-public:
-    virtual ~IGraphExplorer() {}
-
-    virtual void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) = 0;
-    virtual int getEdgeWeight(EdgeRef edge) = 0;
-    virtual int getTurnCost(EdgeRef from, int via, EdgeRef to) = 0;
-    virtual int getOtherNode(EdgeRef edge, int node) = 0;
-};
-
-class IGraphIndex
-{
-public:
-    virtual ~IGraphIndex() {}
-
-    virtual int getClosestNode(Coord point) = 0;
-};
-
 class IGraph
 {
 public:
     virtual ~IGraph() {}
 
-    virtual IGraphExplorer& getGraphExplorer() = 0;
-    virtual IGraphIndex& getIndex() = 0;
     virtual int nodeCount() = 0;
     virtual int edgeCount() = 0;
     virtual Node getNode(int node) = 0;
     virtual Edge getEdge(int edge) = 0;
     virtual Coord getNodeGeom(int node) = 0;
+    virtual int getClosestNode(Coord point) = 0;
+    virtual void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) = 0;
+    virtual int getEdgeWeight(EdgeRef edge) = 0;
+    virtual int getTurnCost(EdgeRef from, int via, EdgeRef to) = 0;
+    virtual int getOtherNode(EdgeRef edge, int node) = 0;
 };
 
 class ICHGraph : public IGraph

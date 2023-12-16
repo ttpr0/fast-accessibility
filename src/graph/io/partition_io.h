@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../comps/partition.h"
+#include "../speed_ups/partition.h"
 #include "./util.h"
 
 std::shared_ptr<Partition> load_node_partition(const std::string& file)

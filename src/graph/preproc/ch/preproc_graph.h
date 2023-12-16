@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "../../base_graph.h"
-#include "../../comps/ch_data.h"
-#include "../../comps/ch_index.h"
 #include "../../comps/graph_base.h"
-#include "../../comps/partition.h"
 #include "../../graph.h"
+#include "../../speed_ups/ch_data.h"
+#include "../../speed_ups/ch_index.h"
+#include "../../speed_ups/partition.h"
 #include "../../structs/adjacency.h"
 
 //*******************************************
@@ -162,8 +162,7 @@ public:
     // Use this only after ch-preprocessing is finished.
     std::shared_ptr<CHData> getCHData()
     {
-        _IDMapping id_mapping(this->base->nodeCount());
         AdjacencyArray adjacency = build_adjacency_array(this->ch_adjacency);
-        return std::make_shared<CHData>(std::move(id_mapping), std::move(this->shortcuts), std::move(adjacency), std::move(this->node_levels));
+        return std::make_shared<CHData>(std::move(this->shortcuts), std::move(adjacency), std::move(this->node_levels));
     }
 };

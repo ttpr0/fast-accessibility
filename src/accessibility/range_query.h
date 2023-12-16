@@ -15,12 +15,11 @@ std::vector<int> calcRangeQuery(typename S::Graph* g, Coord start_point, std::ve
     typename S::Builder alg_builder(g);
     alg_builder.addMaxRange(max_range);
     // get closest node for every demand point
-    IGraphIndex& index = g->getIndex();
-    int start_node = index.getClosestNode(start_point);
+    int start_node = g->getClosestNode(start_point);
     std::vector<int> target_nodes(target_points.size());
     for (int i = 0; i < target_points.size(); i++) {
         auto loc = target_points[i];
-        auto id = index.getClosestNode(loc);
+        int id = g->getClosestNode(loc);
         target_nodes[i] = id;
         if (id >= 0) {
             alg_builder.addTarget(id);

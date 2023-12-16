@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <iostream>
 #include <memory>
@@ -17,16 +18,6 @@
 //*******************************************
 
 class CHOrdering;
-
-template <typename T>
-T max(T a, T b)
-{
-    if (a > b) {
-        return a;
-    } else {
-        return b;
-    }
-}
 
 int _ComputeNodePriority(int node, CHPreprocGraph& graph, Flags<_FlagSH>& flags, std::vector<bool>& is_contracted, std::vector<short>& node_levels,
                          std::vector<int>& contracted_neighbours, std::vector<char>& shortcut_edgecount, int hop_limit)
@@ -160,12 +151,12 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
                 if (!std::get<1>(edges[0])) {
                     ec += 1;
                 } else {
-                    ec += shortcut_edgecount[(!std::get<0>(edges[0]))];
+                    ec += shortcut_edgecount[std::get<0>(edges[0])];
                 }
                 if (!std::get<1>(edges[1])) {
                     ec += 1;
                 } else {
-                    ec += shortcut_edgecount[(!std::get<0>(edges[1]))];
+                    ec += shortcut_edgecount[std::get<0>(edges[1])];
                 }
                 if (ec > 3) {
                     ec = 3;
@@ -188,7 +179,7 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
         // update neighbours
         for (int i = 0; i < in_neigbours.size(); i++) {
             int nb = in_neigbours[i];
-            node_levels[nb] = max<short>(level + 1, node_levels[nb]);
+            node_levels[nb] = std::max<short>(level + 1, node_levels[nb]);
             contracted_neighbours[nb] += 1;
             int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
             node_priorities[nb] = prio;
@@ -196,7 +187,7 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
         }
         for (int i = 0; i < out_neigbours.size(); i++) {
             int nb = out_neigbours[i];
-            node_levels[nb] = max<short>(level + 1, node_levels[nb]);
+            node_levels[nb] = std::max<short>(level + 1, node_levels[nb]);
             contracted_neighbours[nb] += 1;
             int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
             node_priorities[nb] = prio;
@@ -239,7 +230,8 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
 
     // compute node priorities
     std::cout << "computing priorities..." << std::endl;
-    Graph b_graph = build_base_graph(base, weights);
+    auto index = build_base_index(*base);
+    Graph b_graph = build_base_graph(base, weights, index);
     auto is_border = _get_is_border(b_graph, *partition);
     std::vector<int> node_priorities(graph.nodeCount());
     std::priority_queue<pq<std::tuple<int, int>, int>> contraction_order;
@@ -328,7 +320,7 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
         // update neighbours
         for (int i = 0; i < in_neigbours.size(); i++) {
             int nb = in_neigbours[i];
-            node_levels[nb] = max<short>(level + 1, node_levels[nb]);
+            node_levels[nb] = std::max<short>(level + 1, node_levels[nb]);
             contracted_neighbours[nb] += 1;
             if (is_border[nb]) {
                 continue;
@@ -339,7 +331,7 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
         }
         for (int i = 0; i < out_neigbours.size(); i++) {
             int nb = out_neigbours[i];
-            node_levels[nb] = max<short>(level + 1, node_levels[nb]);
+            node_levels[nb] = std::max<short>(level + 1, node_levels[nb]);
             contracted_neighbours[nb] += 1;
             if (is_border[nb]) {
                 continue;

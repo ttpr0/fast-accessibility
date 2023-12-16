@@ -18,11 +18,10 @@ std::vector<float> calcReachability(typename S::Graph* g, std::vector<Coord>& de
     int max_dist = decay.get_max_distance();
     alg_builder.addMaxRange(max_dist);
     // get closest node for every demand point
-    IGraphIndex& index = g->getIndex();
     std::vector<int> dem_nodes(dem_points.size());
     for (int i = 0; i < dem_points.size(); i++) {
         auto loc = dem_points[i];
-        auto id = index.getClosestNode(loc);
+        int id = g->getClosestNode(loc);
         dem_nodes[i] = id;
         if (id >= 0) {
             alg_builder.addTarget(id);
@@ -43,7 +42,7 @@ std::vector<float> calcReachability(typename S::Graph* g, std::vector<Coord>& de
 #pragma omp parallel for firstprivate(flags)
     for (int i = 0; i < sup_points.size(); i++) {
         // get supply information
-        int s_id = index.getClosestNode(sup_points[i]);
+        int s_id = g->getClosestNode(sup_points[i]);
         if (s_id < 0) {
             continue;
         }

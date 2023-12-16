@@ -5,7 +5,7 @@
 
 #include "../comps/graph_base.h"
 
-std::shared_ptr<GraphBase> _remove_nodes(GraphBase& base, std::vector<int>& nodes)
+static std::shared_ptr<GraphBase> _remove_nodes(const GraphBase& base, const std::vector<int>& nodes)
 {
     std::vector<bool> remove(base.nodeCount(), false);
     for (int node : nodes) {
@@ -42,5 +42,32 @@ std::shared_ptr<GraphBase> _remove_nodes(GraphBase& base, std::vector<int>& node
         });
     }
 
-    return build_graph_base(new_nodes, new_edges, new_node_geoms);
+    return new_graph_base(new_nodes, new_edges, new_node_geoms);
+}
+
+// reorders nodes,
+// mapping: old id -> new id
+static std::shared_ptr<GraphBase> _reorder_nodes(const GraphBase& base, const std::vector<int>& mapping)
+{
+    std::vector<Node> new_nodes(base.nodes.size());
+    std::vector<Coord> new_node_geoms(base.nodes.size());
+    for (int i = 0; i < base.nodeCount(); i++) {
+        int m_id = mapping[i];
+        new_nodes[m_id] = base.getNode(i);
+        new_node_geoms[m_id] = base.getNodeGeom(i);
+    }
+    std::vector<Edge> new_edges;
+    for (int i = 0; i < base.edgeCount(); i++) {
+        auto edge = base.getEdge(i);
+        new_edges.push_back({
+            .nodeA = mapping[edge.nodeA],
+            .nodeB = mapping[edge.nodeB],
+            .type = edge.type,
+            .length = edge.length,
+            .maxspeed = edge.maxspeed,
+            .oneway = edge.oneway,
+        });
+    }
+
+    return new_graph_base(new_nodes, new_edges, new_node_geoms);
 }

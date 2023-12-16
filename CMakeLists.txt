@@ -20,7 +20,7 @@ add_executable(${exe_name}
     src/graph/ch_graph_2.cpp
     src/graph/tiled_graph.cpp
     src/graph/structs/adjacency.cpp
-    src/graph/comps/ch_index.cpp
+    src/graph/preproc/build_ch_index.cpp
     src/graph/comps/graph_index.cpp
     src/graph/comps/graph_base.cpp
     src/kd_tree/kd_tree.cpp
@@ -47,7 +47,7 @@ add_library(${lib_name} SHARED
     src/graph/ch_graph_2.cpp
     src/graph/tiled_graph.cpp
     src/graph/structs/adjacency.cpp
-    src/graph/comps/ch_index.cpp
+    src/graph/preproc/build_ch_index.cpp
     src/graph/comps/graph_index.cpp
     src/graph/comps/graph_base.cpp
     src/kd_tree/kd_tree.cpp

@@ -14,8 +14,6 @@ void calcRangeRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, int max_ran
     auto& start_flag = flags[start];
     start_flag.dist = 0;
 
-    auto& explorer = g->getGraphExplorer();
-
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
     while (true) {
@@ -30,13 +28,13 @@ void calcRangeRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, int max_ran
             continue;
         }
         curr_flag.visited = true;
-        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &explorer, &heap, &curr_flag, &max_range](EdgeRef ref) {
+        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &g, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }

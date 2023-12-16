@@ -22,7 +22,7 @@ std::vector<Shortcut> load_shortcuts(const std::string& file)
         int weight = reader.read<int>();
         auto payload = reader.read<std::array<char, 4>>();
 
-        shortcuts.push_back(Shortcut{from, to, weight, payload});
+        shortcuts[i] = Shortcut{from, to, weight, payload};
     }
 
     return shortcuts;

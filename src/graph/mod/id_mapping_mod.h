@@ -1,10 +1,13 @@
 #pragma once
 
-#include "../structs/id_mapping.h"
+#include <array>
+#include <memory>
+
+#include "../comps/id_mapping.h"
 
 // reorders sources,
 // mapping: old id -> new id
-_IDMapping _reorder_sources(_IDMapping& id_mapping, std::vector<int> mapping)
+static std::shared_ptr<_IDMapping> _reorder_sources(const _IDMapping& id_mapping, const std::vector<int>& mapping)
 {
     if (id_mapping.mapping.size() != mapping.size()) {
         throw -1;
@@ -23,12 +26,12 @@ _IDMapping _reorder_sources(_IDMapping& id_mapping, std::vector<int> mapping)
         new_id_mapping[t][1] = new_s;
     }
 
-    return {new_id_mapping};
+    return std::make_shared<_IDMapping>(new_id_mapping);
 }
 
 // reorders targets,
 // mapping: old id -> new id
-_IDMapping _reorder_targets(_IDMapping& id_mapping, std::vector<int> mapping)
+static std::shared_ptr<_IDMapping> _reorder_targets(const _IDMapping& id_mapping, const std::vector<int>& mapping)
 {
     if (id_mapping.mapping.size() != mapping.size()) {
         throw -1;
@@ -47,5 +50,5 @@ _IDMapping _reorder_targets(_IDMapping& id_mapping, std::vector<int> mapping)
         new_id_mapping[s][0] = new_t;
     }
 
-    return {new_id_mapping};
+    return std::make_shared<_IDMapping>(new_id_mapping);
 }

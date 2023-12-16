@@ -7,8 +7,9 @@
 #include <vector>
 
 #include "../../../algorithm/util.h"
-#include "../../comps/partition.h"
 #include "../../graph.h"
+#include "../../speed_ups/partition.h"
+#include "../../structs/adjacency.h"
 #include "../../structs/enums.h"
 #include "../../structs/structs.h"
 
@@ -24,9 +25,8 @@ struct _Flag
 };
 
 // computes shortest paths from start restricted to tile
-void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag> flags, Partition& partition)
+void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag>& flags, Partition& partition)
 {
-    auto& explorer = graph.getGraphExplorer();
     std::priority_queue<pq_item> heap;
 
     flags[start] = {.pathlength = 0, .prevEdge = -1, .visited = false};
@@ -45,7 +45,7 @@ void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag> flags, Partitio
         }
         curr_flag.visited = true;
         short curr_tile = partition.get_node_tile(curr_id);
-        explorer.forAdjacentEdges(curr_id, FORWARD, ADJACENT_ALL, [&heap, &explorer, &flags, &curr_tile, &partition, &curr_flag](EdgeRef ref) {
+        graph.forAdjacentEdges(curr_id, FORWARD, ADJACENT_ALL, [&heap, &graph, &flags, &curr_tile, &partition, &curr_flag](EdgeRef ref) {
             if (!ref.isEdge()) {
                 return;
             }
@@ -58,7 +58,7 @@ void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag> flags, Partitio
             if (other_flag.visited) {
                 return;
             }
-            int weight = explorer.getEdgeWeight(ref);
+            int weight = graph.getEdgeWeight(ref);
             int newlength = curr_flag.pathlength + weight;
             if (newlength < other_flag.pathlength) {
                 other_flag.pathlength = newlength;
@@ -105,7 +105,6 @@ std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, P
     std::vector<int> in_list;
     std::vector<int> out_list;
 
-    auto& explorer = graph.getGraphExplorer();
     for (int i = 0; i < graph.nodeCount(); i++) {
         int id = i;
         short tile = partition.get_node_tile(id);
@@ -113,7 +112,7 @@ std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, P
             continue;
         }
         bool is_added = false;
-        explorer.forAdjacentEdges(id, Direction::BACKWARD, Adjacency::ADJACENT_ALL, [id, &in_list, &is_added, &partition, tile](EdgeRef ref) {
+        graph.forAdjacentEdges(id, Direction::BACKWARD, Adjacency::ADJACENT_ALL, [id, &in_list, &is_added, &partition, tile](EdgeRef ref) {
             if (is_added) {
                 return;
             }
@@ -125,7 +124,7 @@ std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, P
         });
 
         is_added = false;
-        explorer.forAdjacentEdges(id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [id, &out_list, &is_added, &partition, tile](EdgeRef ref) {
+        graph.forAdjacentEdges(id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [id, &out_list, &is_added, &partition, tile](EdgeRef ref) {
             if (is_added) {
                 return;
             }
@@ -147,7 +146,6 @@ std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph
     std::vector<int> border_list;
     std::vector<int> interior_list;
 
-    auto& explorer = graph.getGraphExplorer();
     for (int i = 0; i < graph.nodeCount(); i++) {
         int id = i;
         short tile = partition.get_node_tile(id);
@@ -155,7 +153,7 @@ std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph
             continue;
         }
         bool is_border = false;
-        explorer.forAdjacentEdges(id, Direction::BACKWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
+        graph.forAdjacentEdges(id, Direction::BACKWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
             if (is_border) {
                 return;
             }
@@ -164,7 +162,7 @@ std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph
                 is_border = true;
             }
         });
-        explorer.forAdjacentEdges(id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
+        graph.forAdjacentEdges(id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
             if (is_border) {
                 return;
             }
@@ -188,12 +186,11 @@ std::vector<bool> _get_is_border(IGraph& graph, Partition& partition)
 {
     std::vector<bool> is_border_list(graph.nodeCount());
 
-    auto& explorer = graph.getGraphExplorer();
     for (int i = 0; i < graph.nodeCount(); i++) {
         int id = i;
         short tile = partition.get_node_tile(id);
         bool is_border = false;
-        explorer.forAdjacentEdges(id, Direction::BACKWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
+        graph.forAdjacentEdges(id, Direction::BACKWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
             if (is_border) {
                 return;
             }
@@ -202,7 +199,7 @@ std::vector<bool> _get_is_border(IGraph& graph, Partition& partition)
                 is_border = true;
             }
         });
-        explorer.forAdjacentEdges(id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
+        graph.forAdjacentEdges(id, Direction::FORWARD, Adjacency::ADJACENT_ALL, [id, &is_border, &partition, tile](EdgeRef ref) {
             if (is_border) {
                 return;
             }

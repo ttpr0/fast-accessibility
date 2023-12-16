@@ -12,7 +12,8 @@
 std::shared_ptr<GraphBase> remove_unconnected(std::shared_ptr<GraphBase> base)
 {
     auto weight = build_equal_weighting(*base);
-    Graph graph = build_base_graph(base, weight);
+    auto index = build_base_index(*base);
+    Graph graph = build_base_graph(base, weight, index);
 
     auto comps = connected_components(graph);
 

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../comps/cell_index.h"
+#include "../speed_ups/cell_index.h"
 #include "../structs/adjacency.h"
 #include "../structs/structs.h"
 #include "./util.h"

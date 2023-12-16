@@ -570,6 +570,17 @@ class ICHGraph(pyaccess._pyaccess_ext.IGraph):
     """
     ...
 
+class IDMapping:
+    """
+    None
+    """
+
+    def get_source(self, arg: int, /) -> int:
+        ...
+    
+    def get_target(self, arg: int, /) -> int:
+        ...
+    
 class IDistanceDecay:
     """
     None
@@ -593,6 +604,14 @@ class IGraph:
     """
     ...
 
+class IGraphIndex:
+    """
+    None
+    """
+
+    def get_closest_node(self, arg: pyaccess._pyaccess_ext.Coord, /) -> tuple[int, bool]:
+        ...
+    
 class ITiledGraph(pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -897,7 +916,7 @@ class Partition:
 class RoadType(Enum):
     """
     <attribute '__doc__' of 'RoadType' objects>
-    """
+    """    
     LIVING_STREET: RoadType
     
     MOTORWAY: RoadType
@@ -986,31 +1005,16 @@ class Weighting:
     """
     ...
 
-def build_base_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, /) -> pyaccess._pyaccess_ext.Graph:
+def build_base_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, /) -> pyaccess._pyaccess_ext.Graph:
     ...
 
-def build_ch_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph:
+def build_ch_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.IDMapping, arg4: pyaccess._pyaccess_ext.CHData, arg5: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph:
     ...
 
-def build_ch_graph_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, arg3: pyaccess._pyaccess_ext.CHData, arg4: pyaccess._pyaccess_ext.CHIndex2, /) -> pyaccess._pyaccess_ext.CHGraph2:
+def build_ch_graph_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.CHData, arg6: pyaccess._pyaccess_ext.CHIndex2, /) -> pyaccess._pyaccess_ext.CHGraph2:
     ...
 
-def build_ch_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, /) -> pyaccess._pyaccess_ext.CHIndex:
-    ...
-
-def build_ch_index_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.CHIndex2:
-    ...
-
-def build_default_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:
-    ...
-
-def build_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyaccess_ext.EdgeVector, arg2: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.GraphBase:
-    ...
-
-def build_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: int, /) -> pyaccess._pyaccess_ext.Partition:
-    ...
-
-def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, arg3: pyaccess._pyaccess_ext.TiledData, arg4: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
+def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.TiledData, arg6: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
     ...
 
 def calc_dijkstra_2sfca(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.CoordVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.CoordVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
@@ -1070,22 +1074,89 @@ def load_edge_weights(arg: str, /) -> pyaccess._pyaccess_ext.Weighting:
 def load_graph_base(arg: str, /) -> pyaccess._pyaccess_ext.GraphBase:
     ...
 
+def load_id_mapping(arg: str, /) -> pyaccess._pyaccess_ext.IDMapping:
+    ...
+
 def load_node_partition(arg: str, /) -> pyaccess._pyaccess_ext.Partition:
     ...
 
 def load_tiled_data(arg0: str, arg1: int, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
+def new_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyaccess_ext.EdgeVector, arg2: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.GraphBase:
+    ...
+
+def new_id_mapping(arg: int, /) -> pyaccess._pyaccess_ext.IDMapping:
+    ...
+
+def prepare_base_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
+    ...
+
 def prepare_cell_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.CellIndex:
+    ...
+
+def prepare_ch(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, /) -> pyaccess._pyaccess_ext.CHData:
+    ...
+
+def prepare_ch_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.CHIndex:
+    ...
+
+def prepare_ch_index_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.CHIndex2:
+    ...
+
+def prepare_default_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:
     ...
 
 def prepare_isophast(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> tuple[pyaccess._pyaccess_ext.TiledData, pyaccess._pyaccess_ext.CellIndex]:
     ...
 
+def prepare_kdtree_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
+    ...
+
+def prepare_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: int, /) -> pyaccess._pyaccess_ext.Partition:
+    ...
+
 def prepare_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
+def remove_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:
+    ...
+
 def remove_unconnected(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.GraphBase:
+    ...
+
+@overload
+def reorder_nodes(arg0: pyaccess._pyaccess_ext.CellIndex, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.CellIndex:
+    """
+    reorder_nodes(arg0: pyaccess._pyaccess_ext.CellIndex, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.CellIndex
+    """
+    ...
+
+@overload
+def reorder_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:
+    """
+    reorder_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase
+    """
+    ...
+
+@overload
+def reorder_nodes(arg0: pyaccess._pyaccess_ext.Partition, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.Partition:
+    """
+    reorder_nodes(arg0: pyaccess._pyaccess_ext.Partition, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.Partition
+    """
+    ...
+
+@overload
+def reorder_nodes(arg0: pyaccess._pyaccess_ext.TiledData, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.TiledData:
+    """
+    reorder_nodes(arg0: pyaccess._pyaccess_ext.TiledData, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.TiledData
+    """
+    ...
+
+def reorder_sources(arg0: pyaccess._pyaccess_ext.IDMapping, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.IDMapping:
+    ...
+
+def reorder_targets(arg0: pyaccess._pyaccess_ext.IDMapping, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.IDMapping:
     ...
 
 def store_cell_index(arg0: pyaccess._pyaccess_ext.CellIndex, arg1: str, /) -> None:
@@ -1098,6 +1169,9 @@ def store_edge_weights(arg0: pyaccess._pyaccess_ext.Weighting, arg1: str, /) -> 
     ...
 
 def store_graph_base(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: str, /) -> None:
+    ...
+
+def store_id_mapping(arg0: pyaccess._pyaccess_ext.IDMapping, arg1: str, /) -> None:
     ...
 
 def store_node_partition(arg0: pyaccess._pyaccess_ext.Partition, arg1: str, /) -> None:

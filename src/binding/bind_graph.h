@@ -1,9 +1,11 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 
 #include <nanobind/nanobind.h>
 
+#include "../graph/comps/graph_index.h"
 #include "../graph/graph.h"
 #include "../graph/io/cell_index_io.h"
 #include "../graph/io/ch_data_io.h"
@@ -11,6 +13,13 @@
 #include "../graph/io/partition_io.h"
 #include "../graph/io/tiled_data_io.h"
 #include "../graph/io/weighting_io.h"
+#include "../graph/mod/cell_index_mod.h"
+#include "../graph/mod/graph_base_mod.h"
+#include "../graph/mod/id_mapping_mod.h"
+#include "../graph/mod/partition_mod.h"
+#include "../graph/mod/tiled_data_mod.h"
+#include "../graph/preproc/build_ch_index.h"
+#include "../graph/preproc/ch/ch.h"
 #include "../graph/preproc/partition/partition.h"
 #include "../graph/preproc/remove_unconnected.h"
 #include "../graph/preproc/tiled/tiled.h"
@@ -82,8 +91,15 @@ void bind_graph(nanobind::module_& m)
 
     auto weighting = py::class_<Weighting>(m, "Weighting");
 
+    auto i_graph_index = py::class_<IGraphIndex>(m, "IGraphIndex");
+    i_graph_index.def("get_closest_node", &IGraphIndex::getClosestNode);
+
     auto partition = py::class_<Partition>(m, "Partition");
     partition.def("get_node_tile", &Partition::get_node_tile);
+
+    auto id_mapping = py::class_<_IDMapping>(m, "IDMapping");
+    id_mapping.def("get_source", &_IDMapping::get_source);
+    id_mapping.def("get_target", &_IDMapping::get_target);
 
     auto ch_data = py::class_<CHData>(m, "CHData");
 
@@ -113,6 +129,7 @@ void bind_graph(nanobind::module_& m)
     m.def("load_ch_data", &load_ch_data);
     m.def("load_tiled_data", &load_tiled_data);
     m.def("load_cell_index", &load_cell_index);
+    m.def("load_id_mapping", &load_id_mapping);
 
     m.def("store_graph_base", &store_graph_base);
     m.def("store_edge_weights", &store_edge_weights);
@@ -120,11 +137,20 @@ void bind_graph(nanobind::module_& m)
     m.def("store_ch_data", &store_ch_data);
     m.def("store_tiled_data", &store_tiled_data);
     m.def("store_cell_index", &store_cell_index);
+    m.def("store_id_mapping", &store_id_mapping);
 
-    m.def("build_ch_index", &build_ch_index);
-    m.def("build_ch_index_2", &build_ch_index_2);
-    m.def("build_graph_base", &build_graph_base);
-    m.def("build_default_weighting", &build_default_weighting);
+    m.def("prepare_ch", &CalcContraction3);
+    m.def("prepare_ch_index", &build_ch_index);
+    m.def("prepare_ch_index_2", &build_ch_index_2);
+    m.def("new_graph_base", &new_graph_base);
+    m.def("new_id_mapping", &new_id_mapping);
+    m.def("prepare_default_weighting", &build_default_weighting);
+    m.def("prepare_base_index", &build_base_index);
+    m.def("prepare_kdtree_index", &build_kdtree_index);
+    m.def("prepare_partition", &calc_partition);
+    m.def("prepare_tiled", &PreprocessTiledGraph3);
+    m.def("prepare_cell_index", &PrepareGRASPCellIndex2);
+    m.def("prepare_isophast", &PreprocessTiledGraph5);
 
     m.def("build_base_graph", &build_base_graph);
     m.def("build_tiled_graph", &build_tiled_graph);
@@ -132,9 +158,11 @@ void bind_graph(nanobind::module_& m)
     m.def("build_ch_graph_2", &build_ch_graph_2);
 
     m.def("remove_unconnected", &remove_unconnected);
-    m.def("build_partition", &calc_partition);
-
-    m.def("prepare_tiled", &PreprocessTiledGraph3);
-    m.def("prepare_cell_index", &PrepareGRASPCellIndex2);
-    m.def("prepare_isophast", &PreprocessTiledGraph5);
+    m.def("remove_nodes", &_remove_nodes);
+    m.def("reorder_nodes", static_cast<std::shared_ptr<GraphBase> (*)(GraphBase&, std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<Partition> (*)(Partition&, std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<TiledData> (*)(TiledData&, std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<_CellIndex> (*)(_CellIndex&, std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_sources", &_reorder_sources);
+    m.def("reorder_targets", &_reorder_targets);
 }

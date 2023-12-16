@@ -14,8 +14,6 @@ void calcRestrictedDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, std::v
     auto& start_flag = flags[start];
     start_flag.dist = 0;
 
-    auto& explorer = g->getGraphExplorer();
-
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
     int found_count = 0;
@@ -37,7 +35,7 @@ void calcRestrictedDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, std::v
                 break;
             }
         }
-        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &curr_flag](EdgeRef ref) {
+        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &heap, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -46,7 +44,7 @@ void calcRestrictedDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, std::v
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
             if (other_flag.dist > new_length) {
                 other_flag.dist = new_length;
                 heap.push({other_id, new_length});
@@ -61,8 +59,6 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, i
     auto& start_flag = flags[start];
     start_flag.dist = 0;
 
-    auto& explorer = g->getGraphExplorer();
-
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
     int found_count = 0;
@@ -84,7 +80,7 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, i
                 break;
             }
         }
-        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
+        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -93,7 +89,7 @@ void calcRestrictedRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, i
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }

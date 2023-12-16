@@ -15,9 +15,9 @@ class Partition
 public:
     std::vector<short> node_tiles;
 
-    short get_node_tile(int node) { return this->node_tiles[node]; }
+    short get_node_tile(int node) const { return this->node_tiles[node]; }
 
-    short tile_count()
+    short tile_count() const
     {
         short max = 0;
         for (int i = 0; i < this->node_tiles.size(); i++) {
@@ -29,7 +29,7 @@ public:
         return max + 1;
     }
 
-    std::vector<short> get_tiles()
+    std::vector<short> get_tiles() const
     {
         std::unordered_set<short> tile_set;
         for (int i = 0; i < this->node_tiles.size(); i++) {

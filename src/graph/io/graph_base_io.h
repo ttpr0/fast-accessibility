@@ -48,10 +48,8 @@ std::shared_ptr<GraphBase> load_graph_base(const std::string& file)
     }
 
     AdjacencyArray adj = build_adjacency_array(nodes, edges);
-    // KDTree tree = build_balanced_kdtree(node_geoms);
-    KDTree tree = build_kdtree(node_geoms);
 
-    return std::make_shared<GraphBase>(std::move(nodes), std::move(edges), std::move(node_geoms), std::move(adj), std::move(tree));
+    return std::make_shared<GraphBase>(std::move(nodes), std::move(edges), std::move(node_geoms), std::move(adj));
 }
 
 void store_graph_base(GraphBase& base, const std::string& file)

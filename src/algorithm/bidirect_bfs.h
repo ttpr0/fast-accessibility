@@ -22,8 +22,6 @@ void calc_bidirect_bfs(IGraph& g, int start, Flags<BFSFlag>& flags)
     fwd_queue.push(start);
     bwd_queue.push(start);
 
-    auto& explorer = g.getGraphExplorer();
-
     bool fwd_finished = false;
     bool bwd_finished = false;
     while (true) {
@@ -40,7 +38,7 @@ void calc_bidirect_bfs(IGraph& g, int start, Flags<BFSFlag>& flags)
                 auto& curr_flag = flags[curr_id];
                 if (!curr_flag.fwd_visited) {
                     curr_flag.fwd_visited = true;
-                    explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &explorer, &fwd_queue, &bwd_finished, &curr_flag](EdgeRef ref) {
+                    g.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &fwd_queue, &bwd_finished, &curr_flag](EdgeRef ref) {
                         if (ref.isShortcut()) {
                             return;
                         }
@@ -70,7 +68,7 @@ void calc_bidirect_bfs(IGraph& g, int start, Flags<BFSFlag>& flags)
                 auto& curr_flag = flags[curr_id];
                 if (!curr_flag.bwd_visited) {
                     curr_flag.bwd_visited = true;
-                    explorer.forAdjacentEdges(curr_id, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &explorer, &bwd_queue, &fwd_finished, &curr_flag](EdgeRef ref) {
+                    g.forAdjacentEdges(curr_id, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &bwd_queue, &fwd_finished, &curr_flag](EdgeRef ref) {
                         if (ref.isShortcut()) {
                             return;
                         }

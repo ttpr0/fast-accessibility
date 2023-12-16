@@ -5,10 +5,12 @@
 #include <vector>
 
 #include "./base_graph.h"
-#include "./comps/ch_data.h"
-#include "./comps/ch_index.h"
-#include "./comps/partition.h"
+#include "./comps/graph_index.h"
+#include "./comps/id_mapping.h"
 #include "./graph.h"
+#include "./speed_ups/ch_data.h"
+#include "./speed_ups/ch_index.h"
+#include "./speed_ups/partition.h"
 #include "./structs/adjacency.h"
 
 //*******************************************
@@ -20,24 +22,28 @@ class CHGraph : public ICHGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
-    std::unique_ptr<IGraphExplorer> explorer;
-    std::unique_ptr<IGraphIndex> index;
+    std::shared_ptr<IGraphIndex> index;
 
     // additional components
+    std::shared_ptr<_IDMapping> id_mapping;
     std::shared_ptr<CHData> ch;
     // ch-index
     std::shared_ptr<_CHIndex> ch_index;
 
-    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<CHData> ch,
-            std::shared_ptr<_CHIndex> ch_index);
+    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<_IDMapping> id_mapping,
+            std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
 
-    IGraphExplorer& getGraphExplorer();
-    IGraphIndex& getIndex();
     int nodeCount();
     int edgeCount();
     Node getNode(int node);
     Edge getEdge(int edge);
     Coord getNodeGeom(int node);
+    int getClosestNode(Coord point);
+
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
+    int getEdgeWeight(EdgeRef edge);
+    int getTurnCost(EdgeRef from, int via, EdgeRef to);
+    int getOtherNode(EdgeRef edge, int node);
 
     short getNodeLevel(int node);
     int shortcutCount();
@@ -50,25 +56,29 @@ class CHGraph2 : public IGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
-    std::unique_ptr<IGraphExplorer> explorer;
-    std::unique_ptr<IGraphIndex> index;
+    std::shared_ptr<IGraphIndex> index;
     std::shared_ptr<Partition> partition;
 
     // additional components
+    std::shared_ptr<_IDMapping> id_mapping;
     std::shared_ptr<CHData> ch;
     // ch-index
     std::shared_ptr<_CHIndex2> ch_index;
 
-    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-             std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index);
+    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+             std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index);
 
-    IGraphExplorer& getGraphExplorer();
-    IGraphIndex& getIndex();
     int nodeCount();
     int edgeCount();
     Node getNode(int node);
     Edge getEdge(int edge);
     Coord getNodeGeom(int node);
+    int getClosestNode(Coord point);
+
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
+    int getEdgeWeight(EdgeRef edge);
+    int getTurnCost(EdgeRef from, int via, EdgeRef to);
+    int getOtherNode(EdgeRef edge, int node);
 
     short getNodeLevel(int node);
     int shortcutCount();
@@ -82,14 +92,15 @@ public:
 // ch-graph explorer
 //*******************************************
 
-class CHGraphExplorer : public IGraphExplorer
+class CHGraphExplorer
 {
 public:
     GraphBase& base;
     Weighting& weights;
     CHData& ch;
+    _IDMapping& id_mapping;
 
-    CHGraphExplorer(GraphBase& base, Weighting& weights, CHData& ch) : base(base), weights(weights), ch(ch) {}
+    CHGraphExplorer(GraphBase& base, Weighting& weights, CHData& ch, _IDMapping& id_mapping) : base(base), weights(weights), ch(ch), id_mapping(id_mapping) {}
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
@@ -98,9 +109,10 @@ public:
 };
 
 //*******************************************
-// build  ch-graph
+// build ch-graph
 //*******************************************
 
-CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
-CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch,
-                          std::shared_ptr<_CHIndex2> ch_index);
+CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<_IDMapping> id_mapping,
+                       std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
+CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+                          std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index);

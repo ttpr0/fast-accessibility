@@ -17,8 +17,6 @@ void calcRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_ran
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
 
-    auto& explorer = g->getGraphExplorer();
-
     while (true) {
         if (heap.empty()) {
             break;
@@ -31,7 +29,7 @@ void calcRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_ran
             continue;
         }
         curr_flag.visited = true;
-        explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
+        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -40,7 +38,7 @@ void calcRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_ran
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }

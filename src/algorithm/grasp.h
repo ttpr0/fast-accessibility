@@ -17,8 +17,6 @@ void calcGRASP(ITiledGraph* g, int start, Flags<DistFlag>& flags, int max_range,
     short start_tile = g->getNodeTile(start);
     is_found[start_tile] = true;
 
-    auto& explorer = g->getGraphExplorer();
-
     std::priority_queue<pq_item> heap;
     heap.push({start, 0});
 
@@ -36,13 +34,13 @@ void calcGRASP(ITiledGraph* g, int start, Flags<DistFlag>& flags, int max_range,
         }
         curr_flag.visited = true;
         short curr_tile = g->getNodeTile(curr_id);
-        auto handler = [&flags, &explorer, &heap, &max_range, &curr_flag](EdgeRef ref) {
+        auto handler = [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + explorer.getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
@@ -52,10 +50,10 @@ void calcGRASP(ITiledGraph* g, int start, Flags<DistFlag>& flags, int max_range,
             }
         };
         if (curr_tile == start_tile) {
-            explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, handler);
+            g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, std::cref(handler));
         } else {
             is_found[curr_tile] = true;
-            explorer.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_SKIP, handler);
+            g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_SKIP, handler);
         }
     }
     for (int i = 0; i < contains_targets.size(); i++) {

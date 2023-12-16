@@ -8,25 +8,15 @@
 // base-graph
 //*******************************************
 
-Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights)
+Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index)
 {
-    return {std::move(base), std::move(weights), std::make_unique<KDTreeIndex>(base->getKDTree())};
+    return {std::move(base), std::move(weights), std::move(index)};
 }
 
-Graph::Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index)
+Graph::Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index)
     : base(std::move(base)), weights(std::move(weights)), index(std::move(index))
-{
-    this->explorer = std::make_unique<BaseGraphExplorer>(*this->base, *this->weights);
-}
+{}
 
-IGraphExplorer& Graph::getGraphExplorer()
-{
-    return *this->explorer;
-}
-IGraphIndex& Graph::getIndex()
-{
-    return *this->index;
-}
 int Graph::nodeCount()
 {
     return this->base->nodeCount();
@@ -46,6 +36,47 @@ Edge Graph::getEdge(int edge)
 Coord Graph::getNodeGeom(int node)
 {
     return this->base->getNodeGeom(node);
+}
+int Graph::getClosestNode(Coord point)
+{
+    auto [id, ok] = this->index->getClosestNode(point);
+    if (ok) {
+        return id;
+    }
+    return -1;
+}
+void Graph::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
+{
+    if (typ == Adjacency::ADJACENT_ALL || typ == Adjacency::ADJACENT_EDGES) {
+        auto accessor = this->base->adjacency.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int edge_id = accessor.getEdgeID();
+            int other_id = accessor.getOtherID();
+            func(EdgeRef{edge_id, other_id, 0});
+        }
+    } else {
+        throw 1;
+    }
+    return;
+}
+int Graph::getEdgeWeight(EdgeRef edge)
+{
+    return this->weights->get_edge_weight(edge.edge_id);
+}
+int Graph::getTurnCost(EdgeRef from, int via, EdgeRef to)
+{
+    return 0;
+}
+int Graph::getOtherNode(EdgeRef edge, int node)
+{
+    auto e = this->base->getEdge(edge.edge_id);
+    if (node == e.nodeA) {
+        return e.nodeB;
+    }
+    if (node == e.nodeB) {
+        return e.nodeA;
+    }
+    return -1;
 }
 
 //*******************************************

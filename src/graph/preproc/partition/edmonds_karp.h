@@ -83,7 +83,6 @@ public:
             }
         }
 
-        auto& explorer = this->g->getGraphExplorer();
         while (true) {
             if (queue.size() <= 0) {
                 break;
@@ -97,7 +96,7 @@ public:
                 this->node_tiles[curr] = this->source_tile;
             }
 
-            explorer.forAdjacentEdges(curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
+            this->g->forAdjacentEdges(curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
                 if (visited[ref.other_id] || this->node_tiles[ref.other_id] != this->base_tile) {
                     return;
                 }
@@ -107,7 +106,7 @@ public:
                     visited[ref.other_id] = true;
                 }
             });
-            explorer.forAdjacentEdges(curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
+            this->g->forAdjacentEdges(curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [&visited, this, &queue](EdgeRef ref) {
                 if (visited[ref.other_id] || this->node_tiles[ref.other_id] != this->base_tile) {
                     return;
                 }
@@ -144,8 +143,6 @@ public:
             }
         }
 
-        auto& explorer = this->g->getGraphExplorer();
-
         int end = -1;
         while (true) {
             if (queue.size() <= 0) {
@@ -158,7 +155,7 @@ public:
                 break;
             }
 
-            explorer.forAdjacentEdges(curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [curr, &visited, this, &flags, &queue](EdgeRef ref) {
+            this->g->forAdjacentEdges(curr, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [curr, &visited, this, &flags, &queue](EdgeRef ref) {
                 // check if edge should stil be traversed
                 if (visited[ref.other_id]) {
                     return;
@@ -190,7 +187,7 @@ public:
                     visited[ref.other_id] = true;
                 }
             });
-            explorer.forAdjacentEdges(curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [curr, &visited, this, &flags, &queue](EdgeRef ref) {
+            this->g->forAdjacentEdges(curr, Direction::BACKWARD, Adjacency::ADJACENT_EDGES, [curr, &visited, this, &flags, &queue](EdgeRef ref) {
                 // check if edge should stil be traversed
                 if (visited[ref.other_id]) {
                     return;

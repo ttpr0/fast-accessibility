@@ -10,10 +10,10 @@
 
 #include "../../../algorithm/util.h"
 #include "../../base_graph.h"
-#include "../../comps/cell_index.h"
-#include "../../comps/partition.h"
-#include "../../comps/tiled_data.h"
 #include "../../graph.h"
+#include "../../speed_ups/cell_index.h"
+#include "../../speed_ups/partition.h"
+#include "../../speed_ups/tiled_data.h"
 #include "../../structs/enums.h"
 #include "../../structs/structs.h"
 #include "../ch/ch.h"
@@ -22,7 +22,8 @@
 // Creates tiled-graph with full-shortcut cliques.
 std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
-    Graph graph = build_base_graph(base, weights);
+    auto index = build_base_index(*base);
+    Graph graph = build_base_graph(base, weights, index);
 
     // init components
     std::vector<Shortcut> skip_shortcuts;
@@ -43,10 +44,10 @@ std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base
     int tile_count = tiles.size();
     int c = 1;
     for (auto tile_id : tiles) {
-        printf("tile %v: %v / %v \n", tile_id, c, tile_count);
-        printf("tile %v: getting start nodes \n", tile_id);
+        printf("tile %i: %i / %i \n", tile_id, c, tile_count);
+        printf("tile %i: getting start nodes \n", tile_id);
         auto [start_nodes, end_nodes] = _get_inout_nodes(graph, *partition, tile_id);
-        printf("tile %v: calculating skip edges \n", tile_id);
+        printf("tile %i: calculating skip edges \n", tile_id);
         Flags<_Flag> flags(graph.nodeCount(), {10000000, -1, false});
         for (auto start : start_nodes) {
             flags.soft_reset();
@@ -65,21 +66,21 @@ std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base
                 skip_shortcuts.push_back(shc);
             }
         }
-        printf("tile %v: finished \n", tile_id);
+        printf("tile %i: finished \n", tile_id);
         c += 1;
     }
 
     // build
-    _IDMapping id_mapping(graph.nodeCount());
     auto skip_topology = _create_skip_topology(graph, skip_shortcuts, edge_types);
 
-    return std::make_shared<TiledData>(std::move(id_mapping), std::move(skip_shortcuts), std::move(skip_topology), std::move(edge_types));
+    return std::make_shared<TiledData>(std::move(skip_shortcuts), std::move(skip_topology), std::move(edge_types));
 }
 
 //
 std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
-    Graph graph = build_base_graph(base, weights);
+    auto index = build_base_index(*base);
+    Graph graph = build_base_graph(base, weights, index);
 
     // init components
     std::unordered_map<short, std::vector<Shortcut>> fwd_index_edges;
@@ -87,10 +88,10 @@ std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> ba
 
     // compute cell-indices
     auto tiles = partition->get_tiles();
-    int index = 0;
+    int ind = 0;
     for (auto tile : tiles) {
-        index += 1;
-        std::cout << "Process Tile:" << index << "/" << tiles.size() << std::endl;
+        ind += 1;
+        std::cout << "Process Tile:" << ind << "/" << tiles.size() << std::endl;
         std::vector<Shortcut> index_edges;
         auto [b_nodes, i_nodes] = _get_border_interior_nodes(graph, *partition, tile);
         Flags<_Flag> flags(graph.nodeCount(), {10000000, -1, false});
@@ -124,7 +125,8 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
     auto ch_data = CalcPartialContraction3(base, weights, partition);
 
     printf("Set border nodes to maxlevel: \n");
-    Graph graph = build_base_graph(base, weights);
+    auto index = build_base_index(*base);
+    Graph graph = build_base_graph(base, weights, index);
     auto is_border = _get_is_border(graph, *partition);
     short max_level = 0;
     auto& node_levels = ch_data->node_levels;
@@ -165,8 +167,7 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
     auto skip_topology = _create_skip_topology(graph, skip_shortcuts, edge_types);
 
     // build tiled data
-    _IDMapping id_mapping(graph.nodeCount());
-    auto tiled_data = std::make_shared<TiledData>(std::move(id_mapping), std::move(skip_shortcuts), std::move(skip_topology), std::move(edge_types));
+    auto tiled_data = std::make_shared<TiledData>(std::move(skip_shortcuts), std::move(skip_topology), std::move(edge_types));
 
     printf("Create downwards edge lists: \n");
 
@@ -175,12 +176,11 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
     std::unordered_map<short, std::vector<Shortcut>> bwd_index_edges;
 
     // compute cell indices
-    auto& explorer = graph.getGraphExplorer();
     auto tiles = partition->get_tiles();
-    int index = 0;
+    int ind = 0;
     for (auto tile : tiles) {
-        index += 1;
-        printf("Process Tile: %i/%i", index, (int)tiles.size());
+        ind += 1;
+        printf("Process Tile: %i/%i", ind, (int)tiles.size());
         // get all down edges or shortcuts
         std::vector<Shortcut> index_edges;
         for (int i = 0; i < ch_data->shortcuts.size(); i++) {
@@ -209,7 +209,7 @@ std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTi
                 index_edges.push_back({
                     .from = edge.nodeA,
                     .to = edge.nodeB,
-                    .weight = explorer.getEdgeWeight({i, 0, 0}),
+                    .weight = graph.getEdgeWeight({i, 0, 0}),
                 });
             }
         }

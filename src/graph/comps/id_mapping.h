@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 // Maps indices from a source to a target and reversed.
@@ -13,17 +14,16 @@ public:
     // -> second value maps target t to source s: mapping[t][1] = s
     std::vector<std::array<int, 2>> mapping;
 
-    _IDMapping(int size)
-    {
-        std::vector<std::array<int, 2>> mapping(size);
-        for (int i = 0; i < size; i++) {
-            mapping[i] = {i, i};
-        }
-        this->mapping = mapping;
-    }
-    _IDMapping(std::vector<std::array<int, 2>> mapping) : mapping(mapping) {}
-
     int get_target(int source) { return this->mapping[source][0]; }
 
     int get_source(int target) { return this->mapping[target][1]; }
 };
+
+static std::shared_ptr<_IDMapping> new_id_mapping(int size)
+{
+    std::vector<std::array<int, 2>> mapping(size);
+    for (int i = 0; i < size; i++) {
+        mapping[i] = {i, i};
+    }
+    return std::make_shared<_IDMapping>(mapping);
+}

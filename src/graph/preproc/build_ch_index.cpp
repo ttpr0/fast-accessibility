@@ -1,24 +1,24 @@
+#include <algorithm>
 
-#include "./ch_index.h"
 #include "../ch_graph.h"
+#include "./build_ch_index.h"
 
-std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHData& ch)
+std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHData& ch, _IDMapping& id_mapping)
 {
     std::vector<CHEdge> fwd_down_edges;
     std::vector<CHEdge> bwd_down_edges;
 
-    CHGraphExplorer explorer = {base, weight, ch};
+    CHGraphExplorer explorer = {base, weight, ch, id_mapping};
 
     for (int i = 0; i < base.nodeCount(); i++) {
         int this_id = i;
         int count = 0;
-        explorer.forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS,
-                                  [&explorer, &fwd_down_edges, &count, &this_id](EdgeRef ref) {
-                                      int other_id = ref.other_id;
-                                      int weight = explorer.getEdgeWeight(ref);
-                                      fwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
-                                      count += 1;
-                                  });
+        explorer.forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &fwd_down_edges, &count, &this_id](EdgeRef ref) {
+            int other_id = ref.other_id;
+            int weight = explorer.getEdgeWeight(ref);
+            fwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
+            count += 1;
+        });
         if (count > 16) {
             for (int j = fwd_down_edges.size() - count; j < fwd_down_edges.size(); j++) {
                 auto ch_edge = fwd_down_edges[j];
@@ -29,13 +29,12 @@ std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHD
         }
 
         count = 0;
-        explorer.forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS,
-                                  [&explorer, &bwd_down_edges, &count, &this_id](EdgeRef ref) {
-                                      int other_id = ref.other_id;
-                                      int weight = explorer.getEdgeWeight(ref);
-                                      bwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
-                                      count += 1;
-                                  });
+        explorer.forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &bwd_down_edges, &count, &this_id](EdgeRef ref) {
+            int other_id = ref.other_id;
+            int weight = explorer.getEdgeWeight(ref);
+            bwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
+            count += 1;
+        });
         if (count > 16) {
             for (int j = bwd_down_edges.size() - count; j < bwd_down_edges.size(); j++) {
                 auto ch_edge = bwd_down_edges[j];
@@ -46,14 +45,22 @@ std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHD
         }
     }
 
+    auto sort_by_level = [&ch](const CHEdge& edge_a, const CHEdge& edge_b) {
+        auto level_a = ch.getNodeLevel(edge_a.from);
+        auto level_b = ch.getNodeLevel(edge_b.from);
+        return level_a > level_b;
+    };
+    std::sort(fwd_down_edges.begin(), fwd_down_edges.end(), sort_by_level);
+    std::sort(bwd_down_edges.begin(), bwd_down_edges.end(), sort_by_level);
+
     return std::make_shared<_CHIndex>(std::move(fwd_down_edges), std::move(bwd_down_edges));
 }
 
-std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, CHData& ch, Partition& partition)
+std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, CHData& ch, Partition& partition, _IDMapping& id_mapping)
 {
-    CHGraphExplorer explorer = {base, weight, ch};
-    auto get_tile = [&partition, &ch](int node) {
-        int m_node = ch.id_mapping.get_source(node);
+    CHGraphExplorer explorer = {base, weight, ch, id_mapping};
+    auto get_tile = [&partition, &ch, &id_mapping](int node) {
+        int m_node = id_mapping.get_source(node);
         return partition.get_node_tile(m_node);
     };
 
@@ -186,5 +193,4 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
 
     // add to graph
     return std::make_shared<_CHIndex2>(std::move(fwd_down_edges), std::move(bwd_down_edges));
-    ;
 }

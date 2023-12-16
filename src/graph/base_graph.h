@@ -6,6 +6,7 @@
 
 #include "../kd_tree/kd_tree.h"
 #include "./comps/graph_base.h"
+#include "./comps/graph_index.h"
 #include "./comps/weighting.h"
 #include "./graph.h"
 #include "./structs/adjacency.h"
@@ -23,35 +24,36 @@ class KDTreeIndex;
 // base-graph
 //*******************************************
 
-Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> edge_weights);
+Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> edge_weights, std::shared_ptr<IGraphIndex> index);
 
 class Graph : public IGraph
 {
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
-    std::unique_ptr<IGraphExplorer> explorer;
-    std::unique_ptr<IGraphIndex> index;
+    std::shared_ptr<IGraphIndex> index;
 
-    Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::unique_ptr<IGraphIndex> index);
-
-    IGraphExplorer& getGraphExplorer();
-    IGraphIndex& getIndex();
+    Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index);
 
     int nodeCount();
     int edgeCount();
-
     Node getNode(int node);
     Edge getEdge(int edge);
 
     Coord getNodeGeom(int node);
+    int getClosestNode(Coord point);
+
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
+    int getEdgeWeight(EdgeRef edge);
+    int getTurnCost(EdgeRef from, int via, EdgeRef to);
+    int getOtherNode(EdgeRef edge, int node);
 };
 
 //*******************************************
 // base-graph explorer
 //******************************************
 
-class BaseGraphExplorer : public IGraphExplorer
+class BaseGraphExplorer
 {
 public:
     GraphBase& base;

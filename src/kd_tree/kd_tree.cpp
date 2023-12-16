@@ -163,5 +163,5 @@ void KDTree::insert(float x, float y, int value)
 
 void KDTree::create_balanced(std::vector<TreeValue>& values)
 {
-    this->root = insert_nodes_balanced(values, 0);
+    this->root = insert_nodes_balanced({&values[0], values.size()}, 0);
 }

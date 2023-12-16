@@ -5,7 +5,7 @@
 // graph index
 //*******************************************
 
-int BaseGraphIndex::getClosestNode(Coord point)
+std::tuple<int, bool> BaseGraphIndex::getClosestNode(Coord point)
 {
     int closest = -1;
     int min_dist = 100000;
@@ -19,26 +19,12 @@ int BaseGraphIndex::getClosestNode(Coord point)
             closest = i;
         }
     }
-    return closest;
+    return std::make_tuple(closest, true);
 }
 
-int KDTreeIndex::getClosestNode(Coord point)
+std::tuple<int, bool> KDTreeIndex::getClosestNode(Coord point)
 {
-    auto [id, ok] = this->tree.get_closest(point.lon, point.lat, 0.01);
-    if (ok) {
-        return id;
-    }
-    return -1;
-}
-
-int MappedKDTreeIndex::getClosestNode(Coord point)
-{
-    auto [id, ok] = this->tree.get_closest(point.lon, point.lat, 0.01);
-    if (ok) {
-        int m_id = this->id_mapping.get_target(id);
-        return m_id;
-    }
-    return -1;
+    return this->tree.get_closest(point.lon, point.lat, 0.01);
 }
 
 KDTree build_kdtree(std::vector<Coord>& node_geoms)
@@ -63,12 +49,16 @@ KDTree build_balanced_kdtree(std::vector<Coord>& node_geoms)
     return tree;
 }
 
-// std::unique_ptr<IGraphIndex> build_kdtree_index(std::vector<Coord>& node_geoms)
-// {
-//     return std::make_unique<KDTreeIndex>(node_geoms);
-// }
+std::shared_ptr<IGraphIndex> build_base_index(GraphBase& base)
+{
+    return std::make_shared<BaseGraphIndex>(base.node_geoms);
+}
+std::shared_ptr<IGraphIndex> build_kdtree_index(GraphBase& base)
+{
+    return std::make_shared<KDTreeIndex>(build_kdtree(base.node_geoms));
+}
 
-// std::unique_ptr<IGraphIndex> build_mapped_kdtree_index(std::vector<Coord>& node_geoms, _IDMapping id_mapping)
-// {
-//     return std::make_unique<MappedKDTreeIndex>(node_geoms, std::move(id_mapping));
-// }
+std::shared_ptr<IGraphIndex> build_balanced_kdtree_index(GraphBase& base)
+{
+    return std::make_shared<KDTreeIndex>(build_balanced_kdtree(base.node_geoms));
+}
