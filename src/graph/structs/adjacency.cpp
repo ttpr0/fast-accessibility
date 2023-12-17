@@ -6,7 +6,7 @@
 //*******************************************
 
 // return the node degree for given direction
-short AdjacencyArray::getDegree(int node, Direction dir)
+short AdjacencyArray::getDegree(int node, Direction dir) const
 {
     auto ref = this->node_entries[node];
     if (dir == Direction::FORWARD) {
@@ -16,10 +16,10 @@ short AdjacencyArray::getDegree(int node, Direction dir)
     }
 }
 
-AdjacencyAccessor AdjacencyArray::getNeighbours(int node, Direction dir)
+AdjacencyAccessor AdjacencyArray::getNeighbours(int node, Direction dir) const
 {
     _NodeEntry node_entry = this->node_entries[node];
-    _EdgeEntry* edge_refs;
+    const _EdgeEntry* edge_refs;
     int start;
     int end;
     if (dir == Direction::FORWARD) {
@@ -36,7 +36,7 @@ AdjacencyAccessor AdjacencyArray::getNeighbours(int node, Direction dir)
 }
 
 // return the node degree for given direction
-short AdjacencyList::getDegree(int node, Direction dir)
+short AdjacencyList::getDegree(int node, Direction dir) const
 {
     auto ref = this->node_entries[node];
     if (dir == Direction::FORWARD) {
@@ -46,10 +46,10 @@ short AdjacencyList::getDegree(int node, Direction dir)
     }
 }
 
-AdjacencyAccessor AdjacencyList::getNeighbours(int node, Direction dir)
+AdjacencyAccessor AdjacencyList::getNeighbours(int node, Direction dir) const
 {
-    _DynamicNodeEntry& node_entry = this->node_entries[node];
-    _EdgeEntry* edge_refs;
+    const _DynamicNodeEntry& node_entry = this->node_entries[node];
+    const _EdgeEntry* edge_refs;
     int start;
     int end;
     if (dir == Direction::FORWARD) {
@@ -136,7 +136,7 @@ AdjacencyArray build_adjacency_array(std::vector<Node>& nodes, std::vector<Edge>
 {
     AdjacencyList adj_list(nodes.size());
     for (int i = 0; i < edges.size(); i++) {
-        auto edge = edges[i];
+        auto& edge = edges[i];
         adj_list.addFWDEntry(edge.nodeA, edge.nodeB, i, 0);
         adj_list.addBWDEntry(edge.nodeA, edge.nodeB, i, 0);
     }

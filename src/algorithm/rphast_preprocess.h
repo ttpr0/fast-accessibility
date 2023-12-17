@@ -44,7 +44,7 @@ std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
         down_edges_subset.push_back(edge);
     }
 
-    return std::move(down_edges_subset);
+    return down_edges_subset;
 }
 
 // RPHAST subset selection using priority queue (RTS)
@@ -90,7 +90,7 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_it
         down_edges_subset.push_back(edge);
     }
 
-    return std::move(down_edges_subset);
+    return down_edges_subset;
 }
 
 // RPHAST preprocessing (including updates on dummy edges)
@@ -146,7 +146,7 @@ std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queu
     }
     down_edges_subset[curr_id].to = curr_count;
 
-    return std::move(down_edges_subset);
+    return down_edges_subset;
 }
 
 // Range-RPHAST preprocessing (including updates on dummy edges)
@@ -207,5 +207,5 @@ std::vector<CHEdge4> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq
     }
     down_edges_subset[curr_id].to = curr_count;
 
-    return std::move(down_edges_subset);
+    return down_edges_subset;
 }

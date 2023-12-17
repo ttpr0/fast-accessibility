@@ -52,8 +52,8 @@ public:
     {}
 
     // return the node degree for given direction
-    short getDegree(int node, Direction dir);
-    AdjacencyAccessor getNeighbours(int node, Direction dir);
+    short getDegree(int node, Direction dir) const;
+    AdjacencyAccessor getNeighbours(int node, Direction dir) const;
 };
 
 class AdjacencyList
@@ -73,8 +73,8 @@ public:
     }
 
     // return the node degree for given direction
-    short getDegree(int node, Direction dir);
-    AdjacencyAccessor getNeighbours(int node, Direction dir);
+    short getDegree(int node, Direction dir) const;
+    AdjacencyAccessor getNeighbours(int node, Direction dir) const;
 
     void addEdgeEntries(int node_a, int node_b, int edge_id, char edge_typ);
 
@@ -98,9 +98,9 @@ class AdjacencyAccessor
 public:
     int state;
     int end;
-    _EdgeEntry* edge_refs;
+    const _EdgeEntry* edge_refs;
 
-    AdjacencyAccessor(_EdgeEntry* edge_refs, int state, int end) : state(state), end(end), edge_refs(edge_refs) {}
+    AdjacencyAccessor(const _EdgeEntry* edge_refs, int state, int end) : state(state), end(end), edge_refs(edge_refs) {}
 
     bool next();
     int getEdgeID();

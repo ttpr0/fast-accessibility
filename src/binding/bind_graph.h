@@ -159,10 +159,10 @@ void bind_graph(nanobind::module_& m)
 
     m.def("remove_unconnected", &remove_unconnected);
     m.def("remove_nodes", &_remove_nodes);
-    m.def("reorder_nodes", static_cast<std::shared_ptr<GraphBase> (*)(GraphBase&, std::vector<int>&)>(&_reorder_nodes));
-    m.def("reorder_nodes", static_cast<std::shared_ptr<Partition> (*)(Partition&, std::vector<int>&)>(&_reorder_nodes));
-    m.def("reorder_nodes", static_cast<std::shared_ptr<TiledData> (*)(TiledData&, std::vector<int>&)>(&_reorder_nodes));
-    m.def("reorder_nodes", static_cast<std::shared_ptr<_CellIndex> (*)(_CellIndex&, std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<GraphBase> (*)(const GraphBase&, const std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<Partition> (*)(const Partition&, const std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<TiledData> (*)(const TiledData&, const std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<_CellIndex> (*)(const _CellIndex&, const std::vector<int>&)>(&_reorder_nodes));
     m.def("reorder_sources", &_reorder_sources);
     m.def("reorder_targets", &_reorder_targets);
 }
