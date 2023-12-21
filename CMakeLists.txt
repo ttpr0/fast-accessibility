@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(test LANGUAGES CXX)
 
+set(pyaccess_VERSION 0.0.1a)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 # set(CMAKE_CXX_FLAGS "-Wall -Wextra")
@@ -32,7 +34,7 @@ target_include_directories(${exe_name} PRIVATE
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(${exe_name} PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(${exe_name} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 #***********************************
@@ -53,11 +55,12 @@ add_library(${lib_name} SHARED
     src/kd_tree/kd_tree.cpp
 )
 
-target_include_directories(${lib_name} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(${lib_name} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:pyaccess/include>
 )
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(${lib_name} PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(${lib_name} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 #***********************************
@@ -67,19 +70,12 @@ set(ext_name _pyaccess_ext)
 
 find_package(Python 3.10 COMPONENTS Interpreter Development.Module REQUIRED)
 
-execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-  OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NB_DIR)
-list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
 nanobind_add_module(${ext_name}
     src/bind.cpp
 )
 
-target_include_directories(${ext_name} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
 add_dependencies(${ext_name} ${lib_name})
 target_link_libraries(${ext_name} PRIVATE
     ${lib_name}
@@ -94,5 +90,32 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 # install libraries
-install(TARGETS ${lib_name} DESTINATION pyaccess)
+install(
+    TARGETS ${lib_name}
+    EXPORT PyAccessTargets
+    RUNTIME DESTINATION pyaccess
+    LIBRARY DESTINATION pyaccess
+    ARCHIVE DESTINATION pyaccess/lib
+)
+install(DIRECTORY include/pyaccess DESTINATION pyaccess/include)
 install(TARGETS ${ext_name} LIBRARY DESTINATION pyaccess)
+
+# install exported targets
+install(
+    EXPORT PyAccessTargets
+    FILE PyAccessTargets.cmake
+    DESTINATION pyaccess/cmake
+    NAMESPACE pyaccess::
+)
+
+# install cmake config file
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    cmake/pyaccess-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pyaccess-config.cmake
+    INSTALL_DESTINATION pyaccess/cmake
+)
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/pyaccess-config.cmake
+    DESTINATION pyaccess/cmake
+)
