@@ -14,9 +14,9 @@ public:
     // -> second value maps target t to source s: mapping[t][1] = s
     std::vector<std::array<int, 2>> mapping;
 
-    int get_target(int source) { return this->mapping[source][0]; }
+    int get_target(int source) const { return this->mapping[source][0]; }
 
-    int get_source(int target) { return this->mapping[target][1]; }
+    int get_source(int target) const { return this->mapping[target][1]; }
 };
 
 static std::shared_ptr<_IDMapping> new_id_mapping(int size)

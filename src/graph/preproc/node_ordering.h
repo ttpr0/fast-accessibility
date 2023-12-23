@@ -6,7 +6,11 @@
 #include <stack>
 #include <vector>
 
+#include "../base_graph.h"
+#include "../comps/graph_base.h"
+#include "../comps/graph_index.h"
 #include "../comps/id_mapping.h"
+#include "../comps/weighting.h"
 #include "../graph.h"
 #include "../speed_ups/ch_data.h"
 #include "../speed_ups/partition.h"
@@ -20,73 +24,29 @@ private:
     std::vector<std::array<int, 2>> indices;
 
 public:
-    MappingBuilder(int node_count) : indices(node_count)
-    {
-        for (int i = 0; i < this->indices.size(); i++) {
-            indices[i] = {i, 0};
-        }
-    }
+    MappingBuilder(int node_count);
 
     // will update internal mapping with order-values
     // small order-values will be pushed to front and vice versa
     // uses stable_sort => equal order-values will not affect current order
     // does nothing if node_count does not match
-    void updateOrdering(std::vector<int>& order_values)
-    {
-        if (order_values.size() != this->indices.size()) {
-            return;
-        }
-        for (int i = 0; i < this->indices.size(); i++) {
-            int id = this->indices[i][0];
-            this->indices[i][1] = order_values[id];
-        }
-
-        std::stable_sort(this->indices.begin(), this->indices.end(), [](const std::array<int, 2>& a, const std::array<int, 2>& b) {
-            int val_a = a[1];
-            int val_b = b[1];
-            return val_a < val_b;
-        });
-    }
+    //
+    // order_values contains value for node with id i (value = order_values[i])
+    void updateOrdering(std::vector<int>& order_values);
 
     // updates internal mapping
     // id_mapping is used to map internal mapping ids to ids in order-values
     // if from_source is true => internal ids are target and order-value ids are source
-    void updateOrdering(std::vector<int>& order_values, _IDMapping& id_mapping, bool from_source)
-    {
-        if (order_values.size() != this->indices.size()) {
-            return;
-        }
-        for (int i = 0; i < this->indices.size(); i++) {
-            int id = this->indices[i][0];
-            int m_id;
-            if (from_source) {
-                m_id = id_mapping.get_source(id);
-            } else {
-                m_id = id_mapping.get_target(id);
-            }
-            this->indices[i][1] = order_values[m_id];
-        }
+    //
+    // order_values contains value for node with id i (value = order_values[i])
+    // if from_source: node_mapping is build for target nodes (node-ids of e.g. ch-data) but order_values are given for ordering of base thus id-mapping is used for conversion
+    // if !from_source: reversed is internal mapping is build for graph-base and order-values are given for e.g. ch-data
+    void updateOrdering(std::vector<int>& order_values, _IDMapping& id_mapping, bool from_source);
 
-        std::stable_sort(this->indices.begin(), this->indices.end(), [](const std::array<int, 2>& a, const std::array<int, 2>& b) {
-            int val_a = a[1];
-            int val_b = b[1];
-            return val_a < val_b;
-        });
-    }
-
-    std::vector<int> buildMapping()
-    {
-        std::vector<int> mapping(this->indices.size());
-        for (int i = 0; i < this->indices.size(); i++) {
-            int new_id = i;
-            int id = this->indices[i][0];
-            mapping[id] = new_id;
-        }
-        return mapping;
-    }
+    std::vector<int> buildMapping() const;
 };
 
-std::vector<int> _level_order_values(CHData& ch)
+static std::vector<int> _level_order_values(CHData& ch)
 {
     std::vector<int> order_values(ch.node_levels.size());
     for (int i = 0; i < ch.node_levels.size(); i++) {
@@ -94,8 +54,7 @@ std::vector<int> _level_order_values(CHData& ch)
     }
     return order_values;
 }
-
-std::vector<int> _tile_order_values(IGraph& g, Partition& partition)
+static std::vector<int> _tile_order_values(IGraph& g, Partition& partition)
 {
     std::vector<int> order_values(partition.node_tiles.size());
     auto is_border = _get_is_border(g, partition);
@@ -108,8 +67,7 @@ std::vector<int> _tile_order_values(IGraph& g, Partition& partition)
     }
     return order_values;
 }
-
-std::vector<int> _dfs_order_values(IGraph& g)
+static std::vector<int> _dfs_order_values(IGraph& g)
 {
     std::vector<int> order_values(g.nodeCount(), -1);
 
@@ -136,4 +94,89 @@ std::vector<int> _dfs_order_values(IGraph& g)
     }
 
     return order_values;
+}
+
+// default dfs-ordering for graph-base, weighting, index and partition
+static std::vector<int> build_base_order(std::shared_ptr<GraphBase> base)
+{
+    auto weight = build_equal_weighting(*base);
+    auto index = build_base_index(*base);
+    auto graph = build_base_graph(base, weight, index);
+
+    MappingBuilder builder(base->nodeCount());
+    auto order_values = _dfs_order_values(graph);
+    builder.updateOrdering(order_values);
+    return builder.buildMapping();
+}
+
+// level-ordering for chdata (build without partition)
+// returns mapping for ch-data (not base)
+static std::vector<int> build_ch_order(std::shared_ptr<GraphBase> base, std::shared_ptr<CHData> ch, std::shared_ptr<_IDMapping> id_mapping)
+{
+    auto weight = build_equal_weighting(*base);
+    auto index = build_base_index(*base);
+    auto graph = build_base_graph(base, weight, index);
+
+    MappingBuilder builder(base->nodeCount());
+    auto order_values = _dfs_order_values(graph);
+    builder.updateOrdering(order_values, *id_mapping, true);
+    auto level_values = _level_order_values(*ch);
+    builder.updateOrdering(level_values);
+    return builder.buildMapping();
+}
+
+// tile+level-ordering for chdata2 (build with partition)
+// returns mapping for ch-data (not base or partition)
+static std::vector<int> build_ch2_order(std::shared_ptr<GraphBase> base, std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch, std::shared_ptr<_IDMapping> id_mapping)
+{
+    auto weight = build_equal_weighting(*base);
+    auto index = build_base_index(*base);
+    auto graph = build_base_graph(base, weight, index);
+
+    MappingBuilder builder(base->nodeCount());
+    auto order_values = _dfs_order_values(graph);
+    builder.updateOrdering(order_values, *id_mapping, true);
+    auto level_values = _level_order_values(*ch);
+    builder.updateOrdering(level_values);
+    auto tile_values = _tile_order_values(graph, *partition);
+    builder.updateOrdering(tile_values, *id_mapping, true);
+    return builder.buildMapping();
+}
+
+// remaps mapping using id_mapping => applying original and created mapping will result in identity mapping between base and speed-up
+// if to_target is true => mapping will be transformed from source-mapping to target-mapping
+static std::vector<int> build_mapped_mapping(const std::vector<int>& mapping, const _IDMapping& id_mapping, bool to_target)
+{
+    std::vector<int> new_mapping(mapping.size());
+    for (int i = 0; i < mapping.size(); i++) {
+        int old_id = i;
+        int new_id = mapping[i];
+        int n_old_id;
+        if (to_target) {
+            n_old_id = id_mapping.get_target(old_id);
+        } else {
+            n_old_id = id_mapping.get_source(old_id);
+        }
+        new_mapping[n_old_id] = new_id;
+    }
+    return new_mapping;
+}
+
+// remaps mapping to identity mapping
+// if to_target is true => resulting mapping will map source nodes (base) to target ordering
+static std::vector<int> build_identity_mapping(const _IDMapping& id_mapping, bool to_target)
+{
+    int node_count = id_mapping.mapping.size();
+    std::vector<int> new_mapping(node_count);
+    for (int i = 0; i < node_count; i++) {
+        int old_id;
+        if (to_target) {
+            int old_id = id_mapping.get_source(i);
+        } else {
+            int old_id = id_mapping.get_target(i);
+        }
+        int new_id = i;
+        new_mapping[old_id] = new_id;
+    }
+    return new_mapping;
 }
