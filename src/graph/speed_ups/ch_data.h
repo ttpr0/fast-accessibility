@@ -12,9 +12,9 @@ public:
     AdjacencyArray topology;
     std::vector<short> node_levels;
 
-    short getNodeLevel(int node) { return this->node_levels[node]; }
+    short getNodeLevel(int node) const { return this->node_levels[node]; }
 
-    int shortcutCount() { return this->shortcuts.size(); }
+    int shortcutCount() const { return this->shortcuts.size(); }
 
-    Shortcut getShortcut(int shc) { return this->shortcuts[shc]; }
+    Shortcut getShortcut(int shc) const { return this->shortcuts[shc]; }
 };

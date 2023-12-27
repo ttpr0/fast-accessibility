@@ -12,44 +12,42 @@
 #include "./distance_decay/decay.h"
 
 template <class S>
-std::vector<float> calcReachability(typename S::Graph* g, std::vector<Coord>& dem_points, std::vector<Coord>& sup_points, std::vector<int>& sup_weights, IDistanceDecay& decay)
+std::vector<float> calcReachability(S& alg, std::vector<int>& dem_nodes, std::vector<int>& sup_nodes, std::vector<int>& sup_weights, IDistanceDecay& decay)
 {
-    typename S::Builder alg_builder(g);
     int max_dist = decay.get_max_distance();
-    alg_builder.addMaxRange(max_dist);
-    // get closest node for every demand point
-    std::vector<int> dem_nodes(dem_points.size());
-    for (int i = 0; i < dem_points.size(); i++) {
-        auto loc = dem_points[i];
-        int id = g->getClosestNode(loc);
-        dem_nodes[i] = id;
-        if (id >= 0) {
-            alg_builder.addTarget(id);
+
+    if (!alg.isBuild()) {
+        // prepare solver
+        alg.addMaxRange(max_dist);
+        for (int i = 0; i < dem_nodes.size(); i++) {
+            auto id = dem_nodes[i];
+            if (id >= 0) {
+                alg.addTarget(id);
+            }
         }
+
+        // build alg
+        alg.build();
     }
 
-    // build alg
-    auto alg = alg_builder.build();
-
     // create array containing accessibility results
-    std::vector<std::tuple<int, int>> closest(dem_points.size());
+    std::vector<std::tuple<int, int>> closest(dem_nodes.size());
     for (int i = 0; i < closest.size(); i++) {
         closest[i] = std::make_tuple(10000000, -1);
     }
 
-    auto flags = Flags<DistFlag>(g->nodeCount(), {10000000, false});
+    auto state = alg.makeComputeState();
     std::mutex m;
-#pragma omp parallel for firstprivate(flags)
-    for (int i = 0; i < sup_points.size(); i++) {
+#pragma omp parallel for firstprivate(state)
+    for (int i = 0; i < sup_nodes.size(); i++) {
         // get supply information
-        int s_id = g->getClosestNode(sup_points[i]);
+        int s_id = sup_nodes[i];
         if (s_id < 0) {
             continue;
         }
 
         // compute distances
-        flags.soft_reset();
-        alg.compute(s_id, flags);
+        alg.compute(s_id, state);
 
         // update closest supplies
         m.lock();
@@ -58,8 +56,7 @@ std::vector<float> calcReachability(typename S::Graph* g, std::vector<Coord>& de
             if (d_node == -1) {
                 continue;
             }
-            auto d_flag = flags[d_node];
-            int d_dist = d_flag.dist;
+            int d_dist = state.getDistance(d_node);
             if (d_dist >= max_dist) {
                 continue;
             }
@@ -72,7 +69,7 @@ std::vector<float> calcReachability(typename S::Graph* g, std::vector<Coord>& de
     }
 
     // create array containing reachability results
-    std::vector<float> access(dem_points.size());
+    std::vector<float> access(dem_nodes.size());
     for (int i = 0; i < access.size(); i++) {
         auto [c_dist, c_id] = closest[i];
         if (c_id == -1) {

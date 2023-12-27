@@ -19,8 +19,6 @@
 // tiled-graph
 //*******************************************
 
-class TiledGraphExplorer;
-
 class TiledGraph : public ITiledGraph
 {
 public:
@@ -55,26 +53,6 @@ public:
     int shortcutCount();
     Shortcut getShortcut(int shortcut);
     const std::span<Shortcut> getIndexEdges(short tile, Direction dir);
-};
-
-//*******************************************
-// tiled-graph explorer
-//*******************************************
-
-class TiledGraphExplorer
-{
-public:
-    GraphBase& base;
-    Weighting& weights;
-    TiledData& tiled;
-    _IDMapping& id_mapping;
-
-    TiledGraphExplorer(GraphBase& base, Weighting& weights, TiledData& tiled, _IDMapping& id_mapping) : base(base), weights(weights), tiled(tiled), id_mapping(id_mapping) {}
-
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
-    int getEdgeWeight(EdgeRef edge);
-    int getTurnCost(EdgeRef from, int via, EdgeRef to);
-    int getOtherNode(EdgeRef edge, int node);
 };
 
 //*******************************************

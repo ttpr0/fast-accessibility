@@ -9,23 +9,23 @@
 #include <span>
 #include <vector>
 
-#include "../../graph.h"
-#include "../util.h"
+#include "../../../util/pq_item.h"
+#include "../../explorer/base_explorer.h"
 #include "./edmonds_karp.h"
 
 #define PI 3.14159265358979323846
 
-std::vector<int> _sort_nodes(IGraph& g, std::function<float(Coord)> coord_func)
+static std::vector<int> _sort_nodes(const GraphBase& base, std::function<float(Coord)> coord_func)
 {
-    std::vector<int> nodes(g.nodeCount());
-    for (int i = 0; i < g.nodeCount(); i++) {
+    std::vector<int> nodes(base.nodeCount());
+    for (int i = 0; i < base.nodeCount(); i++) {
         nodes[i] = i;
     }
 
-    std::sort(nodes.begin(), nodes.end(), [&g, &coord_func](int& node_a, int& node_b) {
-        auto coord_a = g.getNodeGeom(node_a);
+    std::sort(nodes.begin(), nodes.end(), [&base, &coord_func](int& node_a, int& node_b) {
+        auto coord_a = base.getNodeGeom(node_a);
         float val_a = coord_func(coord_a);
-        auto coord_b = g.getNodeGeom(node_b);
+        auto coord_b = base.getNodeGeom(node_b);
         float val_b = coord_func(coord_b);
         return val_a < val_b;
     });
@@ -33,7 +33,7 @@ std::vector<int> _sort_nodes(IGraph& g, std::function<float(Coord)> coord_func)
     return nodes;
 }
 
-std::vector<std::vector<int>> _create_orders(IGraph& g)
+static std::vector<std::vector<int>> _create_orders(const GraphBase& base)
 {
     float sin_45 = sin(PI / 4);
     float cos_45 = cos(PI / 4);
@@ -49,25 +49,27 @@ std::vector<std::vector<int>> _create_orders(IGraph& g)
     };
     std::vector<std::vector<int>> orders;
     for (auto f : factors) {
-        orders.push_back(_sort_nodes(g, [&f](Coord coord) { return f[0] * coord.lon + f[1] * coord.lat; }));
+        orders.push_back(_sort_nodes(base, [&f](Coord coord) { return f[0] * coord.lon + f[1] * coord.lat; }));
     }
     return orders;
 }
 
-std::vector<short> InertialFlow(IGraph& g, int tile_count)
+static std::vector<short> inertial_flow(const GraphBase& base, const Weighting& weight, int tile_count)
 {
     // compute node orderings by location embedding
-    auto orders = _create_orders(g);
+    auto orders = _create_orders(base);
+
+    BaseGraphExplorer expl = {base, weight};
 
     // create node_tiles array
-    std::vector<short> node_tiles(g.nodeCount());
-    for (int i = 0; i < g.nodeCount(); i++) {
+    std::vector<short> node_tiles(base.nodeCount());
+    for (int i = 0; i < base.nodeCount(); i++) {
         node_tiles[i] = 0;
     }
 
     // init processing queue containing to be splitted tiles
     std::priority_queue<pq<short, int>> proc_queue;
-    proc_queue.push({0, -g.nodeCount()});
+    proc_queue.push({0, -base.nodeCount()});
 
     // keep track of tile ids
     short max_tile = 0;
@@ -106,7 +108,7 @@ std::vector<short> InertialFlow(IGraph& g, int tile_count)
             int si_c = nodes.size() * (1 - k);
 
             // compute max-flow for current direction
-            auto alg = EdmondsKarp(&g, {&nodes[0], (size_t)so_c}, source_tile, {&nodes[si_c], nodes.size() - si_c}, sink_tile, {&nodes[so_c], (size_t)(si_c - so_c)}, -1);
+            auto alg = EdmondsKarp(&expl, {&nodes[0], (size_t)so_c}, source_tile, {&nodes[si_c], nodes.size() - si_c}, sink_tile, {&nodes[so_c], (size_t)(si_c - so_c)}, -1);
             int flow = alg.ComputeMaxFlow();
             std::cout << "computed flow: " << flow << std::endl;
 

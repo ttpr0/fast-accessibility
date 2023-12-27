@@ -89,26 +89,6 @@ public:
 };
 
 //*******************************************
-// ch-graph explorer
-//*******************************************
-
-class CHGraphExplorer
-{
-public:
-    GraphBase& base;
-    Weighting& weights;
-    CHData& ch;
-    _IDMapping& id_mapping;
-
-    CHGraphExplorer(GraphBase& base, Weighting& weights, CHData& ch, _IDMapping& id_mapping) : base(base), weights(weights), ch(ch), id_mapping(id_mapping) {}
-
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
-    int getEdgeWeight(EdgeRef edge);
-    int getTurnCost(EdgeRef from, int via, EdgeRef to);
-    int getOtherNode(EdgeRef edge, int node);
-};
-
-//*******************************************
 // build ch-graph
 //*******************************************
 

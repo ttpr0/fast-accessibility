@@ -10,28 +10,25 @@
 #include "../graph/graph.h"
 
 template <class S>
-std::vector<int> calcRangeQuery(typename S::Graph* g, Coord start_point, std::vector<Coord>& target_points, int max_range)
+std::vector<int> calcRangeQuery(S& alg, int start_node, std::vector<int>& target_nodes, int max_range)
 {
-    typename S::Builder alg_builder(g);
-    alg_builder.addMaxRange(max_range);
-    // get closest node for every demand point
-    int start_node = g->getClosestNode(start_point);
-    std::vector<int> target_nodes(target_points.size());
-    for (int i = 0; i < target_points.size(); i++) {
-        auto loc = target_points[i];
-        int id = g->getClosestNode(loc);
-        target_nodes[i] = id;
-        if (id >= 0) {
-            alg_builder.addTarget(id);
+    if (!alg.isBuild()) {
+        // prepare solver
+        alg.addMaxRange(max_range);
+        for (int i = 0; i < target_nodes.size(); i++) {
+            auto id = target_nodes[i];
+            if (id >= 0) {
+                alg.addTarget(id);
+            }
         }
+
+        // build solver
+        alg.build();
     }
 
-    // build alg
-    auto alg = alg_builder.build();
-
     // compute flags
-    auto flags = Flags<DistFlag>(g->nodeCount(), {10000000, false});
-    alg.compute(start_node, flags);
+    auto state = alg.makeComputeState();
+    alg.compute(start_node, state);
 
     // create array containing accessibility results
     std::vector<int> ranges(target_nodes.size());
@@ -41,11 +38,11 @@ std::vector<int> calcRangeQuery(typename S::Graph* g, Coord start_point, std::ve
             ranges[i] = -9999;
             continue;
         }
-        auto target_flag = flags[target_node];
-        if (!target_flag.visited) {
+        auto target_dist = state.getDistance(target_node);
+        if (target_dist > max_range) {
             ranges[i] = -9999;
         } else {
-            ranges[i] = target_flag.dist;
+            ranges[i] = target_dist;
         }
     }
 

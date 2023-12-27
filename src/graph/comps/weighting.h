@@ -18,7 +18,7 @@ public:
     std::vector<int> edge_weights;
 
     int get_edge_weight(int edge) const { return this->edge_weights[edge]; }
-    int set_edge_weight(int edge, int weight) { this->edge_weights[edge] = weight; }
+    void set_edge_weight(int edge, int weight) { this->edge_weights[edge] = weight; }
 };
 
 static std::shared_ptr<Weighting> build_default_weighting(const GraphBase& base)
@@ -59,7 +59,7 @@ public:
     std::vector<char> turn_weights;
 
     int get_edge_weight(int edge) const { return this->edge_weights[edge]; }
-    int set_edge_weight(int edge, int weight) { this->edge_weights[edge] = weight; }
+    void set_edge_weight(int edge, int weight) { this->edge_weights[edge] = weight; }
 
     int get_turn_cost(int from, int via, int to) const
     {

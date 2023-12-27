@@ -25,7 +25,7 @@ struct _Flag
 };
 
 // computes shortest paths from start restricted to tile
-void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag>& flags, Partition& partition)
+static void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag>& flags, const Partition& partition)
 {
     std::priority_queue<pq_item> heap;
 
@@ -70,7 +70,7 @@ void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag>& flags, Partiti
 }
 
 // creates topology with cross-border edges (type 10), skip edges (type 20) and shortcuts (type 100)
-AdjacencyArray _create_skip_topology(IGraph& graph, std::vector<Shortcut>& shortcuts, std::vector<char>& edge_types)
+static AdjacencyArray _create_skip_topology(IGraph& graph, std::vector<Shortcut>& shortcuts, std::vector<char>& edge_types)
 {
     AdjacencyList dyn_top(graph.nodeCount());
 
@@ -100,7 +100,7 @@ AdjacencyArray _create_skip_topology(IGraph& graph, std::vector<Shortcut>& short
 // return list of nodes that have at least one cross-border edge
 //
 // returns in_nodes, out_nodes
-std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, Partition& partition, short tile_id)
+static std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, const Partition& partition, short tile_id)
 {
     std::vector<int> in_list;
     std::vector<int> out_list;
@@ -141,7 +141,7 @@ std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, P
 // Computes border and interior nodes of graph tile.
 //
 // If tile doesn't exist arrays will be empty.
-std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph& graph, Partition& partition, short tile_id)
+static std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph& graph, const Partition& partition, short tile_id)
 {
     std::vector<int> border_list;
     std::vector<int> interior_list;
@@ -182,7 +182,7 @@ std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph
 }
 
 // Computes border nodes of graph.
-std::vector<bool> _get_is_border(IGraph& graph, Partition& partition)
+static std::vector<bool> _get_is_border(IGraph& graph, const Partition& partition)
 {
     std::vector<bool> is_border_list(graph.nodeCount());
 

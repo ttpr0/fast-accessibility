@@ -12,19 +12,8 @@
 #include "./structs/adjacency.h"
 
 //*******************************************
-// classes
-//*******************************************
-
-class Graph;
-class BaseGraphExplorer;
-class BaseGraphIndex;
-class KDTreeIndex;
-
-//*******************************************
 // base-graph
 //*******************************************
-
-Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> edge_weights, std::shared_ptr<IGraphIndex> index);
 
 class Graph : public IGraph
 {
@@ -49,23 +38,4 @@ public:
     int getOtherNode(EdgeRef edge, int node);
 };
 
-//*******************************************
-// base-graph explorer
-//******************************************
-
-class BaseGraphExplorer
-{
-public:
-    GraphBase& base;
-    Weighting& weights;
-
-    BaseGraphExplorer(GraphBase& base, Weighting& weights) : base(base), weights(weights) {}
-
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
-
-    int getEdgeWeight(EdgeRef edge);
-
-    int getTurnCost(EdgeRef from, int via, EdgeRef to);
-
-    int getOtherNode(EdgeRef edge, int node);
-};
+Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> edge_weights, std::shared_ptr<IGraphIndex> index);

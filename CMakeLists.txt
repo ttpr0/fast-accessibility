@@ -23,6 +23,10 @@ add_executable(${exe_name}
     src/graph/tiled_graph.cpp
     src/graph/structs/adjacency.cpp
     src/graph/preproc/build_ch_index.cpp
+    src/graph/preproc/node_ordering.cpp
+    src/graph/explorer/base_explorer.cpp
+    src/graph/explorer/tiled_explorer.cpp
+    src/graph/explorer/ch_explorer.cpp
     src/graph/comps/graph_index.cpp
     src/graph/comps/graph_base.cpp
     src/kd_tree/kd_tree.cpp
@@ -43,13 +47,16 @@ endif()
 set(lib_name access)
 
 add_library(${lib_name} SHARED
-    src/main.cpp
     src/graph/base_graph.cpp
     src/graph/ch_graph.cpp
     src/graph/ch_graph_2.cpp
     src/graph/tiled_graph.cpp
     src/graph/structs/adjacency.cpp
     src/graph/preproc/build_ch_index.cpp
+    src/graph/preproc/node_ordering.cpp
+    src/graph/explorer/base_explorer.cpp
+    src/graph/explorer/tiled_explorer.cpp
+    src/graph/explorer/ch_explorer.cpp
     src/graph/comps/graph_index.cpp
     src/graph/comps/graph_base.cpp
     src/kd_tree/kd_tree.cpp

@@ -8,7 +8,7 @@ struct pq_item
     int dist;
 };
 
-bool operator<(const pq_item& a, const pq_item& b)
+static bool operator<(const pq_item& a, const pq_item& b)
 {
     return a.dist > b.dist;
 }

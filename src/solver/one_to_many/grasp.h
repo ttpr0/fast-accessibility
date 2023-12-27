@@ -11,43 +11,59 @@
 #include "../../graph/graph.h"
 #include "../../graph/tiled_graph.h"
 #include "../../util.h"
+#include "./state.h"
 
 // isoGRASP + reGRASP
 class GRASP
 {
-public:
-    typedef ITiledGraph Graph;
-    class Builder
-    {
-    private:
-        Graph* graph;
-        std::vector<bool> active_tiles;
-        int max_range;
-
-    public:
-        Builder(Graph* graph) : graph(graph), active_tiles(graph->tileCount() + 2) {}
-        void addMaxRange(int range) { this->max_range = range; }
-        void addTarget(int id)
-        {
-            short tile = this->graph->getNodeTile(id);
-            this->active_tiles[tile] = true;
-        }
-        GRASP build() { return GRASP(this->graph, this->max_range, std::move(this->active_tiles)); }
-    };
-
 private:
-    Graph* graph;
+    bool is_build;
+    ITiledGraph* graph;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
-    GRASP(Graph* graph, int max_range, std::vector<bool> active_tiles) : graph(graph), max_range(max_range), active_tiles(active_tiles), found_tiles(active_tiles.size()) {}
 
 public:
-    void compute(int s_id, Flags<DistFlag>& flags)
+    GRASP(ITiledGraph* graph) : graph(graph), max_range(max_range), active_tiles(graph->tileCount() + 2, false), found_tiles(graph->tileCount() + 2, false)
     {
+        this->is_build = false;
+        this->max_range = 10000000;
+    }
+
+    void addMaxRange(int range)
+    {
+        if (this->is_build) {
+            return;
+        }
+        this->max_range = range;
+    }
+    void addTarget(int id)
+    {
+        if (this->is_build) {
+            return;
+        }
+        short tile = this->graph->getNodeTile(id);
+        this->active_tiles[tile] = true;
+    }
+
+    bool isBuild() { return this->is_build; }
+    void build()
+    {
+        if (this->is_build) {
+            return;
+        }
+        this->is_build = true;
+    }
+
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    void compute(int s_id, NodeBasedState& state)
+    {
+        if (!this->is_build) {
+            return;
+        }
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGRASP(this->graph, s_id, flags, this->max_range, this->active_tiles, this->found_tiles);
+        calcGRASP(this->graph, s_id, state.flags, this->max_range, this->active_tiles, this->found_tiles);
     }
 };

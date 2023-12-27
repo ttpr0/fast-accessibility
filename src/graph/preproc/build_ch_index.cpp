@@ -1,10 +1,8 @@
 #include <algorithm>
 
-#include "../ch_graph.h"
+#include "../explorer/ch_explorer.h"
 #include "./build_ch_index.h"
 
-// CHData should be reordered by level.
-// Node-Ordering of GraphBase and Weighting are source CHData is target of id_mapping.
 std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHData& ch, _IDMapping& id_mapping)
 {
     std::vector<CHEdge> fwd_down_edges;
@@ -58,8 +56,6 @@ std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHD
     return std::make_shared<_CHIndex>(std::move(fwd_down_edges), std::move(bwd_down_edges));
 }
 
-// CHData has to be reordered by tile and level.
-// Node-Ordering of GraphBase, Weighting and Partition are source CHData is target of id_mapping.
 std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, CHData& ch, Partition& partition, _IDMapping& id_mapping)
 {
     CHGraphExplorer explorer = {base, weight, ch, id_mapping};

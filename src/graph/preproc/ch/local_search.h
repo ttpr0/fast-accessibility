@@ -42,7 +42,7 @@ bool contains(std::vector<T> vec, T item)
 // * is-contracted is used to limit search to nodes that have not been contracted yet (bool array containing every node in graph)
 //
 // * returns in-neighbours and out-neughbours
-std::tuple<std::vector<int>, std::vector<int>> _FindNeighbours(CHPreprocGraph& explorer, int id, std::vector<bool>& is_contracted)
+static std::tuple<std::vector<int>, std::vector<int>> _find_neighbours(CHPreprocGraph& explorer, int id, std::vector<bool>& is_contracted)
 {
     // compute out-going neighbours
     std::vector<int> out_neigbours;
@@ -76,8 +76,8 @@ std::tuple<std::vector<int>, std::vector<int>> _FindNeighbours(CHPreprocGraph& e
 // Performs a local dijkstra search from start until all targets are found or hop_limit reached.
 // Flags will be set in flags-array.
 // is_contracted contains true for every node that is already contracted (will not be used while finding shortest path).
-void _RunLocalSearch(int start, std::vector<int>& targets, CHPreprocGraph& explorer, std::priority_queue<pq_item>& heap, Flags<_FlagSH>& flags, std::vector<bool>& is_contracted,
-                     int hop_limit)
+static void _run_local_search(int start, std::vector<int>& targets, CHPreprocGraph& explorer, std::priority_queue<pq_item>& heap, Flags<_FlagSH>& flags,
+                              std::vector<bool>& is_contracted, int hop_limit)
 {
     auto& start_flag = flags[start];
     start_flag.curr_length = 0;
@@ -136,7 +136,7 @@ void _RunLocalSearch(int start, std::vector<int>& targets, CHPreprocGraph& explo
 
 // Returns the neccessary shortcut between from and to.
 // If no shortcut is needed false will be returned.
-std::tuple<std::array<std::tuple<int, bool>, 2>, bool> _GetShortcut(int from, int to, int via, CHPreprocGraph& explorer, Flags<_FlagSH>& flags)
+static std::tuple<std::array<std::tuple<int, bool>, 2>, bool> _get_shortcut(int from, int to, int via, CHPreprocGraph& explorer, Flags<_FlagSH>& flags)
 {
     std::array<std::tuple<int, bool>, 2> edges;
 

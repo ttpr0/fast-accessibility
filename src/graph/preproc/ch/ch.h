@@ -8,8 +8,8 @@
 #include <tuple>
 #include <vector>
 
+#include "../../../util/pq_item.h"
 #include "../tiled/util.h"
-#include "../util.h"
 #include "./local_search.h"
 #include "./preproc_graph.h"
 
@@ -19,23 +19,23 @@
 
 class CHOrdering;
 
-int _ComputeNodePriority(int node, CHPreprocGraph& graph, Flags<_FlagSH>& flags, std::vector<bool>& is_contracted, std::vector<short>& node_levels,
-                         std::vector<int>& contracted_neighbours, std::vector<char>& shortcut_edgecount, int hop_limit)
+int _compute_node_priority(int node, CHPreprocGraph& graph, Flags<_FlagSH>& flags, std::vector<bool>& is_contracted, std::vector<short>& node_levels,
+                           std::vector<int>& contracted_neighbours, std::vector<char>& shortcut_edgecount, int hop_limit)
 {
-    auto [in_neigbours, out_neigbours] = _FindNeighbours(graph, node, is_contracted);
+    auto [in_neigbours, out_neigbours] = _find_neighbours(graph, node, is_contracted);
     int edge_diff = -(in_neigbours.size() + out_neigbours.size());
     char edge_count = 0;
     for (int i = 0; i < in_neigbours.size(); i++) {
         int from = in_neigbours[i];
         flags.soft_reset();
         std::priority_queue<pq_item> heap;
-        _RunLocalSearch(from, out_neigbours, graph, heap, flags, is_contracted, hop_limit);
+        _run_local_search(from, out_neigbours, graph, heap, flags, is_contracted, hop_limit);
         for (int j = 0; j < out_neigbours.size(); j++) {
             int to = out_neigbours[j];
             if (from == to) {
                 continue;
             }
-            auto [edges, shortcut_needed] = _GetShortcut(from, to, node, graph, flags);
+            auto [edges, shortcut_needed] = _get_shortcut(from, to, node, graph, flags);
             if (!shortcut_needed) {
                 continue;
             }
@@ -67,7 +67,7 @@ int _ComputeNodePriority(int node, CHPreprocGraph& graph, Flags<_FlagSH>& flags,
 //*******************************************
 
 // Computes contraction using 2*ED + CN + EC + 5*L with hop-limits.
-std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights)
+std::shared_ptr<CHData> calc_contraction(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights)
 {
     auto graph = CHPreprocGraph(base, weights);
 
@@ -94,7 +94,7 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
     std::cout << "computing priorities..." << std::endl;
     std::vector<int> node_priorities(graph.nodeCount());
     for (int i = 0; i < graph.nodeCount(); i++) {
-        node_priorities[i] = _ComputeNodePriority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
+        node_priorities[i] = _compute_node_priority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
     }
 
     // put nodes into priority queue
@@ -126,19 +126,19 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
 
         // contract node
         short level = node_levels[node_id];
-        auto [in_neigbours, out_neigbours] = _FindNeighbours(graph, node_id, is_contracted);
+        auto [in_neigbours, out_neigbours] = _find_neighbours(graph, node_id, is_contracted);
         int ed = in_neigbours.size() + out_neigbours.size();
         for (int i = 0; i < in_neigbours.size(); i++) {
             int from = in_neigbours[i];
             std::priority_queue<pq_item> heap;
             flags.soft_reset();
-            _RunLocalSearch(from, out_neigbours, graph, heap, flags, is_contracted, hop_limit);
+            _run_local_search(from, out_neigbours, graph, heap, flags, is_contracted, hop_limit);
             for (int j = 0; j < out_neigbours.size(); j++) {
                 int to = out_neigbours[j];
                 if (from == to) {
                     continue;
                 }
-                auto [edges, shortcut_needed] = _GetShortcut(from, to, node_id, graph, flags);
+                auto [edges, shortcut_needed] = _get_shortcut(from, to, node_id, graph, flags);
                 if (!shortcut_needed) {
                     continue;
                 }
@@ -181,7 +181,7 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
             int nb = in_neigbours[i];
             node_levels[nb] = std::max<short>(level + 1, node_levels[nb]);
             contracted_neighbours[nb] += 1;
-            int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
+            int prio = _compute_node_priority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
             node_priorities[nb] = prio;
             contraction_order.push({std::make_tuple(nb, prio), prio});
         }
@@ -189,7 +189,7 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
             int nb = out_neigbours[i];
             node_levels[nb] = std::max<short>(level + 1, node_levels[nb]);
             contracted_neighbours[nb] += 1;
-            int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
+            int prio = _compute_node_priority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
             node_priorities[nb] = prio;
             contraction_order.push({std::make_tuple(nb, prio), prio});
         }
@@ -205,7 +205,7 @@ std::shared_ptr<CHData> CalcContraction3(std::shared_ptr<GraphBase> base, std::s
 // Computes contraction using 2*ED + CN + EC + 5*L with hop-limits.
 //
 // Only non border nodes are contracted.
-std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
+std::shared_ptr<CHData> calc_partial_contraction(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
     auto graph = CHPreprocGraph(base, weights);
 
@@ -240,7 +240,7 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
             node_priorities[i] = 10000000000;
             continue;
         }
-        int prio = _ComputeNodePriority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
+        int prio = _compute_node_priority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
         node_priorities[i] = prio;
         contraction_order.push({std::make_tuple(i, prio), prio});
     }
@@ -267,19 +267,19 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
 
         // contract node
         short level = node_levels[node_id];
-        auto [in_neigbours, out_neigbours] = _FindNeighbours(graph, node_id, is_contracted);
+        auto [in_neigbours, out_neigbours] = _find_neighbours(graph, node_id, is_contracted);
         int ed = in_neigbours.size() + out_neigbours.size();
         for (int i = 0; i < in_neigbours.size(); i++) {
             int from = in_neigbours[i];
             std::priority_queue<pq_item> heap;
             flags.soft_reset();
-            _RunLocalSearch(from, out_neigbours, graph, heap, flags, is_contracted, hop_limit);
+            _run_local_search(from, out_neigbours, graph, heap, flags, is_contracted, hop_limit);
             for (int j = 0; j < out_neigbours.size(); j++) {
                 int to = out_neigbours[j];
                 if (from == to) {
                     continue;
                 }
-                auto [edges, shortcut_needed] = _GetShortcut(from, to, node_id, graph, flags);
+                auto [edges, shortcut_needed] = _get_shortcut(from, to, node_id, graph, flags);
                 if (!shortcut_needed) {
                     continue;
                 }
@@ -325,7 +325,7 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
             if (is_border[nb]) {
                 continue;
             }
-            int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
+            int prio = _compute_node_priority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
             node_priorities[nb] = prio;
             contraction_order.push({std::make_tuple(nb, prio), prio});
         }
@@ -336,7 +336,7 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
             if (is_border[nb]) {
                 continue;
             }
-            int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
+            int prio = _compute_node_priority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, hop_limit);
             node_priorities[nb] = prio;
             contraction_order.push({std::make_tuple(nb, prio), prio});
         }
@@ -350,7 +350,7 @@ std::shared_ptr<CHData> CalcPartialContraction3(std::shared_ptr<GraphBase> base,
 }
 
 // Computes contraction using 2*ED + CN + EC + 5*L without hop-limits (uses partition to contract border nodes last).
-std::shared_ptr<CHData> CalcContraction5(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
+static std::shared_ptr<CHData> calc_contraction_tiled(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
     auto graph = CHPreprocGraph(base, weights);
 
@@ -384,7 +384,7 @@ std::shared_ptr<CHData> CalcContraction5(std::shared_ptr<GraphBase> base, std::s
             node_priorities[i] = 10000000000;
             continue;
         }
-        int prio = _ComputeNodePriority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
+        int prio = _compute_node_priority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
         node_priorities[i] = prio;
         contraction_order.push({std::make_tuple(i, prio), prio});
     }
@@ -402,7 +402,7 @@ std::shared_ptr<CHData> CalcContraction5(std::shared_ptr<GraphBase> base, std::s
                 if (!is_border[i]) {
                     continue;
                 }
-                int prio = _ComputeNodePriority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
+                int prio = _compute_node_priority(i, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
                 node_priorities[i] = prio;
                 contraction_order.push({std::make_tuple(i, prio), prio});
             }
@@ -423,19 +423,19 @@ std::shared_ptr<CHData> CalcContraction5(std::shared_ptr<GraphBase> base, std::s
 
         // contract node
         short level = node_levels[node_id];
-        auto [in_neigbours, out_neigbours] = _FindNeighbours(graph, node_id, is_contracted);
+        auto [in_neigbours, out_neigbours] = _find_neighbours(graph, node_id, is_contracted);
         int ed = in_neigbours.size() + out_neigbours.size();
         for (int i = 0; i < in_neigbours.size(); i++) {
             int from = in_neigbours[i];
             std::priority_queue<pq_item> heap;
             flags.soft_reset();
-            _RunLocalSearch(from, out_neigbours, graph, heap, flags, is_contracted, 1000);
+            _run_local_search(from, out_neigbours, graph, heap, flags, is_contracted, 1000);
             for (int j = 0; j < out_neigbours.size(); j++) {
                 int to = out_neigbours[j];
                 if (from == to) {
                     continue;
                 }
-                auto [edges, shortcut_needed] = _GetShortcut(from, to, node_id, graph, flags);
+                auto [edges, shortcut_needed] = _get_shortcut(from, to, node_id, graph, flags);
                 if (!shortcut_needed) {
                     continue;
                 }
@@ -472,7 +472,7 @@ std::shared_ptr<CHData> CalcContraction5(std::shared_ptr<GraphBase> base, std::s
             if (is_border[nb] && !is_border_contraction) {
                 continue;
             }
-            int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
+            int prio = _compute_node_priority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
             node_priorities[nb] = prio;
             contraction_order.push({std::make_tuple(nb, prio), prio});
         }
@@ -483,7 +483,7 @@ std::shared_ptr<CHData> CalcContraction5(std::shared_ptr<GraphBase> base, std::s
             if (is_border[nb] && !is_border_contraction) {
                 continue;
             }
-            int prio = _ComputeNodePriority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
+            int prio = _compute_node_priority(nb, graph, flags, is_contracted, node_levels, contracted_neighbours, shortcut_edgecount, 1000);
             node_priorities[nb] = prio;
             contraction_order.push({std::make_tuple(nb, prio), prio});
         }

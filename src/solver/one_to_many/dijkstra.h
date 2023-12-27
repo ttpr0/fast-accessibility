@@ -11,30 +11,46 @@
 #include "../../graph/base_graph.h"
 #include "../../graph/graph.h"
 #include "../../util.h"
+#include "./state.h"
 
 // RangeDijkstra
 class RangeDijkstra
 {
-public:
-    typedef IGraph Graph;
-    class Builder
-    {
-    private:
-        Graph* graph;
-        int max_range;
-
-    public:
-        Builder(Graph* graph) : graph(graph) {}
-        void addMaxRange(int range) { this->max_range = range; }
-        void addTarget(int id) {}
-        RangeDijkstra build() { return RangeDijkstra(this->graph, this->max_range); }
-    };
-
 private:
-    Graph* graph;
+    bool is_build;
+    IGraph* graph;
     int max_range;
-    RangeDijkstra(Graph* graph, int max_range) : graph(graph), max_range(max_range) {}
 
 public:
-    void compute(int s_id, Flags<DistFlag>& flags) { calcRangeDijkstra(this->graph, s_id, flags, this->max_range); }
+    RangeDijkstra(IGraph* graph) : graph(graph)
+    {
+        this->is_build = false;
+        this->max_range = 10000000;
+    }
+    void addMaxRange(int range)
+    {
+        if (this->is_build) {
+            return;
+        }
+        this->max_range = range;
+    }
+    void addTarget(int id) {}
+
+    bool isBuild() { return this->is_build; }
+    void build()
+    {
+        if (this->is_build) {
+            return;
+        }
+        this->is_build = true;
+    }
+
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    void compute(int s_id, NodeBasedState& state)
+    {
+        if (!this->is_build) {
+            return;
+        }
+        calcRangeDijkstra(this->graph, s_id, state.flags, this->max_range);
+    }
 };

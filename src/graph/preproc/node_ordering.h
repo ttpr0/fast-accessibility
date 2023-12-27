@@ -46,7 +46,7 @@ public:
     std::vector<int> buildMapping() const;
 };
 
-static std::vector<int> _level_order_values(CHData& ch)
+static std::vector<int> _level_order_values(const CHData& ch)
 {
     std::vector<int> order_values(ch.node_levels.size());
     for (int i = 0; i < ch.node_levels.size(); i++) {
@@ -54,7 +54,7 @@ static std::vector<int> _level_order_values(CHData& ch)
     }
     return order_values;
 }
-static std::vector<int> _tile_order_values(IGraph& g, Partition& partition)
+static std::vector<int> _tile_order_values(IGraph& g, const Partition& partition)
 {
     std::vector<int> order_values(partition.node_tiles.size());
     auto is_border = _get_is_border(g, partition);

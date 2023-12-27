@@ -8,12 +8,9 @@
 #include "../../speed_ups/partition.h"
 #include "./inertial_flow.h"
 
-std::shared_ptr<Partition> calc_partition(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weight, int count)
+static std::shared_ptr<Partition> calc_partition(const GraphBase& base, const Weighting& weight, int count)
 {
-    auto index = build_base_index(*base);
-    Graph graph = build_base_graph(base, weight, index);
-
-    auto tiles = InertialFlow(graph, count);
+    auto tiles = inertial_flow(base, weight, count);
 
     return std::make_shared<Partition>(std::move(tiles));
 }

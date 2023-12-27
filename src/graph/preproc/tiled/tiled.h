@@ -20,7 +20,7 @@
 #include "./util.h"
 
 // Creates tiled-graph with full-shortcut cliques.
-std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
+static std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
     auto index = build_base_index(*base);
     Graph graph = build_base_graph(base, weights, index);
@@ -77,7 +77,7 @@ std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base
 }
 
 //
-std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
+static std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
     auto index = build_base_index(*base);
     Graph graph = build_base_graph(base, weights, index);
@@ -118,11 +118,11 @@ std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> ba
     return std::make_shared<_CellIndex>(fwd_index_edges, bwd_index_edges);
 }
 
-std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTiledGraph5(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
-                                                                                          std::shared_ptr<Partition> partition)
+static std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> PreprocessTiledGraph5(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights,
+                                                                                                 std::shared_ptr<Partition> partition)
 {
     printf("Compute subset contraction: \n");
-    auto ch_data = CalcPartialContraction3(base, weights, partition);
+    auto ch_data = calc_partial_contraction(base, weights, partition);
 
     printf("Set border nodes to maxlevel: \n");
     auto index = build_base_index(*base);
