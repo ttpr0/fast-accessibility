@@ -224,20 +224,20 @@ def _haversine_length(points: list[Point], r:float=6365000) -> float:
 def _create_graph_components(nodes: list[Node], edges: list[Edge]):
     graph_nodes = NodeVector()
     graph_edges = EdgeVector()
-    node_geoms = CoordVector()
 
     for node in nodes:
-        graph_nodes.append(GraphNode())
-        node_geoms.append(Coord(node.point.lon, node.point.lat))
+        g_node = GraphNode()
+        g_node.loc = Coord(node.point.lon, node.point.lat)
+        graph_nodes.append(g_node)
 
     for edge in edges:
         graph_edges.append(GraphEdge(edge.nodeA, edge.nodeB, edge.type, edge.length, edge.templimit))
         if not edge.oneway:
             graph_edges.append(GraphEdge(edge.nodeB, edge.nodeA, edge.type, edge.length, edge.templimit))
     
-    return graph_nodes, graph_edges, node_geoms
+    return graph_nodes, graph_edges
 
-def parse_osm(file: str) -> tuple[NodeVector, EdgeVector, CoordVector]:
+def parse_osm(file: str) -> tuple[NodeVector, EdgeVector]:
     nodes = []
     edges = []
     index_mapping = {}

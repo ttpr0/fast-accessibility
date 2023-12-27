@@ -794,6 +794,13 @@ class Node:
         ...
     
     @property
+    def loc(self) -> pyaccess._pyaccess_ext.Coord:
+        ...
+    @loc.setter
+    def loc(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None:
+        ...
+    
+    @property
     def typ(self) -> str:
         ...
     @typ.setter
@@ -973,7 +980,6 @@ class RoadType(Enum):
     """
     <attribute '__doc__' of 'RoadType' objects>
     """
-    
     LIVING_STREET: RoadType
     
     MOTORWAY: RoadType
@@ -1289,7 +1295,7 @@ def map_to_closest(arg0: list, arg1: pyaccess._pyaccess_ext.IGraph, /) -> pyacce
     """
     ...
 
-def new_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyaccess_ext.EdgeVector, arg2: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.GraphBase:
+def new_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyaccess_ext.EdgeVector, /) -> pyaccess._pyaccess_ext.GraphBase:
     ...
 
 def new_id_mapping(arg: int, /) -> pyaccess._pyaccess_ext.IDMapping:

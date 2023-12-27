@@ -4,6 +4,7 @@
 #include <tuple>
 
 #include "./enums.h"
+#include "./geom.h"
 
 struct Edge
 {
@@ -18,6 +19,7 @@ struct Edge
 struct Node
 {
     char type;
+    Coord location;
 };
 
 struct Shortcut

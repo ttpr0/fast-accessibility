@@ -22,9 +22,9 @@ public:
 class BaseGraphIndex : public IGraphIndex
 {
 public:
-    std::vector<Coord>& node_geoms;
+    std::vector<Node>& nodes;
 
-    BaseGraphIndex(std::vector<Coord>& node_geoms) : node_geoms(node_geoms) {}
+    BaseGraphIndex(std::vector<Node>& nodes) : nodes(nodes) {}
 
     std::tuple<int, bool> getClosestNode(Coord point);
 };

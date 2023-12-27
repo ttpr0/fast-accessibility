@@ -13,7 +13,6 @@ static std::shared_ptr<GraphBase> _remove_nodes(const GraphBase& base, const std
     }
 
     std::vector<Node> new_nodes;
-    std::vector<Coord> new_node_geoms;
     std::vector<int> mapping(base.nodeCount());
     int id = 0;
     for (int i = 0; i < base.nodeCount(); i++) {
@@ -22,7 +21,6 @@ static std::shared_ptr<GraphBase> _remove_nodes(const GraphBase& base, const std
             continue;
         }
         new_nodes.push_back(base.getNode(i));
-        new_node_geoms.push_back(base.getNodeGeom(i));
         mapping[i] = id;
         id += 1;
     }
@@ -42,7 +40,7 @@ static std::shared_ptr<GraphBase> _remove_nodes(const GraphBase& base, const std
         });
     }
 
-    return new_graph_base(new_nodes, new_edges, new_node_geoms);
+    return new_graph_base(new_nodes, new_edges);
 }
 
 // reorders nodes,
@@ -50,11 +48,9 @@ static std::shared_ptr<GraphBase> _remove_nodes(const GraphBase& base, const std
 static std::shared_ptr<GraphBase> _reorder_nodes(const GraphBase& base, const std::vector<int>& mapping)
 {
     std::vector<Node> new_nodes(base.nodes.size());
-    std::vector<Coord> new_node_geoms(base.nodes.size());
     for (int i = 0; i < base.nodeCount(); i++) {
         int m_id = mapping[i];
         new_nodes[m_id] = base.getNode(i);
-        new_node_geoms[m_id] = base.getNodeGeom(i);
     }
     std::vector<Edge> new_edges;
     for (int i = 0; i < base.edgeCount(); i++) {
@@ -69,5 +65,5 @@ static std::shared_ptr<GraphBase> _reorder_nodes(const GraphBase& base, const st
         });
     }
 
-    return new_graph_base(new_nodes, new_edges, new_node_geoms);
+    return new_graph_base(new_nodes, new_edges);
 }

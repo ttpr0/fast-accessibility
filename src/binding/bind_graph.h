@@ -68,6 +68,7 @@ void bind_graph(nanobind::module_& m)
     auto node = py::class_<Node>(m, "Node");
     node.def(py::init<>());
     node.def_rw("typ", &Node::type);
+    node.def_rw("loc", &Node::location);
 
     auto shortcut = py::class_<Shortcut>(m, "Shortcut");
     shortcut.def(py::init<>());
