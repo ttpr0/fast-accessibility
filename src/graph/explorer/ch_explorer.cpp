@@ -5,15 +5,23 @@
 // ch-graph explorer
 //******************************************
 
-int CHGraphExplorer::nodeCount()
+int CHGraphExplorer::nodeCount() const
 {
     return this->base.nodeCount();
 }
-short CHGraphExplorer::getNodeLevel(int node)
+int CHGraphExplorer::edgeCount() const
+{
+    return this->base.edgeCount();
+}
+int CHGraphExplorer::shortcutCount() const
+{
+    return this->ch.shortcutCount();
+}
+short CHGraphExplorer::getNodeLevel(int node) const
 {
     return this->ch.getNodeLevel(node);
 }
-void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
+void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const
 {
     if (typ == Adjacency::ADJACENT_ALL) {
         int m_node = this->id_mapping.get_source(node);
@@ -93,7 +101,7 @@ void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, s
     }
     return;
 }
-int CHGraphExplorer::getEdgeWeight(EdgeRef edge)
+int CHGraphExplorer::getEdgeWeight(EdgeRef edge) const
 {
     if (edge.isCHShortcut()) {
         auto shc = this->ch.getShortcut(edge.edge_id);
@@ -102,11 +110,11 @@ int CHGraphExplorer::getEdgeWeight(EdgeRef edge)
         return this->weights.get_edge_weight(edge.edge_id);
     }
 }
-int CHGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to)
+int CHGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to) const
 {
     return 0;
 }
-int CHGraphExplorer::getOtherNode(EdgeRef edge, int node)
+int CHGraphExplorer::getOtherNode(EdgeRef edge, int node) const
 {
     if (edge.isShortcut()) {
         auto e = this->ch.getShortcut(edge.edge_id);

@@ -19,13 +19,13 @@ public:
 
     BaseGraphExplorer(const GraphBase& base, const Weighting& weights) : base(base), weights(weights) {}
 
-    int nodeCount();
-    int edgeCount();
+    int nodeCount() const;
+    int edgeCount() const;
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const;
 
-    int getEdgeWeight(EdgeRef edge);
-    int getTurnCost(EdgeRef from, int via, EdgeRef to);
+    int getEdgeWeight(EdgeRef edge) const;
+    int getTurnCost(EdgeRef from, int via, EdgeRef to) const;
 
-    int getOtherNode(EdgeRef edge, int node);
+    int getOtherNode(EdgeRef edge, int node) const;
 };

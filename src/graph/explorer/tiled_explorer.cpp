@@ -5,16 +5,24 @@
 // ch-graph explorer
 //*******************************************
 
-int TiledGraphExplorer::nodeCount()
+int TiledGraphExplorer::nodeCount() const
 {
     return this->base.nodeCount();
 }
-short TiledGraphExplorer::getNodeTile(int node)
+int TiledGraphExplorer::edgeCount() const
+{
+    return this->base.edgeCount();
+}
+int TiledGraphExplorer::shortcutCount() const
+{
+    return this->tiled.shortcutCount();
+}
+short TiledGraphExplorer::getNodeTile(int node) const
 {
     int m_node = this->id_mapping.get_source(node);
     return this->partition.get_node_tile(m_node);
 }
-void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
+void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const
 {
     if (typ == ADJACENT_SKIP) {
         auto skip_accessor = this->tiled.topology.getNeighbours(node, dir);
@@ -39,7 +47,7 @@ void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ
     }
     return;
 }
-int TiledGraphExplorer::getEdgeWeight(EdgeRef edge)
+int TiledGraphExplorer::getEdgeWeight(EdgeRef edge) const
 {
     if (edge.isShortcut()) {
         auto shc = this->tiled.getShortcut(edge.edge_id);
@@ -48,11 +56,11 @@ int TiledGraphExplorer::getEdgeWeight(EdgeRef edge)
         return this->weights.get_edge_weight(edge.edge_id);
     }
 }
-int TiledGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to)
+int TiledGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to) const
 {
     return 0;
 }
-int TiledGraphExplorer::getOtherNode(EdgeRef edge, int node)
+int TiledGraphExplorer::getOtherNode(EdgeRef edge, int node) const
 {
     if (edge.isShortcut()) {
         auto e = this->tiled.getShortcut(edge.edge_id);

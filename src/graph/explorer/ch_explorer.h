@@ -25,11 +25,16 @@ public:
     CHGraphExplorer(const GraphBase& base, const Weighting& weights, const CHData& ch, const _IDMapping& id_mapping) : base(base), weights(weights), ch(ch), id_mapping(id_mapping)
     {}
 
-    int nodeCount();
-    short getNodeLevel(int node);
+    int nodeCount() const;
+    int edgeCount() const;
+    int shortcutCount() const;
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
-    int getEdgeWeight(EdgeRef edge);
-    int getTurnCost(EdgeRef from, int via, EdgeRef to);
-    int getOtherNode(EdgeRef edge, int node);
+    short getNodeLevel(int node) const;
+
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const;
+
+    int getEdgeWeight(EdgeRef edge) const;
+    int getTurnCost(EdgeRef from, int via, EdgeRef to) const;
+
+    int getOtherNode(EdgeRef edge, int node) const;
 };

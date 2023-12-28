@@ -27,11 +27,16 @@ public:
         : base(base), weights(weights), partition(partition), tiled(tiled), id_mapping(id_mapping)
     {}
 
-    int nodeCount();
-    short getNodeTile(int node);
+    int nodeCount() const;
+    int edgeCount() const;
+    int shortcutCount() const;
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
-    int getEdgeWeight(EdgeRef edge);
-    int getTurnCost(EdgeRef from, int via, EdgeRef to);
-    int getOtherNode(EdgeRef edge, int node);
+    short getNodeTile(int node) const;
+
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const;
+
+    int getEdgeWeight(EdgeRef edge) const;
+    int getTurnCost(EdgeRef from, int via, EdgeRef to) const;
+
+    int getOtherNode(EdgeRef edge, int node) const;
 };
