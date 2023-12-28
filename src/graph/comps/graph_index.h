@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "../../kd_tree/kd_tree.h"
+#include "../../util/kd_tree/kd_tree.h"
 #include "./graph_base.h"
 
 //*******************************************
@@ -28,9 +28,6 @@ public:
 
     std::tuple<int, bool> getClosestNode(Coord point);
 };
-
-KDTree build_kdtree(std::vector<Coord>& node_geoms);
-KDTree build_balanced_kdtree(std::vector<Coord>& node_geoms);
 
 class KDTreeIndex : public IGraphIndex
 {

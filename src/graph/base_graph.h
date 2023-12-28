@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "../kd_tree/kd_tree.h"
 #include "./comps/graph_base.h"
 #include "./comps/graph_index.h"
 #include "./comps/weighting.h"

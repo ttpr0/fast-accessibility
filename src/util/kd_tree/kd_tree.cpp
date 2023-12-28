@@ -1,4 +1,4 @@
-#include "kd_tree.h"
+#include "./kd_tree.h"
 
 void insert_node(KDNode& node, std::unique_ptr<KDNode> new_node, int dim)
 {

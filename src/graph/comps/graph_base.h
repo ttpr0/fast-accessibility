@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include "../../kd_tree/kd_tree.h"
 #include "../structs/adjacency.h"
 #include "../structs/geom.h"
 #include "../structs/structs.h"
