@@ -42,10 +42,10 @@ void bind_utilities(nanobind::module_& m)
 
     m.def("map_to_closest", static_cast<std::vector<int> (*)(const std::vector<Coord>&, IGraph&)>(&map_to_closest));
     m.def("map_to_closest", static_cast<int (*)(Coord, IGraph&)>(&map_to_closest));
-    m.def("map_to_closest", [](py::list l, IGraph& graph) {
+    m.def("map_to_closest", [](py::list& l, IGraph& graph) {
         std::vector<int> closest(l.size());
         for (int i = 0; i < l.size(); i++) {
-            py::tuple t = l[i];
+            py::tuple t = py::cast<py::tuple>(l[i]);
             py::handle lon = t[0];
             py::handle lat = t[1];
             Coord c = {py::cast<float>(lon), py::cast<float>(lat)};
@@ -53,7 +53,7 @@ void bind_utilities(nanobind::module_& m)
         }
         return closest;
     });
-    m.def("map_to_closest", [](py::tuple t, IGraph& graph) {
+    m.def("map_to_closest", [](py::tuple& t, IGraph& graph) {
         py::handle lon = t[0];
         py::handle lat = t[1];
         Coord c = {py::cast<float>(lon), py::cast<float>(lat)};
