@@ -29,7 +29,7 @@ add_executable(${exe_name}
     src/graph/explorer/ch_explorer.cpp
     src/graph/comps/graph_index.cpp
     src/graph/comps/graph_base.cpp
-    src/kd_tree/kd_tree.cpp
+    src/util/kd_tree/kd_tree.cpp
 )
 
 target_include_directories(${exe_name} PRIVATE
@@ -59,7 +59,7 @@ add_library(${lib_name} SHARED
     src/graph/explorer/ch_explorer.cpp
     src/graph/comps/graph_index.cpp
     src/graph/comps/graph_base.cpp
-    src/kd_tree/kd_tree.cpp
+    src/util/kd_tree/kd_tree.cpp
 )
 
 target_include_directories(${lib_name} PUBLIC
