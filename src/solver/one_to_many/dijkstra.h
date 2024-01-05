@@ -51,6 +51,8 @@ public:
         if (!this->is_build) {
             return;
         }
-        calcRangeDijkstra(this->graph, s_id, state.flags, this->max_range);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcRangeDijkstra(this->graph, s_id, flags, this->max_range);
     }
 };

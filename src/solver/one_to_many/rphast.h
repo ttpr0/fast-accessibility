@@ -65,7 +65,9 @@ public:
         if (!this->is_build) {
             return;
         }
-        calcRPHAST(this->graph, s_id, state.flags, this->down_edges_subset);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcRPHAST(this->graph, s_id, flags, this->down_edges_subset);
     }
 };
 
@@ -117,7 +119,9 @@ public:
         if (!this->is_build) {
             return;
         }
-        calcRangeRPHAST(this->graph, s_id, state.flags, this->max_range, this->down_edges_subset);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset);
     }
 };
 
@@ -169,7 +173,9 @@ public:
         if (!this->is_build) {
             return;
         }
-        calcRangeRPHAST(this->graph, s_id, state.flags, this->max_range, this->down_edges_subset);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset);
     }
 };
 
@@ -228,7 +234,9 @@ public:
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGSRPHAST(this->graph, s_id, state.flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
     }
 };
 
@@ -287,6 +295,8 @@ public:
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGSRPHAST(this->graph, s_id, state.flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
     }
 };

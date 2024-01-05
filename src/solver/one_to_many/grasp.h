@@ -64,6 +64,8 @@ public:
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGRASP(this->graph, s_id, state.flags, this->max_range, this->active_tiles, this->found_tiles);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcGRASP(this->graph, s_id, flags, this->max_range, this->active_tiles, this->found_tiles);
     }
 };

@@ -43,7 +43,9 @@ public:
         if (!this->is_build) {
             return;
         }
-        calcPHAST(this->graph, s_id, state.flags);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcPHAST(this->graph, s_id, flags);
     }
 };
 
@@ -86,7 +88,9 @@ public:
         if (!this->is_build) {
             return;
         }
-        calcRangePHAST(this->graph, s_id, state.flags, this->max_range);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcRangePHAST(this->graph, s_id, flags, this->max_range);
     }
 };
 
@@ -141,6 +145,8 @@ public:
         for (int i = 0; i < found_tiles.size(); i++) {
             found_tiles[i] = false;
         }
-        calcGSPHAST(this->graph, s_id, state.flags, this->max_range, this->active_tiles, this->found_tiles);
+        auto& flags = state.flags;
+        flags.soft_reset();
+        calcGSPHAST(this->graph, s_id, flags, this->max_range, this->active_tiles, this->found_tiles);
     }
 };
