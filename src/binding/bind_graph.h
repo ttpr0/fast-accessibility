@@ -14,6 +14,8 @@
 #include "../graph/io/tiled_data_io.h"
 #include "../graph/io/weighting_io.h"
 #include "../graph/mod/cell_index_mod.h"
+#include "../graph/mod/ch_data_mod.h"
+#include "../graph/mod/ch_index_mod.h"
 #include "../graph/mod/graph_base_mod.h"
 #include "../graph/mod/id_mapping_mod.h"
 #include "../graph/mod/partition_mod.h"
@@ -183,7 +185,9 @@ void bind_graph(nanobind::module_& m)
     m.def("reorder_nodes", static_cast<std::shared_ptr<Weighting> (*)(const Weighting&, const std::vector<int>&)>(&_reorder_nodes));
     m.def("reorder_nodes", static_cast<std::shared_ptr<TCWeighting> (*)(const TCWeighting&, const std::vector<int>&)>(&_reorder_nodes));
     m.def("reorder_nodes", static_cast<std::shared_ptr<Partition> (*)(const Partition&, const std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<CHData> (*)(const CHData&, const std::vector<int>&)>(&_reorder_nodes));
     m.def("reorder_nodes", static_cast<std::shared_ptr<TiledData> (*)(const TiledData&, const std::vector<int>&)>(&_reorder_nodes));
+    m.def("reorder_nodes", static_cast<std::shared_ptr<_CHIndex> (*)(const _CHIndex&, const std::vector<int>&)>(&_reorder_nodes));
     m.def("reorder_nodes", static_cast<std::shared_ptr<_CellIndex> (*)(const _CellIndex&, const std::vector<int>&)>(&_reorder_nodes));
     m.def("reorder_sources", &_reorder_sources);
     m.def("reorder_targets", &_reorder_targets);

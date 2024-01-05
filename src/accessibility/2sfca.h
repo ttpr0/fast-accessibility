@@ -17,37 +17,33 @@
 #include "./distance_decay/decay.h"
 
 template <class S>
-std::vector<float> _calc2SFCA(S& alg, IGraph& g, std::vector<Coord>& dem_points, std::vector<int>& dem_weights, std::vector<Coord>& sup_points, std::vector<int>& sup_weights,
-                              IDistanceDecay& decay)
+std::vector<float> _calc2SFCA(S& alg, std::vector<int>& dem_nodes, std::vector<int>& dem_weights, std::vector<int>& sup_nodes, std::vector<int>& sup_weights, IDistanceDecay& decay)
 {
     int max_dist = decay.get_max_distance();
-    alg.addMaxRange(max_dist);
-    // get closest node for every demand point
-    std::vector<int> dem_nodes(dem_points.size());
-    for (int i = 0; i < dem_points.size(); i++) {
-        auto loc = dem_points[i];
-        int id = g.getClosestNode(loc);
-        dem_nodes[i] = id;
-        if (id >= 0) {
-            alg.addTarget(id);
-        }
-    }
 
-    // build alg
-    alg.build();
+    if (!alg.isBuild()) {
+        // preprare solver
+        alg.addMaxRange(max_dist);
+        for (int i = 0; i < dem_nodes.size(); i++) {
+            auto id = dem_nodes[i];
+            if (id >= 0) {
+                alg.addTarget(id);
+            }
+        }
+
+        // build solver
+        alg.build();
+    }
 
     // create array containing accessibility results
-    std::vector<float> access(dem_points.size());
-    for (int i = 0; i < access.size(); i++) {
-        access[i] = 0;
-    }
+    std::vector<float> access(dem_nodes.size(), 0);
 
     auto state = alg.makeComputeState();
     std::mutex m;
 #pragma omp parallel for firstprivate(state)
-    for (int i = 0; i < sup_points.size(); i++) {
+    for (int i = 0; i < sup_nodes.size(); i++) {
         // get supply information
-        int s_id = g.getClosestNode(sup_points[i]);
+        int s_id = sup_nodes[i];
         if (s_id < 0) {
             continue;
         }
