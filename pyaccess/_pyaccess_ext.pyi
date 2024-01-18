@@ -2,6 +2,8 @@ from typing import Any, Optional, overload, Sequence, Iterable, Iterator as iter
 from enum import Enum
 import pyaccess._pyaccess_ext
 
+BACKWARD: Direction
+
 class BinaryDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -26,8 +28,19 @@ class CHData:
     """
     None
     """
-    ...
 
+    def get_adjacent_shortcuts(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
+        ...
+    
+    def get_node_level(self, arg: int, /) -> int:
+        ...
+    
+    def get_shortcut(self, arg: int, /) -> pyaccess._pyaccess_ext.Shortcut:
+        ...
+    
+    def shortcut_count(self) -> int:
+        ...
+    
 class CHGraph(pyaccess._pyaccess_ext.ICHGraph, pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -41,12 +54,6 @@ class CHGraph2(pyaccess._pyaccess_ext.IGraph):
     ...
 
 class CHIndex:
-    """
-    None
-    """
-    ...
-
-class CHIndex2:
     """
     None
     """
@@ -211,6 +218,14 @@ class CoordVector:
         Remove and return item at `index` (default last).
         """
         ...
+    
+class Direction:
+    """
+    <attribute '__doc__' of 'Direction' objects>
+    """
+    BACKWARD: Direction
+    
+    FORWARD: Direction
     
 class Edge:
     """
@@ -379,6 +394,8 @@ class EdgeVector:
         """
         ...
     
+FORWARD: Direction
+
 class FloatVector:
     """
     None
@@ -538,6 +555,9 @@ class GraphBase:
     """
 
     def edge_count(self) -> int:
+        ...
+    
+    def get_adjacent_edges(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
         ...
     
     def get_edge(self, arg: int, /) -> pyaccess._pyaccess_ext.Edge:
@@ -976,10 +996,11 @@ class RangeRPHASTGS:
     def is_build(self) -> bool:
         ...
     
-class RoadType(Enum):
+class RoadType:
     """
     <attribute '__doc__' of 'RoadType' objects>
     """
+    
     LIVING_STREET: RoadType
     
     MOTORWAY: RoadType
@@ -1071,8 +1092,19 @@ class TiledData:
     """
     None
     """
-    ...
 
+    def get_adjacent_shortcuts(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
+        ...
+    
+    def get_edge_type(self, arg: int, /) -> int:
+        ...
+    
+    def get_shortcut(self, arg: int, /) -> pyaccess._pyaccess_ext.Shortcut:
+        ...
+    
+    def shortcut_count(self) -> int:
+        ...
+    
 class TiledGraph(pyaccess._pyaccess_ext.ITiledGraph, pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -1096,7 +1128,7 @@ def build_base_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pya
 def build_ch_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.IDMapping, arg4: pyaccess._pyaccess_ext.CHData, arg5: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph:
     ...
 
-def build_ch_graph_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.CHData, arg6: pyaccess._pyaccess_ext.CHIndex2, /) -> pyaccess._pyaccess_ext.CHGraph2:
+def build_ch_graph_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.CHData, arg6: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph2:
     ...
 
 def build_grasp_solver(arg: pyaccess._pyaccess_ext.ITiledGraph, /) -> pyaccess._pyaccess_ext.GRASP:
@@ -1124,9 +1156,9 @@ def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
     ...
 
 @overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
     """
     ...
 
@@ -1148,6 +1180,27 @@ def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
     """
     calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    """
+    ...
+
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    """
+    ...
+
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    """
+    ...
+
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
     """
     ...
 
@@ -1316,7 +1369,7 @@ def prepare_ch2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess
 def prepare_ch_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.CHIndex:
     ...
 
-def prepare_ch_index_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.CHIndex2:
+def prepare_ch_index_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.CHIndex:
     ...
 
 def prepare_default_tc_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.TCWeighting:
@@ -1379,9 +1432,23 @@ def reorder_nodes(arg0: pyaccess._pyaccess_ext.Partition, arg1: pyaccess._pyacce
     ...
 
 @overload
+def reorder_nodes(arg0: pyaccess._pyaccess_ext.CHData, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.CHData:
+    """
+    reorder_nodes(arg0: pyaccess._pyaccess_ext.CHData, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.CHData
+    """
+    ...
+
+@overload
 def reorder_nodes(arg0: pyaccess._pyaccess_ext.TiledData, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.TiledData:
     """
     reorder_nodes(arg0: pyaccess._pyaccess_ext.TiledData, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.TiledData
+    """
+    ...
+
+@overload
+def reorder_nodes(arg0: pyaccess._pyaccess_ext.CHIndex, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.CHIndex:
+    """
+    reorder_nodes(arg0: pyaccess._pyaccess_ext.CHIndex, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.CHIndex
     """
     ...
 

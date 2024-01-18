@@ -1,6 +1,7 @@
 import osmium as osm
 import math
 from ._pyaccess_ext import Node as GraphNode, Edge as GraphEdge, Coord, CoordVector, NodeVector, EdgeVector, RoadType
+from .graph import Graph, new_graph
 
 class Point:
     __slots__ = "lon", "lat"
@@ -237,11 +238,12 @@ def _create_graph_components(nodes: list[Node], edges: list[Edge]):
     
     return graph_nodes, graph_edges
 
-def parse_osm(file: str) -> tuple[NodeVector, EdgeVector]:
+def parse_osm(file: str) -> Graph:
     nodes = []
     edges = []
     index_mapping = {}
     _parse_osm(file, nodes, edges, index_mapping)
     print("edges: ", len(edges), ", nodes: ", len(nodes))
     _calc_edge_weights(edges)
-    return _create_graph_components(nodes, edges)
+    node_vec, edge_vec = _create_graph_components(nodes, edges)
+    return new_graph(node_vec, edge_vec)

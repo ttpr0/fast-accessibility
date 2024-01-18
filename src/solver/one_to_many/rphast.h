@@ -23,7 +23,7 @@ class RPHAST
 private:
     bool is_build;
     ICHGraph* graph;
-    std::vector<CHEdge> down_edges_subset;
+    std::vector<Shortcut> down_edges_subset;
     int max_range;
     std::queue<int> node_queue;
 
@@ -77,7 +77,7 @@ class RangeRPHAST
 private:
     bool is_build;
     ICHGraph* graph;
-    std::vector<CHEdge> down_edges_subset;
+    std::vector<Shortcut> down_edges_subset;
     int max_range;
     std::queue<int> node_queue;
 
@@ -131,7 +131,7 @@ class RangeRPHAST2
 private:
     bool is_build;
     ICHGraph* graph;
-    std::vector<CHEdge> down_edges_subset;
+    std::vector<Shortcut> down_edges_subset;
     int max_range;
     std::priority_queue<pq_item> node_queue;
 
@@ -185,7 +185,7 @@ class RangeRPHASTGS
 private:
     bool is_build;
     CHGraph2* graph;
-    std::vector<CHEdge4> down_edges_subset;
+    std::vector<Shortcut> down_edges_subset;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
@@ -246,7 +246,7 @@ class RangeRPHASTGS2
 private:
     bool is_build;
     CHGraph2* graph;
-    std::vector<CHEdge4> down_edges_subset;
+    std::vector<Shortcut> down_edges_subset;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
