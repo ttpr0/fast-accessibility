@@ -13,7 +13,7 @@ CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weightin
 }
 
 CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                          std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index)
+                          std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
 {
     return {std::move(base), std::move(weights), std::move(index), std::move(partition), std::move(id_mapping), std::move(ch), std::move(ch_index)};
 }
@@ -188,11 +188,11 @@ Shortcut CHGraph::getShortcut(int shortcut)
 {
     return this->ch->getShortcut(shortcut);
 }
-const std::vector<CHEdge>& CHGraph::getDownEdges(Direction dir)
+const std::vector<Shortcut>& CHGraph::getDownEdges(Direction dir)
 {
     if (dir == Direction::FORWARD) {
-        return this->ch_index->fwd_down_edges;
+        return this->ch_index->get_fwd_index();
     } else {
-        return this->ch_index->bwd_down_edges;
+        return this->ch_index->get_bwd_index();
     }
 }

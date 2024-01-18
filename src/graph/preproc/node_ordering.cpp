@@ -24,7 +24,7 @@ void MappingBuilder::updateOrdering(std::vector<int>& order_values)
         return val_a < val_b;
     });
 }
-void MappingBuilder::updateOrdering(std::vector<int>& order_values, _IDMapping& id_mapping, bool from_source)
+void MappingBuilder::updateOrdering(std::vector<int>& order_values, _IDMapping& id_mapping, bool to_target)
 {
     if (order_values.size() != this->indices.size()) {
         return;
@@ -32,10 +32,10 @@ void MappingBuilder::updateOrdering(std::vector<int>& order_values, _IDMapping& 
     for (int i = 0; i < this->indices.size(); i++) {
         int id = this->indices[i][0];
         int m_id;
-        if (from_source) {
-            m_id = id_mapping.get_source(id);
-        } else {
+        if (to_target) {
             m_id = id_mapping.get_target(id);
+        } else {
+            m_id = id_mapping.get_source(id);
         }
         this->indices[i][1] = order_values[m_id];
     }

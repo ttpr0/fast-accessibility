@@ -27,7 +27,7 @@ static AdjacencyArray _reorder_nodes(const AdjacencyArray& tiled, const std::vec
         for (int j = 0; j < node_ref.fwd_count; j++) {
             auto ref = tiled.fwd_edge_entries[start + j];
             ref.other_id = mapping[ref.other_id];
-            fwd_edge_refs.push_back(ref);
+            fwd_edge_refs[fwd_start + fwd_count] = ref;
             fwd_count += 1;
         }
         node_ref.fwd_start = fwd_start;
@@ -39,7 +39,7 @@ static AdjacencyArray _reorder_nodes(const AdjacencyArray& tiled, const std::vec
         for (int j = 0; j < node_ref.bwd_count; j++) {
             auto ref = tiled.bwd_edge_entries[start + j];
             ref.other_id = mapping[ref.other_id];
-            bwd_edge_refs.push_back(ref);
+            bwd_edge_refs[bwd_start + bwd_count] = ref;
             bwd_count += 1;
         }
         node_ref.bwd_start = bwd_start;

@@ -24,7 +24,7 @@ std::shared_ptr<_CellIndex> load_cell_index(const std::string& file)
             int from = reader.read<int>();
             int to = reader.read<int>();
             int weight = reader.read<int>();
-            auto payload = reader.read<std::array<char, 4>>();
+            auto payload = reader.read<Data<4>>();
             edges[j] = {from, to, weight, payload};
         }
         fwd_index_edges[tile] = edges;
@@ -38,7 +38,7 @@ std::shared_ptr<_CellIndex> load_cell_index(const std::string& file)
             int from = reader.read<int>();
             int to = reader.read<int>();
             int weight = reader.read<int>();
-            auto payload = reader.read<std::array<char, 4>>();
+            auto payload = reader.read<Data<4>>();
             edges[j] = {from, to, weight, payload};
         }
         bwd_index_edges[tile] = edges;
@@ -62,7 +62,7 @@ void store_cell_index(_CellIndex& index, const std::string& file)
             writer.write<int>(shc.from);
             writer.write<int>(shc.to);
             writer.write<int>(shc.weight);
-            writer.write<std::array<char, 4>>(shc.payload);
+            writer.write<Data<4>>(shc.payload);
         }
     }
     for (auto& [tile, edges] : index.bwd_index_edges) {
@@ -73,7 +73,7 @@ void store_cell_index(_CellIndex& index, const std::string& file)
             writer.write<int>(shc.from);
             writer.write<int>(shc.to);
             writer.write<int>(shc.weight);
-            writer.write<std::array<char, 4>>(shc.payload);
+            writer.write<Data<4>>(shc.payload);
         }
     }
 

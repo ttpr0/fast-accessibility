@@ -49,12 +49,12 @@ void calcGSPHAST(CHGraph2* g, int start, Flags<DistFlag>& flags, int max_range, 
         });
     }
     // iterative down-sweep
-    const std::vector<CHEdge4>& down_edges = g->getDownEdges4(Direction::FORWARD);
-    CHEdge4 overlay_dummy = down_edges[0];
+    const std::vector<Shortcut>& down_edges = g->getDownEdges(Direction::FORWARD);
+    auto overlay_dummy = down_edges[0];
     int overlay_start = 1;
     int overlay_end = 1 + overlay_dummy.to;
     for (int i = overlay_start; i < overlay_end; i++) {
-        CHEdge4 edge = down_edges[i];
+        auto edge = down_edges[i];
         auto& curr_flag = flags[edge.from];
         int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
@@ -64,18 +64,19 @@ void calcGSPHAST(CHGraph2* g, int start, Flags<DistFlag>& flags, int max_range, 
         if (other_flag.dist > new_len) {
             other_flag.dist = new_len;
             other_flag.visited = true;
-            is_found[edge.to_tile] = true;
+            short to_tile = edge.payload.get<short>(0);
+            is_found[to_tile] = true;
         }
     }
     for (int i = overlay_end; i < down_edges.size(); i++) {
-        CHEdge4 curr_dummy = down_edges[i];
-        int curr_tile = curr_dummy.to_tile;
+        auto curr_dummy = down_edges[i];
+        int curr_tile = curr_dummy.payload.get<short>(0);
         int curr_count = curr_dummy.to;
         if (is_found[curr_tile] && contains_targets[curr_tile]) {
             int tile_start = i + 1;
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {
-                CHEdge4 edge = down_edges[j];
+                auto edge = down_edges[j];
                 auto& curr_flag = flags[edge.from];
                 int new_len = curr_flag.dist + edge.weight;
                 if (new_len > max_range) {

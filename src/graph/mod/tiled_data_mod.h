@@ -13,12 +13,12 @@ static std::shared_ptr<TiledData> _reorder_nodes(const TiledData& tiled, const s
     std::vector<Shortcut> new_shortcuts(tiled.shortcutCount());
     for (int i = 0; i < tiled.shortcutCount(); i++) {
         auto shc = tiled.getShortcut(i);
-        new_shortcuts.push_back({
+        new_shortcuts[i] = {
             .from = mapping[shc.from],
             .to = mapping[shc.to],
             .weight = shc.weight,
             .payload = shc.payload,
-        });
+        };
     }
 
     auto skip_topology = _reorder_nodes(tiled.topology, mapping);

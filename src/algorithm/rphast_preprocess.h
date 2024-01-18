@@ -9,7 +9,7 @@
 #include "./util.h"
 
 // standard RPHAST subset selection
-std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
+std::vector<Shortcut> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
 {
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
@@ -34,8 +34,8 @@ std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
         });
     }
     // selecting subset of downward edges for linear sweep
-    std::vector<CHEdge> down_edges_subset;
-    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
+    std::vector<Shortcut> down_edges_subset;
+    const std::vector<Shortcut>& down_edges = g->getDownEdges(Direction::FORWARD);
     for (int i = 0; i < down_edges.size(); i++) {
         auto edge = down_edges[i];
         if (!graph_subset[edge.from]) {
@@ -48,7 +48,7 @@ std::vector<CHEdge> preprocessRPHAST(ICHGraph* g, std::queue<int>&& node_queue)
 }
 
 // RPHAST subset selection using priority queue (RTS)
-std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_item>&& node_queue, int max_range)
+std::vector<Shortcut> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_item>&& node_queue, int max_range)
 {
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
@@ -80,8 +80,8 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_it
         });
     }
     // selecting subset of downward edges for linear sweep
-    std::vector<CHEdge> down_edges_subset;
-    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
+    std::vector<Shortcut> down_edges_subset;
+    const std::vector<Shortcut>& down_edges = g->getDownEdges(Direction::FORWARD);
     for (int i = 0; i < down_edges.size(); i++) {
         auto edge = down_edges[i];
         if (!graph_subset[edge.from]) {
@@ -94,7 +94,7 @@ std::vector<CHEdge> preprocessRangeRPHAST(ICHGraph* g, std::priority_queue<pq_it
 }
 
 // RPHAST preprocessing (including updates on dummy edges)
-std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queue)
+std::vector<Shortcut> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queue)
 {
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
@@ -119,14 +119,15 @@ std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queu
         });
     }
     // selecting subset of downward edges for linear sweep
-    std::vector<CHEdge4> down_edges_subset;
-    const std::vector<CHEdge4>& down_edges = g->getDownEdges4(Direction::FORWARD);
+    std::vector<Shortcut> down_edges_subset;
+    const std::vector<Shortcut>& down_edges = g->getDownEdges(Direction::FORWARD);
     int curr_id = 0;
     int curr_count = 0;
     down_edges_subset.push_back(down_edges[0]);
     for (int i = 0; i < down_edges.size(); i++) {
         auto edge = down_edges[i];
-        if (edge.is_dummy) {
+        bool is_dummy = edge.payload.get<bool>(2);
+        if (is_dummy) {
             if (curr_count == 0) {
                 down_edges_subset[curr_id] = edge;
                 curr_count = 0;
@@ -150,7 +151,7 @@ std::vector<CHEdge4> preprocessGSRPHAST(CHGraph2* g, std::queue<int>&& node_queu
 }
 
 // Range-RPHAST preprocessing (including updates on dummy edges)
-std::vector<CHEdge4> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq_item>&& node_queue, int max_range)
+std::vector<Shortcut> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq_item>&& node_queue, int max_range)
 {
     std::vector<bool> graph_subset(g->nodeCount());
     for (int i = 0; i < g->nodeCount(); i++) {
@@ -180,14 +181,15 @@ std::vector<CHEdge4> preprocessRangeGSRPHAST(CHGraph2* g, std::priority_queue<pq
         });
     }
     // selecting subset of downward edges for linear sweep
-    std::vector<CHEdge4> down_edges_subset;
-    const std::vector<CHEdge4>& down_edges = g->getDownEdges4(Direction::FORWARD);
+    std::vector<Shortcut> down_edges_subset;
+    const std::vector<Shortcut>& down_edges = g->getDownEdges(Direction::FORWARD);
     int curr_id = 0;
     int curr_count = 0;
     down_edges_subset.push_back(down_edges[0]);
     for (int i = 0; i < down_edges.size(); i++) {
         auto edge = down_edges[i];
-        if (edge.is_dummy) {
+        bool is_dummy = edge.payload.get<bool>(2);
+        if (is_dummy) {
             if (curr_count == 0) {
                 down_edges_subset[curr_id] = edge;
                 curr_count = 0;

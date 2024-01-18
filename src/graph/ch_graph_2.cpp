@@ -6,7 +6,7 @@
 //*******************************************
 
 CHGraph2::CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                   std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index)
+                   std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
     : base(std::move(base)),
       weights(std::move(weights)),
       index(std::move(index)),
@@ -181,12 +181,12 @@ Shortcut CHGraph2::getShortcut(int shortcut)
 {
     return this->ch->getShortcut(shortcut);
 }
-const std::vector<CHEdge4>& CHGraph2::getDownEdges4(Direction dir)
+const std::vector<Shortcut>& CHGraph2::getDownEdges(Direction dir)
 {
     if (dir == Direction::FORWARD) {
-        return this->ch_index->fwd_down_edges;
+        return this->ch_index->get_fwd_index();
     } else {
-        return this->ch_index->bwd_down_edges;
+        return this->ch_index->get_bwd_index();
     }
 }
 short CHGraph2::getNodeTile(int node)

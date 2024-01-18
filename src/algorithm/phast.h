@@ -42,7 +42,7 @@ void calcPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags)
         });
     }
 
-    const std::vector<CHEdge>& down_edges = g->getDownEdges(Direction::FORWARD);
+    const std::vector<Shortcut>& down_edges = g->getDownEdges(Direction::FORWARD);
     int length = down_edges.size();
     for (int i = 0; i < length; i++) {
         auto edge = down_edges[i];

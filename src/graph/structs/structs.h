@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <stdexcept>
 #include <tuple>
 
 #include "./enums.h"
@@ -22,26 +23,6 @@ struct Node
     Coord location;
 };
 
-struct Shortcut
-{
-    int from;
-    int to;
-    int weight;
-    std::array<char, 4> payload;
-
-    template <class T>
-    void set(T value, int pos)
-    {
-        *(static_cast<T*>(this->payload[pos])) = value;
-    }
-
-    template <class T>
-    T get(int pos)
-    {
-        return *(static_cast<T*>(this->payload[pos]));
-    }
-};
-
 struct EdgeRef
 {
     int edge_id;
@@ -55,27 +36,65 @@ struct EdgeRef
     bool isCHShortcut() { return this->type == 100; }
 };
 
-struct CHEdge
+template <int size>
+struct Data
 {
-    int from;
-    int to;
-    int weight;
-    short count;
-    bool skip;
+    char data[size];
+
+    Data() : data{0} {}
+
+    template <class T>
+    void set(int pos, T value)
+    {
+#ifndef NDEBUG
+        if (pos + sizeof(T) >= size) {
+            throw std::invalid_argument("out of bounds");
+        }
+#endif
+        *(static_cast<T*>(static_cast<void*>(&this->data[pos]))) = value;
+    }
+
+    template <class T>
+    T get(int pos) const
+    {
+#ifndef NDEBUG
+        if (pos + sizeof(T) >= size) {
+            throw std::invalid_argument("out of bounds");
+        }
+#endif
+        return *(static_cast<const T*>(static_cast<const void*>(&this->data[pos])));
+    }
 };
 
-struct CHEdge4
+struct Shortcut
 {
     int from;
     int to;
     int weight;
-    short to_tile;
-    bool is_dummy;
+    Data<4> payload;
 };
 
-struct TiledSHEdge
-{
-    int from;
-    int to;
-    int weight;
-};
+// struct CHEdge
+// {
+//     int from;
+//     int to;
+//     int weight;
+//     short count;
+//     bool skip;
+// };
+
+// struct CHEdge4
+// {
+//     int from;
+//     int to;
+//     int weight;
+//     short to_tile;
+//     bool is_dummy;
+// };
+
+// struct TiledSHEdge
+// {
+//     int from;
+//     int to;
+//     int weight;
+// };

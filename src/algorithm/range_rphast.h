@@ -9,7 +9,7 @@
 #include "./util.h"
 
 // RPHAST with simple range restriction
-void calcRangeRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<CHEdge>& down_edges_subset)
+void calcRangeRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<Shortcut>& down_edges_subset)
 {
     auto& start_flag = flags[start];
     start_flag.dist = 0;

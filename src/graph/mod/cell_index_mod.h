@@ -13,26 +13,28 @@ static std::shared_ptr<_CellIndex> _reorder_nodes(const _CellIndex& index, const
     std::unordered_map<short, std::vector<Shortcut>> new_fwd_index;
     for (auto [tile, shortcuts] : index.fwd_index_edges) {
         std::vector<Shortcut> new_shortcuts(shortcuts.size());
-        for (auto shc : shortcuts) {
-            new_shortcuts.push_back({
+        for (int i = 0; i < shortcuts.size(); i++) {
+            auto& shc = shortcuts[i];
+            new_shortcuts[i] = {
                 .from = mapping[shc.from],
                 .to = mapping[shc.to],
                 .weight = shc.weight,
                 .payload = shc.payload,
-            });
+            };
         }
         new_fwd_index[tile] = new_shortcuts;
     }
     std::unordered_map<short, std::vector<Shortcut>> new_bwd_index;
     for (auto [tile, shortcuts] : index.bwd_index_edges) {
         std::vector<Shortcut> new_shortcuts(shortcuts.size());
-        for (auto shc : shortcuts) {
-            new_shortcuts.push_back({
+        for (int i = 0; i < shortcuts.size(); i++) {
+            auto& shc = shortcuts[i];
+            new_shortcuts[i] = {
                 .from = mapping[shc.from],
                 .to = mapping[shc.to],
                 .weight = shc.weight,
                 .payload = shc.payload,
-            });
+            };
         }
         new_bwd_index[tile] = new_shortcuts;
     }

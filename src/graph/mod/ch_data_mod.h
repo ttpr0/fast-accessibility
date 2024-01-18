@@ -19,12 +19,12 @@ static std::shared_ptr<CHData> _reorder_nodes(const CHData& ch, const std::vecto
     std::vector<Shortcut> new_shortcuts(ch.shortcutCount());
     for (int i = 0; i < ch.shortcutCount(); i++) {
         auto shc = ch.getShortcut(i);
-        new_shortcuts.push_back({
+        new_shortcuts[i] = {
             .from = mapping[shc.from],
             .to = mapping[shc.to],
             .weight = shc.weight,
             .payload = shc.payload,
-        });
+        };
     }
 
     auto new_topology = _reorder_nodes(ch.topology, mapping);

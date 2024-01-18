@@ -52,6 +52,11 @@ void bind_graph(nanobind::module_& m)
     road_type.value("ROAD", RoadType::ROAD);
     road_type.value("TRACK", RoadType::TRACK);
 
+    auto direction = py::enum_<Direction>(m, "Direction", "Incoming or outgoing edges.");
+    direction.value("FORWARD", Direction::FORWARD);
+    direction.value("BACKWARD", Direction::BACKWARD);
+    direction.export_values();
+
     auto edge = py::class_<Edge>(m, "Edge");
     edge.def(py::init<>());
     edge.def("__init__", [](Edge& e, int nodeA, int nodeB, RoadType typ, float length, int maxspeed) {
@@ -84,7 +89,7 @@ void bind_graph(nanobind::module_& m)
     shortcut.def_rw("weight", &Shortcut::weight);
 
     //*******************************************
-    // graph classes
+    // graph base components
     //*******************************************
 
     auto graph_base = py::class_<GraphBase>(m, "GraphBase");
@@ -93,6 +98,15 @@ void bind_graph(nanobind::module_& m)
     graph_base.def("node_count", &GraphBase::nodeCount);
     graph_base.def("get_edge", &GraphBase::getEdge);
     graph_base.def("edge_count", &GraphBase::edgeCount);
+    graph_base.def("get_adjacent_edges", [](GraphBase& base, int node, Direction dir) {
+        py::list l;
+        auto accessor = base.adjacency.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int edge_id = accessor.getEdgeID();
+            l.append(py::int_(edge_id));
+        }
+        return l;
+    });
 
     auto weighting = py::class_<Weighting>(m, "Weighting");
     weighting.def("get_edge_weight", &Weighting::get_edge_weight);
@@ -107,22 +121,56 @@ void bind_graph(nanobind::module_& m)
     auto i_graph_index = py::class_<IGraphIndex>(m, "IGraphIndex");
     i_graph_index.def("get_closest_node", &IGraphIndex::getClosestNode);
 
-    auto partition = py::class_<Partition>(m, "Partition");
-    partition.def("get_node_tile", &Partition::get_node_tile);
-
     auto id_mapping = py::class_<_IDMapping>(m, "IDMapping");
     id_mapping.def("get_source", &_IDMapping::get_source);
     id_mapping.def("get_target", &_IDMapping::get_target);
 
+    //*******************************************
+    // graph speed-up components
+    //*******************************************
+
+    auto partition = py::class_<Partition>(m, "Partition");
+    partition.def("get_node_tile", &Partition::get_node_tile);
+
     auto ch_data = py::class_<CHData>(m, "CHData");
+    ch_data.def("get_shortcut", &CHData::getShortcut);
+    ch_data.def("shortcut_count", &CHData::shortcutCount);
+    ch_data.def("get_node_level", &CHData::getNodeLevel);
+    ch_data.def("get_adjacent_shortcuts", [](CHData& ch, int node, Direction dir) {
+        py::list l;
+        auto accessor = ch.topology.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int shc_id = accessor.getEdgeID();
+            l.append(py::int_(shc_id));
+        }
+        return l;
+    });
 
     auto ch_index = py::class_<_CHIndex>(m, "CHIndex");
 
-    auto ch_index_2 = py::class_<_CHIndex2>(m, "CHIndex2");
-
     auto tiled_data = py::class_<TiledData>(m, "TiledData");
+    tiled_data.def("get_shortcut", &TiledData::getShortcut);
+    tiled_data.def("shortcut_count", &TiledData::shortcutCount);
+    tiled_data.def("get_edge_type", [](TiledData& tiled, int edge) { return (int)tiled.getEdgeType(edge); });
+    tiled_data.def("get_adjacent_shortcuts", [](TiledData& tiled, int node, Direction dir) {
+        py::list l;
+        auto accessor = tiled.topology.getNeighbours(node, dir);
+        while (accessor.next()) {
+            int shc_id = accessor.getEdgeID();
+            std::array<char, 8> data = accessor.getData();
+            if (data[0] < 100) {
+                continue;
+            }
+            l.append(py::int_(shc_id));
+        }
+        return l;
+    });
 
     auto cell_index = py::class_<_CellIndex>(m, "CellIndex");
+
+    //*******************************************
+    // graph classes
+    //*******************************************
 
     auto i_graph = py::class_<IGraph>(m, "IGraph");
     auto i_ch_graph = py::class_<ICHGraph, IGraph>(m, "ICHGraph");

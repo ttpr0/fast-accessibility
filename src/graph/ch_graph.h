@@ -48,7 +48,7 @@ public:
     short getNodeLevel(int node);
     int shortcutCount();
     Shortcut getShortcut(int shortcut);
-    const std::vector<CHEdge>& getDownEdges(Direction dir);
+    const std::vector<Shortcut>& getDownEdges(Direction dir);
 };
 
 class CHGraph2 : public IGraph
@@ -63,10 +63,10 @@ public:
     std::shared_ptr<_IDMapping> id_mapping;
     std::shared_ptr<CHData> ch;
     // ch-index
-    std::shared_ptr<_CHIndex2> ch_index;
+    std::shared_ptr<_CHIndex> ch_index;
 
     CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-             std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index);
+             std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
 
     int nodeCount();
     int edgeCount();
@@ -83,7 +83,7 @@ public:
     short getNodeLevel(int node);
     int shortcutCount();
     Shortcut getShortcut(int shortcut);
-    const std::vector<CHEdge4>& getDownEdges4(Direction dir);
+    const std::vector<Shortcut>& getDownEdges(Direction dir);
     short getNodeTile(int node);
     int tileCount();
 };
@@ -95,4 +95,4 @@ public:
 CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<_IDMapping> id_mapping,
                        std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
 CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                          std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex2> ch_index);
+                          std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);

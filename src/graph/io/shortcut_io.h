@@ -20,7 +20,7 @@ std::vector<Shortcut> load_shortcuts(const std::string& file)
         int from = reader.read<int>();
         int to = reader.read<int>();
         int weight = reader.read<int>();
-        auto payload = reader.read<std::array<char, 4>>();
+        auto payload = reader.read<Data<4>>();
 
         shortcuts[i] = Shortcut{from, to, weight, payload};
     }
@@ -41,7 +41,7 @@ void store_shortcuts(std::vector<Shortcut>& shortcuts, const std::string& file)
         writer.write<int>(shc.from);
         writer.write<int>(shc.to);
         writer.write<int>(shc.weight);
-        writer.write<std::array<char, 4>>(shc.payload);
+        writer.write<Data<4>>(shc.payload);
     }
 
     writeFile(file, writer.bytes());

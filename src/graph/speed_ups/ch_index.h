@@ -8,13 +8,9 @@
 class _CHIndex
 {
 public:
-    std::vector<CHEdge> fwd_down_edges;
-    std::vector<CHEdge> bwd_down_edges;
-};
+    std::vector<Shortcut> fwd_down_edges;
+    std::vector<Shortcut> bwd_down_edges;
 
-class _CHIndex2
-{
-public:
-    std::vector<CHEdge4> fwd_down_edges;
-    std::vector<CHEdge4> bwd_down_edges;
+    std::vector<Shortcut>& get_fwd_index() { return this->fwd_down_edges; }
+    std::vector<Shortcut>& get_bwd_index() { return this->bwd_down_edges; }
 };

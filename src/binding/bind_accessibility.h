@@ -28,10 +28,13 @@ void bind_accessibility(nanobind::module_& m)
     //*******************************************
 
     // 2sfca functions
-    m.def("calc_2sfca", &_calc2SFCA<RangeDijkstra>);
+    m.def("calc_2sfca", &calc2SFCA<RangeDijkstra>);
     m.def("calc_2sfca", &calc2SFCA<RangePHAST>);
     m.def("calc_2sfca", &calc2SFCA<RangeRPHAST>);
     m.def("calc_2sfca", &calc2SFCA<RangeRPHAST2>);
+    m.def("calc_2sfca", &calc2SFCA<RangePHASTGS>);
+    m.def("calc_2sfca", &calc2SFCA<RangeRPHASTGS>);
+    m.def("calc_2sfca", &calc2SFCA<GRASP>);
 
     // range query functions
     m.def("calc_range_query", &calcRangeQuery<RangeDijkstra>);

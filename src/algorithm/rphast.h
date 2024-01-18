@@ -9,7 +9,7 @@
 #include "./util.h"
 
 // simple RPHAST
-void calcRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, std::vector<CHEdge>& down_edges_subset)
+void calcRPHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, std::vector<Shortcut>& down_edges_subset)
 {
     auto& start_flag = flags[start];
     start_flag.dist = 0;

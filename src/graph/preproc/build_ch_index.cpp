@@ -5,8 +5,8 @@
 
 std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHData& ch, _IDMapping& id_mapping)
 {
-    std::vector<CHEdge> fwd_down_edges;
-    std::vector<CHEdge> bwd_down_edges;
+    std::vector<Shortcut> fwd_down_edges;
+    std::vector<Shortcut> bwd_down_edges;
 
     CHGraphExplorer explorer = {base, weight, ch, id_mapping};
 
@@ -16,14 +16,17 @@ std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHD
         explorer.forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &fwd_down_edges, &count, &this_id](EdgeRef ref) {
             int other_id = ref.other_id;
             int weight = explorer.getEdgeWeight(ref);
-            fwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
+            Shortcut shc = {this_id, other_id, weight};
+            shc.payload.set(0, (short)1);
+            shc.payload.set(2, false);
+            fwd_down_edges.push_back(shc);
             count += 1;
         });
         if (count > 16) {
             for (int j = fwd_down_edges.size() - count; j < fwd_down_edges.size(); j++) {
                 auto ch_edge = fwd_down_edges[j];
-                ch_edge.count = count;
-                ch_edge.skip = true;
+                ch_edge.payload.set(0, (short)count);
+                ch_edge.payload.set(2, true);
                 fwd_down_edges[j] = ch_edge;
             }
         }
@@ -32,20 +35,23 @@ std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHD
         explorer.forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS, [&explorer, &bwd_down_edges, &count, &this_id](EdgeRef ref) {
             int other_id = ref.other_id;
             int weight = explorer.getEdgeWeight(ref);
-            bwd_down_edges.push_back(CHEdge{this_id, other_id, weight, 1, false});
+            Shortcut shc = {this_id, other_id, weight};
+            shc.payload.set(0, (short)1);
+            shc.payload.set(2, false);
+            bwd_down_edges.push_back(shc);
             count += 1;
         });
         if (count > 16) {
             for (int j = bwd_down_edges.size() - count; j < bwd_down_edges.size(); j++) {
                 auto ch_edge = bwd_down_edges[j];
-                ch_edge.count = count;
-                ch_edge.skip = true;
+                ch_edge.payload.set(0, (short)count);
+                ch_edge.payload.set(2, true);
                 bwd_down_edges[j] = ch_edge;
             }
         }
     }
 
-    auto sort_by_level = [&ch](const CHEdge& edge_a, const CHEdge& edge_b) {
+    auto sort_by_level = [&ch](const Shortcut& edge_a, const Shortcut& edge_b) {
         auto level_a = ch.getNodeLevel(edge_a.from);
         auto level_b = ch.getNodeLevel(edge_b.from);
         return level_a > level_b;
@@ -56,7 +62,7 @@ std::shared_ptr<_CHIndex> build_ch_index(GraphBase& base, Weighting& weight, CHD
     return std::make_shared<_CHIndex>(std::move(fwd_down_edges), std::move(bwd_down_edges));
 }
 
-std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, CHData& ch, Partition& partition, _IDMapping& id_mapping)
+std::shared_ptr<_CHIndex> build_ch_index_2(GraphBase& base, Weighting& weight, CHData& ch, Partition& partition, _IDMapping& id_mapping)
 {
     CHGraphExplorer explorer = {base, weight, ch, id_mapping};
     auto get_tile = [&partition, &ch, &id_mapping](int node) {
@@ -80,15 +86,18 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
     }
 
     // initialize down edges lists
-    std::vector<CHEdge4> fwd_down_edges;
-    std::vector<CHEdge4> bwd_down_edges;
+    std::vector<Shortcut> fwd_down_edges;
+    std::vector<Shortcut> bwd_down_edges;
     int border_count = 0;
 
     // add overlay down-edges
-    fwd_down_edges.push_back(CHEdge4{0, 0, 0, 0, true});
-    bwd_down_edges.push_back(CHEdge4{0, 0, 0, 0, true});
-    std::unordered_map<short, std::vector<CHEdge4>> fwd_other_edges;
-    std::unordered_map<short, std::vector<CHEdge4>> bwd_other_edges;
+    Shortcut dummy = {0, 0, 0};
+    dummy.payload.set(0, (short)0);
+    dummy.payload.set(2, true);
+    fwd_down_edges.push_back(dummy);
+    bwd_down_edges.push_back(dummy);
+    std::unordered_map<short, std::vector<Shortcut>> fwd_other_edges;
+    std::unordered_map<short, std::vector<Shortcut>> bwd_other_edges;
     for (int i = 0; i < base.nodeCount(); i++) {
         int this_id = i;
         short this_tile = get_tile(this_id);
@@ -99,9 +108,11 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
         explorer.forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS, [&](EdgeRef ref) {
             int other_id = ref.other_id;
             short other_tile = get_tile(other_id);
-            CHEdge4 edge = {this_id, other_id, explorer.getEdgeWeight(ref), other_tile, false};
+            Shortcut edge = {this_id, other_id, explorer.getEdgeWeight(ref)};
+            edge.payload.set(0, other_tile);
+            edge.payload.set(2, false);
             if (!is_border[other_id]) {
-                std::vector<CHEdge4> edges;
+                std::vector<Shortcut> edges;
                 if (fwd_other_edges.contains(this_tile)) {
                     edges = fwd_other_edges[this_tile];
                 }
@@ -114,9 +125,11 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
         explorer.forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS, [&](EdgeRef ref) {
             int other_id = ref.other_id;
             short other_tile = get_tile(other_id);
-            CHEdge4 edge = {this_id, other_id, explorer.getEdgeWeight(ref), other_tile, false};
+            Shortcut edge = {this_id, other_id, explorer.getEdgeWeight(ref)};
+            edge.payload.set(0, other_tile);
+            edge.payload.set(2, false);
             if (!is_border[other_id]) {
-                std::vector<CHEdge4> edges;
+                std::vector<Shortcut> edges;
                 if (bwd_other_edges.contains(this_tile)) {
                     edges = bwd_other_edges[this_tile];
                 }
@@ -133,8 +146,11 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
         int this_id = i;
         short this_tile = get_tile(this_id);
         if (this_tile != curr_tile) {
-            fwd_down_edges.push_back(CHEdge4{0, 0, 0, this_tile, true});
-            bwd_down_edges.push_back(CHEdge4{0, 0, 0, this_tile, true});
+            Shortcut dummy = {0, 0, 0};
+            dummy.payload.set(0, this_tile);
+            dummy.payload.set(2, true);
+            fwd_down_edges.push_back(dummy);
+            bwd_down_edges.push_back(dummy);
             curr_tile = this_tile;
             if (fwd_other_edges.contains(this_tile)) {
                 auto& edges = fwd_other_edges[this_tile];
@@ -151,11 +167,13 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
         }
         explorer.forAdjacentEdges(this_id, Direction::FORWARD, Adjacency::ADJACENT_DOWNWARDS, [&](EdgeRef ref) {
             int other_id = ref.other_id;
-            fwd_down_edges.push_back(CHEdge4{this_id, other_id, explorer.getEdgeWeight(ref), 0, false});
+            Shortcut shc = {this_id, other_id, explorer.getEdgeWeight(ref)};
+            fwd_down_edges.push_back(shc);
         });
         explorer.forAdjacentEdges(this_id, Direction::BACKWARD, Adjacency::ADJACENT_DOWNWARDS, [&](EdgeRef ref) {
             int other_id = ref.other_id;
-            bwd_down_edges.push_back(CHEdge4{this_id, other_id, explorer.getEdgeWeight(ref), 0, false});
+            Shortcut shc = {this_id, other_id, explorer.getEdgeWeight(ref)};
+            bwd_down_edges.push_back(shc);
         });
     }
 
@@ -163,8 +181,9 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
     int fwd_id = 0;
     int fwd_count = 0;
     for (int i = 0; i < fwd_down_edges.size(); i++) {
-        CHEdge4 edge = fwd_down_edges[i];
-        if (edge.is_dummy) {
+        Shortcut edge = fwd_down_edges[i];
+        bool is_dummy = edge.payload.get<bool>(2);
+        if (is_dummy) {
             // set count in previous dummy
             fwd_down_edges[fwd_id].to = fwd_count;
             // reset count
@@ -178,8 +197,9 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
     int bwd_id = 0;
     int bwd_count = 0;
     for (int i = 0; i < bwd_down_edges.size(); i++) {
-        CHEdge4 edge = bwd_down_edges[i];
-        if (edge.is_dummy) {
+        Shortcut edge = bwd_down_edges[i];
+        bool is_dummy = edge.payload.get<bool>(2);
+        if (is_dummy) {
             // set count in previous dummy
             bwd_down_edges[bwd_id].to = bwd_count;
             // reset count
@@ -192,5 +212,5 @@ std::shared_ptr<_CHIndex2> build_ch_index_2(GraphBase& base, Weighting& weight, 
     bwd_down_edges[bwd_id].to = bwd_count;
 
     // add to graph
-    return std::make_shared<_CHIndex2>(std::move(fwd_down_edges), std::move(bwd_down_edges));
+    return std::make_shared<_CHIndex>(std::move(fwd_down_edges), std::move(bwd_down_edges));
 }
