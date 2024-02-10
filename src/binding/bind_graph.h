@@ -5,21 +5,20 @@
 
 #include <nanobind/nanobind.h>
 
-#include "../graph/comps/graph_index.h"
+#include "../graph/base/graph_index.h"
 #include "../graph/graph.h"
 #include "../graph/io/cell_index_io.h"
 #include "../graph/io/ch_data_io.h"
 #include "../graph/io/graph_base_io.h"
+#include "../graph/io/id_mapping_io.h"
 #include "../graph/io/partition_io.h"
 #include "../graph/io/tiled_data_io.h"
 #include "../graph/io/weighting_io.h"
-#include "../graph/mod/cell_index_mod.h"
-#include "../graph/mod/ch_data_mod.h"
-#include "../graph/mod/ch_index_mod.h"
+#include "../graph/mod/ch_mod.h"
 #include "../graph/mod/graph_base_mod.h"
 #include "../graph/mod/id_mapping_mod.h"
+#include "../graph/mod/overlay_mod.h"
 #include "../graph/mod/partition_mod.h"
-#include "../graph/mod/tiled_data_mod.h"
 #include "../graph/mod/weighting_mod.h"
 #include "../graph/preproc/build_ch_index.h"
 #include "../graph/preproc/ch/ch.h"
@@ -28,6 +27,8 @@
 #include "../graph/preproc/remove_unconnected.h"
 #include "../graph/preproc/tiled/tiled.h"
 #include "../graph/structs/geom.h"
+#include "../graph/weights/tc_weighting.h"
+#include "../graph/weights/weighting.h"
 
 void bind_graph(nanobind::module_& m)
 {

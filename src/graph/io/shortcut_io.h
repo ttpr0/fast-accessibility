@@ -6,7 +6,7 @@
 #include "../structs/structs.h"
 #include "./util.h"
 
-std::vector<Shortcut> load_shortcuts(const std::string& file)
+static std::vector<Shortcut> load_shortcuts(const std::string& file)
 {
     auto arr = readAllFile(file);
     auto reader = BufferReader(arr);
@@ -28,7 +28,7 @@ std::vector<Shortcut> load_shortcuts(const std::string& file)
     return shortcuts;
 }
 
-void store_shortcuts(std::vector<Shortcut>& shortcuts, const std::string& file)
+static void store_shortcuts(const std::vector<Shortcut>& shortcuts, const std::string& file)
 {
     auto writer = BufferWriter();
 

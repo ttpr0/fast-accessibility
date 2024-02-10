@@ -1,11 +1,8 @@
-#pragma once
 
-#include <string>
 
-#include "../structs/adjacency.h"
-#include "./util.h"
+#include "./adjaceny_io.h"
 
-static AdjacencyArray load_adjacency_array(const std::string& file, bool typed, int node_count)
+AdjacencyArray load_adjacency_array(const std::string& file, bool typed, int node_count)
 {
     auto arr = readAllFile(file);
     auto reader = BufferReader(arr);
@@ -46,7 +43,7 @@ static AdjacencyArray load_adjacency_array(const std::string& file, bool typed, 
     return {node_entries, fwd_edges, bwd_edges};
 }
 
-static void store_adjacency_array(const AdjacencyArray& adj, bool typed, const std::string& file)
+void store_adjacency_array(const AdjacencyArray& adj, bool typed, const std::string& file)
 {
     auto writer = BufferWriter();
 

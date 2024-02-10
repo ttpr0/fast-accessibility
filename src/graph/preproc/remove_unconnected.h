@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "../../algorithm/connected_components.h"
+#include "../base/graph_base.h"
 #include "../base_graph.h"
-#include "../comps/graph_base.h"
-#include "../comps/weighting.h"
 #include "../mod/graph_base_mod.h"
+#include "../weights/weighting.h"
 
 std::shared_ptr<GraphBase> remove_unconnected(std::shared_ptr<GraphBase> base)
 {

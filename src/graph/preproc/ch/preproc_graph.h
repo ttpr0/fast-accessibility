@@ -6,8 +6,8 @@
 #include <tuple>
 #include <vector>
 
+#include "../../base/graph_base.h"
 #include "../../base_graph.h"
-#include "../../comps/graph_base.h"
 #include "../../graph.h"
 #include "../../speed_ups/ch_data.h"
 #include "../../speed_ups/ch_index.h"

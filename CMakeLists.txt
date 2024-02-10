@@ -27,8 +27,24 @@ add_executable(${exe_name}
     src/graph/explorer/base_explorer.cpp
     src/graph/explorer/tiled_explorer.cpp
     src/graph/explorer/ch_explorer.cpp
-    src/graph/comps/graph_index.cpp
-    src/graph/comps/graph_base.cpp
+    src/graph/base/graph_index.cpp
+    src/graph/base/graph_base.cpp
+    src/graph/weights/weighting.cpp
+    src/graph/weights/tc_weighting.cpp
+    src/graph/io/cell_index_io.cpp
+    src/graph/io/ch_data_io.cpp
+    src/graph/io/graph_base_io.cpp
+    src/graph/io/id_mapping_io.cpp
+    src/graph/io/partition_io.cpp
+    src/graph/io/tiled_data_io.cpp
+    src/graph/io/weighting_io.cpp
+    src/graph/mod/adjacency_mod.cpp
+    src/graph/mod/ch_mod.cpp
+    src/graph/mod/graph_base_mod.cpp
+    src/graph/mod/id_mapping_mod.cpp
+    src/graph/mod/overlay_mod.cpp
+    src/graph/mod/partition_mod.cpp
+    src/graph/mod/weighting_mod.cpp
     src/util/kd_tree/kd_tree.cpp
 )
 
@@ -57,8 +73,24 @@ add_library(${lib_name} SHARED
     src/graph/explorer/base_explorer.cpp
     src/graph/explorer/tiled_explorer.cpp
     src/graph/explorer/ch_explorer.cpp
-    src/graph/comps/graph_index.cpp
-    src/graph/comps/graph_base.cpp
+    src/graph/base/graph_index.cpp
+    src/graph/base/graph_base.cpp
+    src/graph/weights/weighting.cpp
+    src/graph/weights/tc_weighting.cpp
+    src/graph/io/cell_index_io.cpp
+    src/graph/io/ch_data_io.cpp
+    src/graph/io/graph_base_io.cpp
+    src/graph/io/id_mapping_io.cpp
+    src/graph/io/partition_io.cpp
+    src/graph/io/tiled_data_io.cpp
+    src/graph/io/weighting_io.cpp
+    src/graph/mod/adjacency_mod.cpp
+    src/graph/mod/ch_mod.cpp
+    src/graph/mod/graph_base_mod.cpp
+    src/graph/mod/id_mapping_mod.cpp
+    src/graph/mod/overlay_mod.cpp
+    src/graph/mod/partition_mod.cpp
+    src/graph/mod/weighting_mod.cpp
     src/util/kd_tree/kd_tree.cpp
 )
 

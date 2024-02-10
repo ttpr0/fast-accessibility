@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-#include "./comps/graph_base.h"
-#include "./comps/graph_index.h"
-#include "./comps/weighting.h"
+#include "./base/graph_base.h"
+#include "./base/graph_index.h"
 #include "./graph.h"
 #include "./structs/adjacency.h"
+#include "./weights/weighting.h"
 
 //*******************************************
 // base-graph

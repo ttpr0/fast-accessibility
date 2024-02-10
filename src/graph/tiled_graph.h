@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include "./base/graph_base.h"
+#include "./base/graph_index.h"
+#include "./base/id_mapping.h"
 #include "./base_graph.h"
-#include "./comps/graph_base.h"
-#include "./comps/graph_index.h"
-#include "./comps/id_mapping.h"
 #include "./graph.h"
 #include "./speed_ups/cell_index.h"
 #include "./speed_ups/ch_data.h"

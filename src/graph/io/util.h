@@ -16,7 +16,7 @@
 // util methods
 //*******************************************
 
-std::vector<char> readAllFile(std::string filename)
+static std::vector<char> readAllFile(std::string filename)
 {
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
@@ -37,7 +37,7 @@ std::vector<char> readAllFile(std::string filename)
     return arr;
 }
 
-std::vector<char> _readAllFile(std::string filename)
+static std::vector<char> _readAllFile(std::string filename)
 {
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
@@ -58,7 +58,7 @@ std::vector<char> _readAllFile(std::string filename)
     return arr;
 }
 
-void writeFile(const std::string& filename, std::vector<char>& data)
+static void writeFile(const std::string& filename, const std::vector<char>& data)
 {
     auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
     myfile.write(&data[0], data.size());
@@ -68,17 +68,17 @@ void writeFile(const std::string& filename, std::vector<char>& data)
 class BufferReader
 {
 private:
-    std::vector<char>& buffer;
+    const std::vector<char>& buffer;
     size_t offset;
 
 public:
-    BufferReader(std::vector<char>& buffer) : buffer(buffer), offset(0) {}
+    BufferReader(const std::vector<char>& buffer) : buffer(buffer), offset(0) {}
 
     template <typename T>
     T read()
     {
         int size = sizeof(T);
-        T item = *(reinterpret_cast<T*>(&buffer[this->offset]));
+        T item = *(reinterpret_cast<const T*>(&buffer[this->offset]));
         this->offset += size;
         return item;
     }
@@ -87,10 +87,10 @@ public:
     std::vector<T> read_vector()
     {
         int size = sizeof(T);
-        int count = *(reinterpret_cast<int*>(&this->buffer[this->offset]));
+        int count = *(reinterpret_cast<const int*>(&this->buffer[this->offset]));
         std::vector<T> arr(count);
         for (int i = 0; i < count; i++) {
-            T item = *(reinterpret_cast<T*>(&buffer[this->offset + 4 + i * size]));
+            T item = *(reinterpret_cast<const T*>(&buffer[this->offset + 4 + i * size]));
             arr[i] = item;
         }
         this->offset += 4 + count * size;
@@ -118,7 +118,7 @@ public:
     }
 
     template <typename T>
-    void write_vector(std::span<T> arr)
+    void write_vector(std::span<const T> arr)
     {
         int size = sizeof(T);
         int count = arr.size();
@@ -142,7 +142,7 @@ std::vector<T> read_vector_from_file(const std::string& file)
 }
 
 template <typename T>
-void write_vector_to_file(std::vector<T>& vec, const std::string& file)
+void write_vector_to_file(const std::vector<T>& vec, const std::string& file)
 {
     auto writer = BufferWriter();
 

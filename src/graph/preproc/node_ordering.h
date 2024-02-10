@@ -6,14 +6,14 @@
 #include <stack>
 #include <vector>
 
+#include "../base/graph_base.h"
+#include "../base/graph_index.h"
+#include "../base/id_mapping.h"
 #include "../base_graph.h"
-#include "../comps/graph_base.h"
-#include "../comps/graph_index.h"
-#include "../comps/id_mapping.h"
-#include "../comps/weighting.h"
 #include "../graph.h"
 #include "../speed_ups/ch_data.h"
 #include "../speed_ups/partition.h"
+#include "../weights/weighting.h"
 #include "./tiled/util.h"
 
 // builds node_mapping for _reorder_nodes functions
@@ -40,7 +40,7 @@ public:
     //
     // order_values contains value for node with id i (value = order_values[i])
     // if from_source: node_mapping is build for target nodes (node-ids of e.g. ch-data) but order_values are given for ordering of base thus id-mapping is used for conversion
-    // if !from_source: reversed is internal mapping is build for graph-base and order-values are given for e.g. ch-data
+    // if !from_source: internal mapping is build for graph-base and order-values are given for e.g. ch-data
     void updateOrdering(std::vector<int>& order_values, _IDMapping& id_mapping, bool from_source);
 
     std::vector<int> buildMapping() const;

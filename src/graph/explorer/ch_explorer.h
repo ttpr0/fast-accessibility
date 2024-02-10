@@ -3,9 +3,9 @@
 #include <functional>
 #include <vector>
 
-#include "../comps/graph_base.h"
-#include "../comps/id_mapping.h"
-#include "../comps/weighting.h"
+#include "../base/graph_base.h"
+#include "../base/id_mapping.h"
+#include "../weights/weighting.h"
 #include "../speed_ups/ch_data.h"
 #include "../speed_ups/partition.h"
 #include "../structs/structs.h"

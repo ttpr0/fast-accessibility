@@ -1,7 +1,7 @@
 
 #include <array>
 
-#include "./comps/graph_index.h"
+#include "./base/graph_index.h"
 #include "./tiled_graph.h"
 
 //*******************************************

@@ -3,12 +3,12 @@
 #include <functional>
 #include <vector>
 
-#include "../comps/graph_base.h"
-#include "../comps/id_mapping.h"
-#include "../comps/weighting.h"
+#include "../base/graph_base.h"
+#include "../base/id_mapping.h"
 #include "../speed_ups/partition.h"
 #include "../speed_ups/tiled_data.h"
 #include "../structs/structs.h"
+#include "../weights/weighting.h"
 
 //*******************************************
 // tiled-graph explorer

@@ -2,7 +2,7 @@
 #include <math.h>
 
 #include "./base_graph.h"
-#include "./comps/graph_index.h"
+#include "./base/graph_index.h"
 
 //*******************************************
 // base-graph

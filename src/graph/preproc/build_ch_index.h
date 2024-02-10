@@ -4,13 +4,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../comps/graph_base.h"
-#include "../comps/id_mapping.h"
-#include "../comps/weighting.h"
+#include "../base/graph_base.h"
+#include "../base/id_mapping.h"
 #include "../speed_ups/ch_data.h"
 #include "../speed_ups/ch_index.h"
 #include "../speed_ups/partition.h"
 #include "../structs/structs.h"
+#include "../weights/weighting.h"
 
 // CHData should be reordered by level.
 // Node-Ordering of GraphBase and Weighting are source CHData is target of id_mapping.

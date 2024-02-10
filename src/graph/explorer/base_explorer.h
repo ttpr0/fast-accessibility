@@ -3,8 +3,8 @@
 #include <functional>
 #include <vector>
 
-#include "../comps/graph_base.h"
-#include "../comps/weighting.h"
+#include "../base/graph_base.h"
+#include "../weights/weighting.h"
 #include "../structs/structs.h"
 
 //*******************************************
