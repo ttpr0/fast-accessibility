@@ -7,8 +7,10 @@
 #include <vector>
 
 #include "../graph/graph.h"
+#include "../graph/util/map_coords.h"
 #include "../solver/one_to_many/phast.h"
 #include "../solver/one_to_many/rphast.h"
+#include "./2sfca.h"
 #include "./distance_decay/linear_decay.h"
 
 // 2sfca using range-PHAST
@@ -16,7 +18,10 @@ std::vector<float> calcRangePHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poin
                                        int max_range)
 {
     auto decay = LinearDecay(max_range);
-    return calc2SFCA<RangePHAST>(g, dem_points, dem_weights, sup_points, sup_weights, decay);
+    RangePHAST solver = {g};
+    auto dem_nodes = map_to_closest(dem_points, *g);
+    auto sup_nodes = map_to_closest(sup_points, *g);
+    return calc2SFCA<RangePHAST>(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay);
 }
 
 // rphast using queue
@@ -24,7 +29,10 @@ std::vector<float> calcRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_points, 
                                    int max_range)
 {
     auto decay = LinearDecay(max_range);
-    return calc2SFCA<RPHAST>(g, dem_points, dem_weights, sup_points, sup_weights, decay);
+    RPHAST solver = {g};
+    auto dem_nodes = map_to_closest(dem_points, *g);
+    auto sup_nodes = map_to_closest(sup_points, *g);
+    return calc2SFCA<RPHAST>(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay);
 }
 
 // range rphast using queue
@@ -32,7 +40,10 @@ std::vector<float> calcRangeRPHAST2SFCA(ICHGraph* g, std::vector<Coord>& dem_poi
                                         int max_range)
 {
     auto decay = LinearDecay(max_range);
-    return calc2SFCA<RangeRPHAST>(g, dem_points, dem_weights, sup_points, sup_weights, decay);
+    RangeRPHAST solver = {g};
+    auto dem_nodes = map_to_closest(dem_points, *g);
+    auto sup_nodes = map_to_closest(sup_points, *g);
+    return calc2SFCA<RangeRPHAST>(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay);
 }
 
 // range rphast using priority queue
@@ -40,7 +51,10 @@ std::vector<float> calcRangeRPHAST2SFCA2(ICHGraph* g, std::vector<Coord>& dem_po
                                          int max_range)
 {
     auto decay = LinearDecay(max_range);
-    return calc2SFCA<RangeRPHAST2>(g, dem_points, dem_weights, sup_points, sup_weights, decay);
+    RangeRPHAST2 solver = {g};
+    auto dem_nodes = map_to_closest(dem_points, *g);
+    auto sup_nodes = map_to_closest(sup_points, *g);
+    return calc2SFCA<RangeRPHAST2>(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay);
 }
 
 // range-rphast+gs using queue
@@ -48,5 +62,8 @@ std::vector<float> calcGSRPHAST2SFCA(CHGraph2* g, std::vector<Coord>& dem_points
                                      int max_range)
 {
     auto decay = LinearDecay(max_range);
-    return calc2SFCA<RangeRPHASTGS>(g, dem_points, dem_weights, sup_points, sup_weights, decay);
+    RangeRPHASTGS solver = {g};
+    auto dem_nodes = map_to_closest(dem_points, *g);
+    auto sup_nodes = map_to_closest(sup_points, *g);
+    return calc2SFCA<RangeRPHASTGS>(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay);
 }
