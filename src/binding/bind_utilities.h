@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+#include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/bind_vector.h>
 #include <nanobind/stl/shared_ptr.h>
@@ -42,6 +43,8 @@ void bind_utilities(nanobind::module_& m)
 
     m.def("map_to_closest", static_cast<std::vector<int> (*)(const std::vector<Coord>&, IGraph&)>(&map_to_closest));
     m.def("map_to_closest", static_cast<int (*)(Coord, IGraph&)>(&map_to_closest));
+    m.def("map_to_closest", static_cast<Vector<int> (*)(VectorView<float>, VectorView<float>, IGraph&)>(&map_to_closest));
+    m.def("map_to_closest", static_cast<int (*)(float, float, IGraph&)>(&map_to_closest));
     m.def("map_to_closest", [](py::list& l, IGraph& graph) {
         std::vector<int> closest(l.size());
         for (int i = 0; i < l.size(); i++) {

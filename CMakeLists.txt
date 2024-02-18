@@ -11,6 +11,13 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 # set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 
 #***********************************
+# find dependencies
+#***********************************
+
+find_package(Eigen3 3.3 REQUIRED)
+find_package(OpenMP REQUIRED)
+
+#***********************************
 # benchmark executable
 #***********************************
 set(exe_name test)
@@ -53,10 +60,10 @@ target_include_directories(${exe_name} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(${exe_name} PRIVATE OpenMP::OpenMP_CXX)
-endif()
+target_link_libraries(${exe_name} PRIVATE 
+    OpenMP::OpenMP_CXX
+    Eigen3::Eigen   
+)
 
 #***********************************
 # library
@@ -99,9 +106,10 @@ target_include_directories(${lib_name} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
     $<INSTALL_INTERFACE:pyaccess/include>
 )
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(${lib_name} PRIVATE OpenMP::OpenMP_CXX)
-endif()
+target_link_libraries(${lib_name} PRIVATE 
+    OpenMP::OpenMP_CXX
+    Eigen3::Eigen   
+)
 
 #***********************************
 # binding for library
@@ -119,6 +127,7 @@ nanobind_add_module(${ext_name}
 add_dependencies(${ext_name} ${lib_name})
 target_link_libraries(${ext_name} PRIVATE
     ${lib_name}
+    Eigen3::Eigen
 )
 
 #***********************************

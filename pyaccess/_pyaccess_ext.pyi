@@ -1,5 +1,6 @@
 from typing import Any, Optional, overload, Sequence, Iterable, Iterator as iterator
 from enum import Enum
+import numpy.typing
 import pyaccess._pyaccess_ext
 
 BACKWARD: Direction
@@ -219,7 +220,7 @@ class CoordVector:
         """
         ...
     
-class Direction:
+class Direction(Enum):
     """
     <attribute '__doc__' of 'Direction' objects>
     """
@@ -996,11 +997,10 @@ class RangeRPHASTGS:
     def is_build(self) -> bool:
         ...
     
-class RoadType:
+class RoadType(Enum):
     """
     <attribute '__doc__' of 'RoadType' objects>
     """
-    
     LIVING_STREET: RoadType
     
     MOTORWAY: RoadType
@@ -1156,51 +1156,51 @@ def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
     ...
 
 @overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
-    """
-    ...
-
-@overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
-    """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
-    """
-    ...
-
-@overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
-    """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
-    """
-    ...
-
-@overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
-    """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IntVector, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
@@ -1220,79 +1220,128 @@ def calc_mapped_order(arg0: pyaccess._pyaccess_ext.IntVector, arg1: pyaccess._py
     ...
 
 @overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
-    """
-    ...
-
-@overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
-    """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
     """
     ...
 
 @overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
-    """
-    ...
-
-@overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
-    """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
     """
     ...
 
 @overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
-    """
-    ...
-
-@overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
-    """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
     """
     ...
 
 @overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2: pyaccess._pyaccess_ext.IntVector, arg3: int, /) -> pyaccess._pyaccess_ext.IntVector
-    """
-    ...
-
-@overload
-def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
-    """
-    calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
     """
     ...
 
 @overload
-def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_reachability(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
-    """
-    ...
-
-@overload
-def calc_reachability(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
-    """
-    calc_reachability(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
     """
     ...
 
 @overload
-def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.IntVector, arg2: pyaccess._pyaccess_ext.IntVector, arg3: pyaccess._pyaccess_ext.IntVector, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> pyaccess._pyaccess_ext.FloatVector
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
+    """
+    ...
+
+@overload
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_reachability(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_reachability(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_reachability(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_reachability(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
@@ -1338,6 +1387,20 @@ def map_to_closest(arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pya
 def map_to_closest(arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int:
     """
     map_to_closest(arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int
+    """
+    ...
+
+@overload
+def map_to_closest(arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, arg2: pyaccess._pyaccess_ext.IGraph, /) -> numpy.typing.NDArray:
+    """
+    map_to_closest(arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg2: pyaccess._pyaccess_ext.IGraph, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def map_to_closest(arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IGraph, /) -> int:
+    """
+    map_to_closest(arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IGraph, /) -> int
     """
     ...
 
