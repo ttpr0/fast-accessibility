@@ -65,7 +65,8 @@ class BaseObject:
     def build_index(self):
         if self.base is None:
             raise NotImplementedError("this should not have happened, please load first")
-        self.index = _pyaccess_ext.prepare_kdtree_index(self.base)
+        # self.index = _pyaccess_ext.prepare_kdtree_index(self.base)
+        self.index = _pyaccess_ext.prepare_balanced_kdtree_index(self.base)
 
     def get_index(self) -> _pyaccess_ext.IGraphIndex:
         if self.index is None:

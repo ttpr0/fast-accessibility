@@ -4,6 +4,7 @@ import numpy as np
 
 from . import _pyaccess_ext
 from .graph import Graph
+from .util import _build_graph, _build_ch_graph, _build_overlay_graph, _build_ch_graph_2
 
 class OneToManyType(Enum):
     RANGE_DIJKSTRA = 0
@@ -25,49 +26,22 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
-            g = _pyaccess_ext.build_base_graph(b, w, i)
+            g = _build_graph(graph, weight)
             solver = _pyaccess_ext.build_range_dijkstra_solver(g)
         case OneToManyType.RANGE_PHAST:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            g = _pyaccess_ext.build_ch_graph(b, w, i, id_m, ch_d, ch_i)
+            g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_phast_solver(g)
         case OneToManyType.RANGE_RPHAST:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            g = _pyaccess_ext.build_ch_graph(b, w, i, id_m, ch_d, ch_i)
+            g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_solver(g)
         case OneToManyType.RANGE_RPHAST_GS:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            partition = graph._get_ch_partition(ch)
-            if partition is None:
-                raise ValueError(f"ch {ch} hasnt been build with partition")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            p = graph._get_partition(partition)
-            g = _pyaccess_ext.build_ch_graph_2(b, w, i, p, id_m, ch_d, ch_i)
+            g = _build_ch_graph_2(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_gs_solver(g)
         case _:
             raise NotImplementedError("")
@@ -97,46 +71,22 @@ def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tu
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
-            g = _pyaccess_ext.build_base_graph(b, w, i)
+            g = _build_graph(graph, weight)
             solver = _pyaccess_ext.build_range_dijkstra_solver(g)
         case OneToManyType.RANGE_PHAST:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            g = _pyaccess_ext.build_ch_graph(b, w, i, id_m, ch_d, ch_i)
+            g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_phast_solver(g)
         case OneToManyType.RANGE_RPHAST:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            g = _pyaccess_ext.build_ch_graph(b, w, i, id_m, ch_d, ch_i)
+            g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_solver(g)
         case OneToManyType.GRASP:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if overlay is None:
                 raise ValueError("no overlay specified")
-            t_d, t_i, id_m = graph._get_overlay(overlay)
-            p = graph._get_partition(graph._get_overlay_partition(overlay))
-            g = _pyaccess_ext.build_tiled_graph(b, w, i, p, id_m, t_d, t_i)
+            g = _build_overlay_graph(graph, overlay)
             solver = _pyaccess_ext.build_grasp_solver(g)
         case _:
             raise NotImplementedError("")
@@ -156,46 +106,22 @@ def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points:
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
-            g = _pyaccess_ext.build_base_graph(b, w, i)
+            g = _build_graph(graph, weight)
             solver = _pyaccess_ext.build_range_dijkstra_solver(g)
         case OneToManyType.RANGE_PHAST:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            g = _pyaccess_ext.build_ch_graph(b, w, i, id_m, ch_d, ch_i)
+            g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_phast_solver(g)
         case OneToManyType.RANGE_RPHAST:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if ch is None:
                 raise ValueError("no ch specified")
-            ch_d, ch_i, id_m = graph._get_ch(ch)
-            g = _pyaccess_ext.build_ch_graph(b, w, i, id_m, ch_d, ch_i)
+            g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_solver(g)
         case OneToManyType.GRASP:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
             if overlay is None:
                 raise ValueError("no overlay specified")
-            t_d, t_i, id_m = graph._get_overlay(overlay)
-            p = graph._get_partition(graph._get_overlay_partition(overlay))
-            g = _pyaccess_ext.build_tiled_graph(b, w, i, p, id_m, t_d, t_i)
+            g = _build_overlay_graph(graph, overlay)
             solver = _pyaccess_ext.build_grasp_solver(g)
         case _:
             raise NotImplementedError("")
@@ -219,12 +145,7 @@ def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_p
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            b = graph._get_base()
-            w = graph._get_weight(weight)
-            if not isinstance(w, _pyaccess_ext.Weighting):
-                raise ValueError("invalid weighting specified")
-            i = graph._get_index()
-            g = _pyaccess_ext.build_base_graph(b, w, i)
+            g = _build_graph(graph, weight)
             solver = _pyaccess_ext.build_range_dijkstra_solver(g)
         case _:
             raise NotImplementedError("")
