@@ -213,6 +213,7 @@ void bind_graph(nanobind::module_& m)
     m.def("prepare_default_tc_weighting", &build_default_tc_weighting);
     m.def("prepare_base_index", &build_base_index);
     m.def("prepare_kdtree_index", &build_kdtree_index);
+    m.def("prepare_balanced_kdtree_index", &build_balanced_kdtree_index);
     m.def("prepare_partition", &calc_partition);
     m.def("prepare_tiled", &PreprocessTiledGraph3);
     m.def("prepare_cell_index", &PrepareGRASPCellIndex2);

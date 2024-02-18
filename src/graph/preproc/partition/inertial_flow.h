@@ -139,7 +139,7 @@ static std::vector<short> inertial_flow(const GraphBase& base, const Weighting& 
             node_tiles[i] = tiles[i];
         }
         max_tile += 1;
-        if (max_tile >= tile_count) {
+        if (max_tile >= tile_count - 1) {
             break;
         }
 

@@ -7,3 +7,7 @@ name = "pyaccess"
 version = "0.0.1"
 description = "A minimal python binding for the accessibility calculations"
 requires-python = ">=3.8"
+
+[tool.scikit-build]
+wheel.packages = ["pyaccess"]
+sdist.exclude = ["test", "__pycache__"]

@@ -1417,6 +1417,9 @@ def new_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyac
 def new_id_mapping(arg: int, /) -> pyaccess._pyaccess_ext.IDMapping:
     ...
 
+def prepare_balanced_kdtree_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
+    ...
+
 def prepare_base_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
     ...
 

@@ -49,7 +49,7 @@ std::unique_ptr<KDNode> insert_nodes_balanced(std::span<TreeValue> values, int d
 
     std::sort(values.begin(), values.end(), [&dim](const TreeValue& v1, const TreeValue& v2) { return v1.coords[dim] < v2.coords[dim]; });
 
-    int mid = len / 2;
+    int mid = (float)len / 2;
     auto value = values[mid];
     auto new_node = std::make_unique<KDNode>(value.coords[0], value.coords[1], value.value);
 
@@ -64,10 +64,12 @@ std::unique_ptr<KDNode> insert_nodes_balanced(std::span<TreeValue> values, int d
         default:
             return nullptr;
     }
-    auto left_half = std::span(values.data(), mid);
+    auto left_half = std::span(&values[0], mid);
     new_node->less = insert_nodes_balanced(left_half, new_dim);
-    auto right_half = std::span(&values.data()[mid + 1], len - mid);
-    new_node->more = insert_nodes_balanced(right_half, new_dim);
+    if (mid < len - 1) {
+        auto right_half = std::span(&values[mid + 1], len - mid - 1);
+        new_node->more = insert_nodes_balanced(right_half, new_dim);
+    }
 
     return new_node;
 }
@@ -97,20 +99,14 @@ std::tuple<std::optional<KDNode*>, double> get_closest_node(KDNode& node, int di
             return std::make_tuple(std::nullopt, -1);
     }
 
-    if ((val - s_val) < max_dist) {
-        if (!node.more) {
-            return std::make_tuple(std::nullopt, -1);
-        }
+    if ((val - s_val) < max_dist && node.more) {
         auto [new_closest, new_dist] = get_closest_node(*node.more, new_dim, x, y, max_dist);
         if (new_closest.has_value() && new_dist < dist) {
             closest = new_closest.value();
             dist = new_dist;
         }
     }
-    if ((s_val - val) < max_dist) {
-        if (!node.less) {
-            return std::make_tuple(std::nullopt, -1);
-        }
+    if ((s_val - val) < max_dist && node.less) {
         auto [new_closest, new_dist] = get_closest_node(*node.less, new_dim, x, y, max_dist);
         if (new_closest && new_dist < dist) {
             closest = new_closest.value();
@@ -163,5 +159,5 @@ void KDTree::insert(float x, float y, int value)
 
 void KDTree::create_balanced(std::vector<TreeValue>& values)
 {
-    this->root = insert_nodes_balanced({&values[0], values.size()}, 0);
+    this->root = insert_nodes_balanced({values.data(), values.size()}, 0);
 }

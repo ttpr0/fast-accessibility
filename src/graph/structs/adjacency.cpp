@@ -158,11 +158,17 @@ AdjacencyArray build_adjacency_array(AdjacencyList& adj_list)
             fwd_entries.push_back(edge_entry);
             fwd_count += 1;
         }
+        if (fwd_count == 0) {
+            fwd_start = 0;
+        }
         int bwd_start = bwd_entries.size();
         short bwd_count = 0;
         for (auto edge_entry : node_entry.bwd_edges) {
             bwd_entries.push_back(edge_entry);
             bwd_count += 1;
+        }
+        if (bwd_count == 0) {
+            bwd_start = 0;
         }
         _NodeEntry new_entry = {
             .fwd_start = fwd_start,

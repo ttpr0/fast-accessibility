@@ -25,7 +25,7 @@ AdjacencyArray _reorder_nodes(const AdjacencyArray& tiled, const std::vector<int
             fwd_edge_refs[fwd_start + fwd_count] = ref;
             fwd_count += 1;
         }
-        node_ref.fwd_start = fwd_start;
+        node_ref.fwd_start = fwd_count > 0 ? fwd_start : 0;
         node_ref.fwd_count = fwd_count;
         fwd_start += fwd_count;
 
@@ -37,7 +37,7 @@ AdjacencyArray _reorder_nodes(const AdjacencyArray& tiled, const std::vector<int
             bwd_edge_refs[bwd_start + bwd_count] = ref;
             bwd_count += 1;
         }
-        node_ref.bwd_start = bwd_start;
+        node_ref.bwd_start = bwd_count > 0 ? bwd_start : 0;
         node_ref.bwd_count = bwd_count;
         bwd_start += bwd_count;
     }
