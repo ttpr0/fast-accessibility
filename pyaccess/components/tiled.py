@@ -33,7 +33,7 @@ class TiledObject:
         if not os.path.isfile(f"{path}-ch_data"):
             raise NotImplementedError("unable to find ch-object")
         if self.tiled_data is None or self.has_changed == True:
-            self.tiled_data = _pyaccess_ext.load_tiled_data(f"{path}-tiled_data", 0) # TODO: Remove need for node_count
+            self.tiled_data = _pyaccess_ext.load_tiled_data(f"{path}-tiled_data")
         if self.cell_index is None or self.has_changed == True:
             self.cell_index = _pyaccess_ext.load_cell_index(f"{path}-cell_index")
         if self.id_mapping is None or self.has_changed == True:
@@ -49,7 +49,7 @@ class TiledObject:
             raise NotImplementedError("storing unloaded ch-object not possibile")
         if not self.has_changed:
             return
-        _pyaccess_ext.store_tiled_data(self.tiled_data, f"{path}-tiled_data", 0) # TODO: Remove need for node_count
+        _pyaccess_ext.store_tiled_data(self.tiled_data, f"{path}-tiled_data")
         _pyaccess_ext.store_cell_index(self.cell_index, f"{path}-cell_index")
         _pyaccess_ext.store_id_mapping(self.id_mapping, f"{path}-id_mapping")
         self.has_changed = False

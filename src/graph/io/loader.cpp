@@ -52,7 +52,7 @@ TiledGraph loadTiledGraph(const std::string& path)
     auto weight = load_edge_weights(path + "");
     auto partition = load_node_partition(path + "");
     auto id_mapping = load_id_mapping(path + "_mapping");
-    auto tiled = load_tiled_data(path + "", base->nodeCount());
+    auto tiled = load_tiled_data(path + "");
     auto cell_index = load_cell_index(path + "");
 
     // build graph

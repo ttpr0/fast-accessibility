@@ -39,10 +39,31 @@ class Graph:
     def _get_name(self) -> str:
         return self._name
 
-    def get_explorer(self, weight: str = "default") -> Explorer:
-        return Explorer(self._get_base(), self._get_weight(weight))
+    def get_explorer(self, weight: str = "default", partition: str | None = None, ch: str | None = None, overlay: str | None = None) -> Explorer:
+        """Creates a graph-explorer to traverse the graphs nodes, edges and shortcuts.
+        """
+        b = self._get_base()
+        w = self._get_weight(weight)
+        i = self._get_index()
+        p = None
+        im = None
+        c = None
+        o = None
+        if partition is not None:
+            p = self._get_partition(partition)
+        if ch is not None:
+            c, _, im = self._get_ch(ch)
+            part = self._get_ch_partition(ch)
+            if part is not None:
+                p = self._get_partition(part)
+        if overlay is not None:
+            o, _, im = self._get_overlay(overlay)
+            p = self._get_partition(self._get_overlay_partition(overlay))
+        return Explorer(b, w, i, p, im, c, o)
 
     def store(self, name: str | None = None, path: str | None = None):
+        """Stores the graph into the given path.
+        """
         if path is not None:
             self._base_path = path
         if name is not None:
@@ -71,6 +92,8 @@ class Graph:
             file.write(json.dumps(meta))
 
     def delete(self):
+        """Deletes the graph and all components (removing everything from disk).
+        """
         if os.path.isfile(f"{self._base_path}/{self._name}-meta"):
             os.remove(f"{self._base_path}/{self._name}-meta")
         self.base.delete(f"{self._base_path}/{self._name}")
@@ -96,9 +119,24 @@ class Graph:
         base = self.base.get_base()
         mapping = _pyaccess_ext.calc_dfs_order(base)
         self.base.reorder(Ordering.DFS_ORDERING, mapping)
-        # TODO: reorder or delete other components
+        for w, o in self.weights.items():
+            o.delete(f"{self._base_path}/{self._name}_{w}")
+        self.weights = {}
+        for p, o in self.partitions.items():
+            o.delete(f"{self._base_path}/{self._name}_partition_{p}")
+        self.partitions = {}
+        for c, o in self.ch.items():
+            o.delete(f"{self._base_path}/{self._name}_ch_{c}")
+        self.ch = {}
+        for t, o in self.tiled.items():
+            o.delete(f"{self._base_path}/{self._name}_tiled_{t}")
+        self.tiled = {}
 
     def add_default_weighting(self, name: str = "default"):
+        """Adds a new default weighting to the graph.
+
+        Weights are the time cost of traversing a street (computed from edges maxspeed and roadtype).
+        """
         if name in self.weights:
             raise ValueError(f"weighting {name} already exists")
         base = self._get_base()
@@ -107,12 +145,18 @@ class Graph:
         self.weights[name] = weight_obj
 
     def add_weighting(self, name: str, weights: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting):
+        """Adds a new weighting to the graph.
+
+        To create a weighting use new_weighting(...), new_tc_weighting(...), etc.
+        """
         if name in self.weights:
             raise ValueError(f"weighting {name} already exists")
         weight_obj = WeightObject_new(weights)
         self.weights[name] = weight_obj
 
     def add_partition(self, name: str, cell_count: int):
+        """Computes a node-partition of graph using inertial-flow algorithm.
+        """
         if name in self.partitions:
             raise ValueError(f"partition {name} already exists")
         base = self._get_base()
@@ -122,6 +166,10 @@ class Graph:
         self.partitions[name] = partition_obj
 
     def add_contraction(self, name: str, weight: str, partition: str | None = None):
+        """Contracts graph with given weighting using 2*ED + CN + EC + 5*L contraction order.
+
+        If partition is specified cells will be contracted individually (similar to isophast).
+        """
         if name in self.ch:
             raise ValueError(f"contraction {name} already exists")
         b = self._get_base()
@@ -139,6 +187,8 @@ class Graph:
         self.ch[name] = ch_obj
 
     def add_grasp_overlay(self, name: str, weight: str, partition: str):
+        """Computes grasp overlay from the given weighting and partition.
+        """
         if name in self.ch:
             raise ValueError(f"overlay {name} already exists")
         b = self._get_base()
@@ -153,6 +203,8 @@ class Graph:
         self.tiled[name] = tiled_obj
 
     def add_isophast_overlay(self, name: str, weight: str, partition: str):
+        """Computes isophast overlay from the given weighting and partition.
+        """
         if name in self.ch:
             raise ValueError(f"overlay {name} already exists")
         b = self._get_base()
@@ -164,6 +216,70 @@ class Graph:
         id_mapping = _pyaccess_ext.new_id_mapping(b.node_count())
         tiled_obj = TiledObject_new(weight, partition, tiled_data, cell_index, id_mapping)
         self.tiled[name] = tiled_obj
+
+    def remove_weighting(self, name: str):
+        """Removes and deletes a weighting and all dependant contractions and overlays.
+        """
+        if name not in self.weights:
+            raise ValueError(f"weighting {name} does not exist")
+        o = self.weights[name]
+        o.delete(f"{self._base_path}/{self._name}_{name}")
+        del self.weights[name]
+        rm_ch = []
+        for c, o in self.ch.items():
+            w = o.get_base_weigth()
+            if w == name:
+                rm_ch.append(c)
+        for c in rm_ch:
+            self.remove_ch(c)
+        rm_ov = []
+        for t, o in self.tiled.items():
+            w = o.get_base_weigth()
+            if w == name:
+                rm_ov.append(t)
+        for t in rm_ov:
+            self.remove_overlay(t)
+
+    def remove_partition(self, name: str):
+        """Removes and deletes a partition and all dependant contractions and overlays.
+        """
+        if name not in self.partitions:
+            raise ValueError(f"partition {name} does not exist")
+        o = self.partitions[name]
+        o.delete(f"{self._base_path}/{self._name}_partition_{name}")
+        del self.partitions[name]
+        rm_ch = []
+        for c, o in self.ch.items():
+            p = o.get_base_partition()
+            if p == name:
+                rm_ch.append(c)
+        for c in rm_ch:
+            self.remove_ch(c)
+        rm_ov = []
+        for t, o in self.tiled.items():
+            p = o.get_base_partition()
+            if p == name:
+                rm_ov.append(t)
+        for t in rm_ov:
+            self.remove_overlay(t)
+
+    def remove_ch(self, name: str):
+        """Removes and deletes a contraction.
+        """
+        if name not in self.ch:
+            raise ValueError(f"ch {name} does not exist")
+        o = self.ch[name]
+        o.delete(f"{self._base_path}/{self._name}_ch_{name}")
+        del self.ch[name]
+
+    def remove_overlay(self, name: str):
+        """Removes and deletes an overlay.
+        """
+        if name not in self.tiled:
+            raise ValueError(f"overlay {name} does not exist")
+        o = self.tiled[name]
+        o.delete(f"{self._base_path}/{self._name}_tiled_{name}")
+        del self.tiled[name]
 
     def _get_base(self) -> _pyaccess_ext.GraphBase:
         if not self.base.is_loaded():
@@ -237,10 +353,18 @@ class Graph:
         return tiled.get_base_partition()
 
 def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) -> Graph:
+    """Creates a new graph from nodes and edges.
+
+    Use graph.store(...) to store and load_graph() to load a graph from a directory.
+    """
     base = BaseObject_new(nodes, edges)
     return Graph("", "", base, {}, {}, {}, {})
 
 def load_graph(name: str, path: str) -> Graph:
+    """Loads graph from a directory.
+
+    Components are lazily loaded thus first accessibility calculations will be slower.
+    """
     meta: dict
     with open(f"{path}/{name}-meta", "r") as file:
         meta = json.loads(file.read())

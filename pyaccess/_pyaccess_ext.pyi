@@ -1366,7 +1366,7 @@ def load_node_partition(arg: str, /) -> pyaccess._pyaccess_ext.Partition:
 def load_tc_weights(arg: str, /) -> pyaccess._pyaccess_ext.TCWeighting:
     ...
 
-def load_tiled_data(arg0: str, arg1: int, /) -> pyaccess._pyaccess_ext.TiledData:
+def load_tiled_data(arg: str, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
 @overload
@@ -1545,6 +1545,6 @@ def store_node_partition(arg0: pyaccess._pyaccess_ext.Partition, arg1: str, /) -
 def store_tc_weights(arg0: pyaccess._pyaccess_ext.TCWeighting, arg1: str, /) -> None:
     ...
 
-def store_tiled_data(arg0: pyaccess._pyaccess_ext.TiledData, arg1: str, arg2: int, /) -> None:
+def store_tiled_data(arg0: pyaccess._pyaccess_ext.TiledData, arg1: str, /) -> None:
     ...
 

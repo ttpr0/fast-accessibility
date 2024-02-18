@@ -12,9 +12,15 @@ class OneToManyType(Enum):
     RANGE_RPHAST_GS = 4
     GRASP = 5
 
+RANGE_DIJKSTRA = OneToManyType.RANGE_DIJKSTRA
+RANGE_PHAST = OneToManyType.RANGE_PHAST
+RANGE_RPHAST = OneToManyType.RANGE_RPHAST
+RANGE_RPHAST_GS = OneToManyType.RANGE_RPHAST_GS
+GRASP = OneToManyType.GRASP
+
 OneToManySolver: TypeAlias = _pyaccess_ext.RangeDijkstra | _pyaccess_ext.RangePHAST | _pyaccess_ext.RangeRPHAST
 
-def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = OneToManyType.RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None) -> list[float]:
+def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None) -> list[float]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
@@ -86,7 +92,7 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
     access = _pyaccess_ext.calc_2sfca(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay)
     return access.tolist()
 
-def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = OneToManyType.RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None) -> list[int]:
+def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None) -> list[int]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
@@ -145,7 +151,7 @@ def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tu
     ranges = _pyaccess_ext.calc_range_query(solver, sup_node, dem_nodes, max_range)
     return ranges.tolist()
 
-def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = OneToManyType.RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None) -> np.ndarray:
+def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None) -> np.ndarray:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
@@ -208,7 +214,7 @@ def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points:
     matrix = _pyaccess_ext.calc_matrix_query(solver, sup_node, dem_nodes, max_range)
     return matrix
 
-def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = OneToManyType.RANGE_DIJKSTRA, weight: str = "default") -> list[float]:
+def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default") -> list[float]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:

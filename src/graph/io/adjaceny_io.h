@@ -5,7 +5,7 @@
 #include "../structs/adjacency.h"
 #include "./util.h"
 
-static AdjacencyArray load_adjacency_array(const std::string& file, bool typed, int node_count)
+static AdjacencyArray load_adjacency_array(const std::string& file, bool typed)
 {
     auto arr = readAllFile(file);
     auto reader = BufferReader(arr);
@@ -14,6 +14,7 @@ static AdjacencyArray load_adjacency_array(const std::string& file, bool typed, 
     std::vector<_EdgeEntry> fwd_edges;
     std::vector<_EdgeEntry> bwd_edges;
 
+    int node_count = reader.read<int>();
     int fwd_count = reader.read<int>();
     int bwd_count = reader.read<int>();
 
@@ -50,6 +51,7 @@ static void store_adjacency_array(const AdjacencyArray& adj, bool typed, const s
 {
     auto writer = BufferWriter();
 
+    writer.write<int>(adj.node_entries.size());
     writer.write<int>(adj.fwd_edge_entries.size());
     writer.write<int>(adj.bwd_edge_entries.size());
 

@@ -8,11 +8,11 @@ class Explorer:
     weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting
     index: _pyaccess_ext.IGraphIndex
     partition: _pyaccess_ext.Partition | None
+    id_mapping: _pyaccess_ext.IDMapping | None
     ch: _pyaccess_ext.CHData | None
     tiled: _pyaccess_ext.TiledData | None
-    # TODO: missing id-mapping
 
-    def __init__(self, base: _pyaccess_ext.GraphBase, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting, index: _pyaccess_ext.IGraphIndex | None = None, partition: _pyaccess_ext.Partition | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None):
+    def __init__(self, base: _pyaccess_ext.GraphBase, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting, index: _pyaccess_ext.IGraphIndex | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None):
         self.base = base
         self.weight = weight
         if index is None:
@@ -20,6 +20,9 @@ class Explorer:
         else:
             self.index = index
         self.partition = partition
+        self.id_mapping = id_mapping
+        if ch is not None and tiled is not None:
+            raise ValueError("explorer cannot contain both CH and tiled data")
         self.ch = ch
         self.tiled = tiled
 
@@ -56,9 +59,10 @@ class Explorer:
         return edges
 
     def get_node_level(self, node_id: int) -> int:
-        if self.ch is None:
+        if self.ch is None or self.id_mapping is None:
             raise ValueError("explorer does not contain node-level information")
-        return self.ch.get_node_level(node_id)
+        m_node_id = self.id_mapping.get_target(node_id)
+        return self.ch.get_node_level(m_node_id)
 
     def get_node_partition(self, node_id: int) -> int:
         if self.partition is None:
@@ -85,8 +89,10 @@ class Explorer:
         raise ValueError("explorer does not contain shortcut information")
 
     def get_adjacent_shortcuts(self, node_id: int, direction: _pyaccess_ext.Direction) -> list[int]:
-        if self.ch is not None:
-            return self.ch.get_adjacent_shortcuts(node_id, direction)
-        if self.tiled is not None:
-            return self.tiled.get_adjacent_shortcuts(node_id, direction)
+        if self.ch is not None and self.id_mapping is not None:
+            m_node_id = self.id_mapping.get_target(node_id)
+            return self.ch.get_adjacent_shortcuts(m_node_id, direction)
+        if self.tiled is not None and self.id_mapping is not None:
+            m_node_id = self.id_mapping.get_target(node_id)
+            return self.tiled.get_adjacent_shortcuts(m_node_id, direction)
         raise ValueError("explorer does not contain shortcut information")

@@ -12,7 +12,7 @@ std::shared_ptr<CHData> load_ch_data(const std::string& file)
 {
     auto node_levels = read_vector_from_file<short>(file + "-level");
     auto shortcuts = load_shortcuts(file + "-shortcut");
-    auto adjacency = load_adjacency_array(file + "-ch_graph", false, node_levels.size());
+    auto adjacency = load_adjacency_array(file + "-ch_graph", false);
 
     return std::make_shared<CHData>(std::move(shortcuts), std::move(adjacency), std::move(node_levels));
 }
