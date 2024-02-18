@@ -137,7 +137,7 @@ Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_w
                     continue;
                 }
                 int d_dist = state.getDistance(d_node);
-                if (d_dist >= max_dist) {
+                if (d_dist > max_dist) {
                     continue;
                 }
                 float distance_decay = decay.get_distance_weight(d_dist);
@@ -151,7 +151,7 @@ Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_w
                     continue;
                 }
                 int d_dist = state.getDistance(d_node);
-                if (d_dist >= max_dist) {
+                if (d_dist > max_dist) {
                     continue;
                 }
                 float distance_decay = decay.get_distance_weight(d_dist);

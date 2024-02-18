@@ -58,7 +58,7 @@ Vector<float> calcReachability(S& alg, VectorView<int> dem_nodes, VectorView<int
                 continue;
             }
             int d_dist = state.getDistance(d_node);
-            if (d_dist >= max_dist) {
+            if (d_dist > max_dist) {
                 continue;
             }
             auto [c_dist, c_id] = closest[i];
