@@ -2,8 +2,12 @@ import json
 import fiona
 import pyaccess
 
-base = pyaccess.load_graph_base("./data/graphs/base")
-partition = pyaccess.load_node_partition("./data/graphs/partition")
+GRAPH_DIR = "./data/graphs"
+GRAPH_NAME = "test"
+OUT_DIR = "."
+
+graph = pyaccess.load_graph(GRAPH_NAME, GRAPH_DIR)
+explorer = graph.get_explorer(partition="partition")
 
 driver = "GPKG"
 
@@ -15,12 +19,12 @@ nodes_schema = {
     ])
 }
 
-with fiona.open("graph.gpkg", "w", driver=driver, schema=nodes_schema, layer="nodes") as file:
+with fiona.open(f"{OUT_DIR}/graph.gpkg", "w", driver=driver, schema=nodes_schema, layer="nodes") as file:
     features = []
-    for i in range(base.node_count()):
-        node = base.get_node(i)
-        coord = base.get_node_geom(i)
-        tile = partition.get_node_tile(i)
+    for i in range(explorer.node_count()):
+        node = explorer.get_node(i)
+        coord = node.loc
+        tile = explorer.get_node_partition(i)
         features.append({
             "geometry": {
                 "type": "Point",
@@ -39,16 +43,18 @@ edges_schema = {
         ('index', 'int'),
         ('nodeA', 'int'),
         ('nodeB', 'int'),
-        ('type', 'int')
+        ('tile', 'int')
     ])
 }
 
-with fiona.open("graph.gpkg", "w", driver=driver, schema=edges_schema, layer="edges") as file:
+with fiona.open(f"{OUT_DIR}/graph.gpkg", "w", driver=driver, schema=edges_schema, layer="edges") as file:
     features = []
-    for i in range(base.edge_count()):
-        edge = base.get_edge(i)
-        coord_a = base.get_node_geom(edge.node_a)
-        coord_b = base.get_node_geom(edge.node_b)
+    for i in range(explorer.edge_count()):
+        edge = explorer.get_edge(i)
+        coord_a = explorer.get_node(edge.node_a).loc
+        coord_b = explorer.get_node(edge.node_b).loc
+        tile_a = explorer.get_node_partition(edge.node_a)
+        tile_b = explorer.get_node_partition(edge.node_b)
         features.append({
             "geometry": {
                 "type": "LineString",
@@ -58,7 +64,7 @@ with fiona.open("graph.gpkg", "w", driver=driver, schema=edges_schema, layer="ed
                 "index": i,
                 "nodeA": edge.node_b,
                 "nodeB": edge.node_b,
-                "type": 0,
+                "tile": tile_a if tile_a == tile_b else -1,
             }
         })
     file.writerecords(features)

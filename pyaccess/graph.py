@@ -16,22 +16,22 @@ class Graph:
     _base_path: str
     _name: str
 
-    base: BaseObject
-    weights: dict[str, WeightObject]
-    partitions: dict[str, PartitionObject]
-    ch: dict[str, CHObject]
-    tiled: dict[str, TiledObject]
+    _base: BaseObject
+    _weights: dict[str, WeightObject]
+    _partitions: dict[str, PartitionObject]
+    _ch: dict[str, CHObject]
+    _tiled: dict[str, TiledObject]
 
     def __init__(self, _base_path: str, _name: str, base: BaseObject, weights: dict[str, WeightObject], partitions: dict[str, PartitionObject], ch: dict[str, CHObject], tiled: dict[str, TiledObject]):
         self._base_path = _base_path
         self._name = _name
 
-        self.base = base
+        self._base = base
 
-        self.weights = weights
-        self.partitions = partitions
-        self.ch = ch
-        self.tiled = tiled
+        self._weights = weights
+        self._partitions = partitions
+        self._ch = ch
+        self._tiled = tiled
 
     def _get_path(self) -> str:
         return self._base_path
@@ -53,11 +53,13 @@ class Graph:
             p = self._get_partition(partition)
         if ch is not None:
             c, _, im = self._get_ch(ch)
+            w = self._get_weight(self._get_ch_weight(ch))
             part = self._get_ch_partition(ch)
             if part is not None:
                 p = self._get_partition(part)
         if overlay is not None:
             o, _, im = self._get_overlay(overlay)
+            w = self._get_weight(self._get_overlay_weight(overlay))
             p = self._get_partition(self._get_overlay_partition(overlay))
         return Explorer(b, w, i, p, im, c, o)
 
@@ -69,23 +71,23 @@ class Graph:
         if name is not None:
             self._name = name
         meta = {}
-        meta["base"] = self.base.get_metadata()
-        self.base.store(f"{self._base_path}/{self._name}")
+        meta["base"] = self._base.get_metadata()
+        self._base.store(f"{self._base_path}/{self._name}")
         meta["weights"] = {}
-        for w, o in self.weights.items():
+        for w, o in self._weights.items():
             meta["weights"][w] = o.get_metadata()
             o.store(f"{self._base_path}/{self._name}_{w}")
         meta["partitions"] = {}
-        for p, o in self.partitions.items():
+        for p, o in self._partitions.items():
             meta["partitions"][p] = o.get_metadata()
             o.store(f"{self._base_path}/{self._name}_partition_{p}")
         meta["speed_ups"] = {}
         meta["speed_ups"]["ch"] = {}
-        for c, o in self.ch.items():
+        for c, o in self._ch.items():
             meta["speed_ups"]["ch"][c] = o.get_metadata()
             o.store(f"{self._base_path}/{self._name}_ch_{c}")
         meta["speed_ups"]["tiled"] = {}
-        for t, o in self.tiled.items():
+        for t, o in self._tiled.items():
             meta["speed_ups"]["tiled"][t] = o.get_metadata()
             o.store(f"{self._base_path}/{self._name}_tiled_{t}")
         with open(f"{self._base_path}/{self._name}-meta", "w") as file:
@@ -96,81 +98,81 @@ class Graph:
         """
         if os.path.isfile(f"{self._base_path}/{self._name}-meta"):
             os.remove(f"{self._base_path}/{self._name}-meta")
-        self.base.delete(f"{self._base_path}/{self._name}")
-        for name, weight in self.weights.items():
+        self._base.delete(f"{self._base_path}/{self._name}")
+        for name, weight in self._weights.items():
             weight.delete(f"{self._base_path}/{self._name}_{name}")
-        self.weights = {}
-        for name, partition in self.partitions.items():
+        self._weights = {}
+        for name, partition in self._partitions.items():
             partition.delete(f"{self._base_path}/{self._name}_partition_{name}")
-        self.partitions = {}
-        for name, ch in self.ch.items():
+        self._partitions = {}
+        for name, ch in self._ch.items():
             ch.delete(f"{self._base_path}/{self._name}_ch_{name}")
-        self.ch = {}
-        for name, tiled in self.tiled.items():
+        self._ch = {}
+        for name, tiled in self._tiled.items():
             tiled.delete(f"{self._base_path}/{self._name}_tiled_{name}")
-        self.tiled = {}
+        self._tiled = {}
 
     def optimize_base(self):
         """removes all unconnected components and reorders graph with DFS-Ordering
         """
-        if not self.base.is_loaded():
-            self.base.load(f"{self._base_path}/{self._name}")
-        self.base.remove_unconnected()
-        base = self.base.get_base()
+        if not self._base.is_loaded():
+            self._base.load(f"{self._base_path}/{self._name}")
+        self._base.remove_unconnected()
+        base = self._base.get_base()
         mapping = _pyaccess_ext.calc_dfs_order(base)
-        self.base.reorder(Ordering.DFS_ORDERING, mapping)
-        for w, o in self.weights.items():
+        self._base.reorder(Ordering.DFS_ORDERING, mapping)
+        for w, o in self._weights.items():
             o.delete(f"{self._base_path}/{self._name}_{w}")
-        self.weights = {}
-        for p, o in self.partitions.items():
+        self._weights = {}
+        for p, o in self._partitions.items():
             o.delete(f"{self._base_path}/{self._name}_partition_{p}")
-        self.partitions = {}
-        for c, o in self.ch.items():
+        self._partitions = {}
+        for c, o in self._ch.items():
             o.delete(f"{self._base_path}/{self._name}_ch_{c}")
-        self.ch = {}
-        for t, o in self.tiled.items():
+        self._ch = {}
+        for t, o in self._tiled.items():
             o.delete(f"{self._base_path}/{self._name}_tiled_{t}")
-        self.tiled = {}
+        self._tiled = {}
 
     def add_default_weighting(self, name: str = "default"):
         """Adds a new default weighting to the graph.
 
         Weights are the time cost of traversing a street (computed from edges maxspeed and roadtype).
         """
-        if name in self.weights:
+        if name in self._weights:
             raise ValueError(f"weighting {name} already exists")
         base = self._get_base()
         weight = _pyaccess_ext.prepare_default_weighting(base)
         weight_obj = WeightObject_new(weight)
-        self.weights[name] = weight_obj
+        self._weights[name] = weight_obj
 
     def add_weighting(self, name: str, weights: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting):
         """Adds a new weighting to the graph.
 
         To create a weighting use new_weighting(...), new_tc_weighting(...), etc.
         """
-        if name in self.weights:
+        if name in self._weights:
             raise ValueError(f"weighting {name} already exists")
         weight_obj = WeightObject_new(weights)
-        self.weights[name] = weight_obj
+        self._weights[name] = weight_obj
 
     def add_partition(self, name: str, cell_count: int):
         """Computes a node-partition of graph using inertial-flow algorithm.
         """
-        if name in self.partitions:
+        if name in self._partitions:
             raise ValueError(f"partition {name} already exists")
         base = self._get_base()
         weight = _pyaccess_ext.prepare_default_weighting(base)
         partition = _pyaccess_ext.prepare_partition(base, weight, cell_count)
         partition_obj = PartitionObject_new(partition)
-        self.partitions[name] = partition_obj
+        self._partitions[name] = partition_obj
 
     def add_contraction(self, name: str, weight: str, partition: str | None = None):
         """Contracts graph with given weighting using 2*ED + CN + EC + 5*L contraction order.
 
         If partition is specified cells will be contracted individually (similar to isophast).
         """
-        if name in self.ch:
+        if name in self._ch:
             raise ValueError(f"contraction {name} already exists")
         b = self._get_base()
         w = self._get_weight(weight)
@@ -184,12 +186,12 @@ class Graph:
             ch = _pyaccess_ext.prepare_ch(b, w)
         id_mapping = _pyaccess_ext.new_id_mapping(b.node_count())
         ch_obj = CHObject_new(weight, ch, id_mapping, partition)
-        self.ch[name] = ch_obj
+        self._ch[name] = ch_obj
 
     def add_grasp_overlay(self, name: str, weight: str, partition: str):
         """Computes grasp overlay from the given weighting and partition.
         """
-        if name in self.ch:
+        if name in self._ch:
             raise ValueError(f"overlay {name} already exists")
         b = self._get_base()
         w = self._get_weight(weight)
@@ -200,12 +202,12 @@ class Graph:
         cell_index = _pyaccess_ext.prepare_cell_index(b, w, p)
         id_mapping = _pyaccess_ext.new_id_mapping(b.node_count())
         tiled_obj = TiledObject_new(weight, partition, tiled_data, cell_index, id_mapping)
-        self.tiled[name] = tiled_obj
+        self._tiled[name] = tiled_obj
 
     def add_isophast_overlay(self, name: str, weight: str, partition: str):
         """Computes isophast overlay from the given weighting and partition.
         """
-        if name in self.ch:
+        if name in self._ch:
             raise ValueError(f"overlay {name} already exists")
         b = self._get_base()
         w = self._get_weight(weight)
@@ -215,25 +217,25 @@ class Graph:
         tiled_data, cell_index = _pyaccess_ext.prepare_isophast(b, w, p)
         id_mapping = _pyaccess_ext.new_id_mapping(b.node_count())
         tiled_obj = TiledObject_new(weight, partition, tiled_data, cell_index, id_mapping)
-        self.tiled[name] = tiled_obj
+        self._tiled[name] = tiled_obj
 
     def remove_weighting(self, name: str):
         """Removes and deletes a weighting and all dependant contractions and overlays.
         """
-        if name not in self.weights:
+        if name not in self._weights:
             raise ValueError(f"weighting {name} does not exist")
-        o = self.weights[name]
+        o = self._weights[name]
         o.delete(f"{self._base_path}/{self._name}_{name}")
-        del self.weights[name]
+        del self._weights[name]
         rm_ch = []
-        for c, o in self.ch.items():
+        for c, o in self._ch.items():
             w = o.get_base_weigth()
             if w == name:
                 rm_ch.append(c)
         for c in rm_ch:
             self.remove_ch(c)
         rm_ov = []
-        for t, o in self.tiled.items():
+        for t, o in self._tiled.items():
             w = o.get_base_weigth()
             if w == name:
                 rm_ov.append(t)
@@ -243,20 +245,20 @@ class Graph:
     def remove_partition(self, name: str):
         """Removes and deletes a partition and all dependant contractions and overlays.
         """
-        if name not in self.partitions:
+        if name not in self._partitions:
             raise ValueError(f"partition {name} does not exist")
-        o = self.partitions[name]
+        o = self._partitions[name]
         o.delete(f"{self._base_path}/{self._name}_partition_{name}")
-        del self.partitions[name]
+        del self._partitions[name]
         rm_ch = []
-        for c, o in self.ch.items():
+        for c, o in self._ch.items():
             p = o.get_base_partition()
             if p == name:
                 rm_ch.append(c)
         for c in rm_ch:
             self.remove_ch(c)
         rm_ov = []
-        for t, o in self.tiled.items():
+        for t, o in self._tiled.items():
             p = o.get_base_partition()
             if p == name:
                 rm_ov.append(t)
@@ -266,48 +268,48 @@ class Graph:
     def remove_ch(self, name: str):
         """Removes and deletes a contraction.
         """
-        if name not in self.ch:
+        if name not in self._ch:
             raise ValueError(f"ch {name} does not exist")
-        o = self.ch[name]
+        o = self._ch[name]
         o.delete(f"{self._base_path}/{self._name}_ch_{name}")
-        del self.ch[name]
+        del self._ch[name]
 
     def remove_overlay(self, name: str):
         """Removes and deletes an overlay.
         """
-        if name not in self.tiled:
+        if name not in self._tiled:
             raise ValueError(f"overlay {name} does not exist")
-        o = self.tiled[name]
+        o = self._tiled[name]
         o.delete(f"{self._base_path}/{self._name}_tiled_{name}")
-        del self.tiled[name]
+        del self._tiled[name]
 
     def _get_base(self) -> _pyaccess_ext.GraphBase:
-        if not self.base.is_loaded():
-            self.base.load(f"{self._base_path}/{self._name}")
-        return self.base.get_base()
+        if not self._base.is_loaded():
+            self._base.load(f"{self._base_path}/{self._name}")
+        return self._base.get_base()
 
     def _get_index(self) -> _pyaccess_ext.IGraphIndex:
-        if not self.base.is_loaded():
-            self.base.load(f"{self._base_path}/{self._name}")
-        if not self.base.has_index():
-            self.base.build_index()
-        return self.base.get_index()
+        if not self._base.is_loaded():
+            self._base.load(f"{self._base_path}/{self._name}")
+        if not self._base.has_index():
+            self._base.build_index()
+        return self._base.get_index()
 
     def _get_weight(self, name: str) -> _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting:
-        w = self.weights[name]
+        w = self._weights[name]
         if not w.is_loaded():
             w.load(f"{self._base_path}/{self._name}_{name}")
         weight = w.get_weight()
         return weight
 
     def _get_partition(self, name: str) -> _pyaccess_ext.Partition:
-        p = self.partitions[name]
+        p = self._partitions[name]
         if not p.is_loaded():
             p.load(f"{self._base_path}/{self._name}_partition_{name}")
         return p.get_partition()
 
     def _get_ch(self, name: str) -> tuple[_pyaccess_ext.CHData, _pyaccess_ext.CHIndex, _pyaccess_ext.IDMapping]:
-        ch = self.ch[name]
+        ch = self._ch[name]
         if not ch.is_loaded():
             ch.load(f"{self._base_path}/{self._name}_ch_{name}")
         if not ch.has_ch_index():
@@ -328,15 +330,15 @@ class Graph:
         return ch_data, ch_index, id_mapping
 
     def _get_ch_weight(self, name: str) -> str:
-        ch = self.ch[name]
+        ch = self._ch[name]
         return ch.get_base_weigth()
 
     def _get_ch_partition(self, name: str) -> str | None:
-        ch = self.ch[name]
+        ch = self._ch[name]
         return ch.get_base_partition()
 
     def _get_overlay(self, name: str) -> tuple[_pyaccess_ext.TiledData, _pyaccess_ext.CellIndex, _pyaccess_ext.IDMapping]:
-        tiled = self.tiled[name]
+        tiled = self._tiled[name]
         if not tiled.is_loaded():
             tiled.load(f"{self._base_path}/{self._name}_tiled_{name}")
         tiled_data = tiled.get_tiled_data()
@@ -345,11 +347,11 @@ class Graph:
         return tiled_data, cell_index, id_mapping
 
     def _get_overlay_weight(self, name: str) -> str:
-        tiled = self.tiled[name]
+        tiled = self._tiled[name]
         return tiled.get_base_weigth()
 
     def _get_overlay_partition(self, name: str) -> str:
-        tiled = self.tiled[name]
+        tiled = self._tiled[name]
         return tiled.get_base_partition()
 
 def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) -> Graph:
