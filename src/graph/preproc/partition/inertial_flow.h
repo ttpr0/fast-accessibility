@@ -9,13 +9,14 @@
 #include <span>
 #include <vector>
 
+#include "../../../util/function_ref.h"
 #include "../../../util/pq_item.h"
 #include "../../explorer/base_explorer.h"
 #include "./edmonds_karp.h"
 
 #define PI 3.14159265358979323846
 
-static std::vector<int> _sort_nodes(const GraphBase& base, std::function<float(Coord)> coord_func)
+static std::vector<int> _sort_nodes(const GraphBase& base, function_ref<float(Coord)> coord_func)
 {
     std::vector<int> nodes(base.nodeCount());
     for (int i = 0; i < base.nodeCount(); i++) {

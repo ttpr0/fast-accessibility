@@ -1,8 +1,8 @@
 
 #include <math.h>
 
-#include "./base_graph.h"
 #include "./base/graph_index.h"
+#include "./base_graph.h"
 
 //*******************************************
 // base-graph
@@ -45,7 +45,7 @@ int Graph::getClosestNode(Coord point)
     }
     return -1;
 }
-void Graph::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
+void Graph::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)
 {
     if (typ == Adjacency::ADJACENT_ALL || typ == Adjacency::ADJACENT_EDGES) {
         auto accessor = this->base->adjacency.getNeighbours(node, dir);

@@ -3,12 +3,13 @@
 #include <functional>
 #include <vector>
 
+#include "../../util/function_ref.h"
 #include "../base/graph_base.h"
 #include "../base/id_mapping.h"
-#include "../weights/weighting.h"
 #include "../speed_ups/ch_data.h"
 #include "../speed_ups/partition.h"
 #include "../structs/structs.h"
+#include "../weights/weighting.h"
 
 //*******************************************
 // ch-graph explorer
@@ -31,7 +32,7 @@ public:
 
     short getNodeLevel(int node) const;
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const;
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) const;
 
     int getEdgeWeight(EdgeRef edge) const;
     int getTurnCost(EdgeRef from, int via, EdgeRef to) const;

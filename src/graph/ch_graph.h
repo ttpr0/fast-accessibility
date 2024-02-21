@@ -12,6 +12,7 @@
 #include "./speed_ups/ch_index.h"
 #include "./speed_ups/partition.h"
 #include "./structs/adjacency.h"
+#include "../util/function_ref.h"
 
 //*******************************************
 // ch-graph
@@ -40,7 +41,7 @@ public:
     Coord getNodeGeom(int node);
     int getClosestNode(Coord point);
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
     int getTurnCost(EdgeRef from, int via, EdgeRef to);
     int getOtherNode(EdgeRef edge, int node);
@@ -75,7 +76,7 @@ public:
     Coord getNodeGeom(int node);
     int getClosestNode(Coord point);
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func);
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
     int getTurnCost(EdgeRef from, int via, EdgeRef to);
     int getOtherNode(EdgeRef edge, int node);

@@ -13,7 +13,7 @@ int BaseGraphExplorer::edgeCount() const
 {
     return this->base.edgeCount();
 }
-void BaseGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const
+void BaseGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) const
 {
     if (typ == Adjacency::ADJACENT_ALL || typ == Adjacency::ADJACENT_EDGES) {
         auto accessor = this->base.adjacency.getNeighbours(node, dir);

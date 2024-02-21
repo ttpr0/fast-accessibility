@@ -6,6 +6,7 @@
 #include <tuple>
 #include <vector>
 
+#include "../../../util/function_ref.h"
 #include "../../base/graph_base.h"
 #include "../../base_graph.h"
 #include "../../graph.h"
@@ -70,7 +71,7 @@ public:
         this->ch_adjacency.addEdgeEntries(node_a, node_b, shc_id, 100);
     }
 
-    void forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> callback) const
+    void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> callback) const
     {
         auto accessor = this->base->adjacency.getNeighbours(node, dir);
         auto sh_accessor = this->ch_adjacency.getNeighbours(node, dir);

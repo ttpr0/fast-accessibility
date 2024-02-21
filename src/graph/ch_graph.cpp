@@ -58,7 +58,7 @@ int CHGraph::getClosestNode(Coord point)
     return -1;
 }
 
-void CHGraph::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
+void CHGraph::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)
 {
     if (typ == Adjacency::ADJACENT_ALL) {
         int m_node = this->id_mapping->get_source(node);

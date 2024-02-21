@@ -60,7 +60,7 @@ int TiledGraph::getClosestNode(Coord point)
     return -1;
 }
 
-void TiledGraph::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func)
+void TiledGraph::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)
 {
     if (typ == ADJACENT_SKIP) {
         auto skip_accessor = this->tiled->topology.getNeighbours(node, dir);

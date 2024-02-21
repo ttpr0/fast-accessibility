@@ -22,7 +22,7 @@ short TiledGraphExplorer::getNodeTile(int node) const
     int m_node = this->id_mapping.get_source(node);
     return this->partition.get_node_tile(m_node);
 }
-void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const
+void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) const
 {
     if (typ == ADJACENT_SKIP) {
         auto skip_accessor = this->tiled.topology.getNeighbours(node, dir);

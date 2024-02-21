@@ -21,7 +21,7 @@ short CHGraphExplorer::getNodeLevel(int node) const
 {
     return this->ch.getNodeLevel(node);
 }
-void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, std::function<void(EdgeRef)> func) const
+void CHGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) const
 {
     if (typ == Adjacency::ADJACENT_ALL) {
         int m_node = this->id_mapping.get_source(node);
