@@ -30,16 +30,11 @@ void TCWeighting::set_turn_cost(int from, int via, int to, int weight)
     this->turn_weights[loc + (int)cols * bwd_index + fwd_index] = weight;
 }
 
-std::shared_ptr<TCWeighting> build_default_tc_weighting(const GraphBase& base)
+std::shared_ptr<TCWeighting> build_tc_weighting(const GraphBase& base)
 {
     std::vector<int> edge_weights(base.edgeCount());
     for (int i = 0; i < base.edgeCount(); i++) {
-        auto edge = base.edges[i];
-        int w = edge.length * 3.6 / edge.maxspeed;
-        if (w < 1) {
-            w = 1;
-        }
-        edge_weights[i] = w;
+        edge_weights[i] = 1;
     }
 
     std::vector<std::tuple<char, char>> edge_indices(base.edgeCount());
@@ -66,4 +61,20 @@ std::shared_ptr<TCWeighting> build_default_tc_weighting(const GraphBase& base)
     std::vector<char> turn_costs(loc, 0);
 
     return std::make_shared<TCWeighting>(std::move(edge_weights), std::move(edge_indices), std::move(turn_refs), std::move(turn_costs));
+}
+
+std::shared_ptr<TCWeighting> build_default_tc_weighting(const GraphBase& base)
+{
+    auto tc_weight = build_tc_weighting(base);
+
+    for (int i = 0; i < base.edgeCount(); i++) {
+        auto edge = base.edges[i];
+        int w = edge.length * 3.6 / edge.maxspeed;
+        if (w < 1) {
+            w = 1;
+        }
+        tc_weight->set_edge_weight(i, w);
+    }
+
+    return std::move(tc_weight);
 }

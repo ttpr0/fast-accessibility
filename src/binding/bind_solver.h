@@ -61,4 +61,9 @@ void bind_solver(nanobind::module_& m)
     grasp.def("is_build", &GRASP::isBuild);
     m.def(
         "build_grasp_solver", [](ITiledGraph* graph) { return GRASP(graph); }, py::keep_alive<1, 0>());
+
+    auto range_dijkstra_tc = py::class_<RangeDijkstraTC>(m, "RangeDijkstraTC");
+    range_dijkstra_tc.def("is_build", &RangeDijkstraTC::isBuild);
+    m.def(
+        "build_range_dijkstra_tc_solver", [](IGraph* graph) { return RangeDijkstraTC(graph); }, py::keep_alive<1, 0>());
 }

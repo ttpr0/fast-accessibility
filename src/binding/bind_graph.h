@@ -177,6 +177,7 @@ void bind_graph(nanobind::module_& m)
     auto i_ch_graph = py::class_<ICHGraph, IGraph>(m, "ICHGraph");
     auto i_tiled_graph = py::class_<ITiledGraph, IGraph>(m, "ITiledGraph");
     auto graph = py::class_<Graph, IGraph>(m, "Graph");
+    auto tc_graph = py::class_<TCGraph, IGraph>(m, "TCGraph");
     auto ch_graph = py::class_<CHGraph, ICHGraph>(m, "CHGraph");
     auto ch_graph_2 = py::class_<CHGraph2, IGraph>(m, "CHGraph2");
     auto tiled_graph = py::class_<TiledGraph, ITiledGraph>(m, "TiledGraph");
@@ -209,8 +210,9 @@ void bind_graph(nanobind::module_& m)
     m.def("prepare_ch_index_2", &build_ch_index_2);
     m.def("new_graph_base", &new_graph_base);
     m.def("new_id_mapping", &new_id_mapping);
+    m.def("new_weighting", &build_weighting);
+    m.def("new_tc_weighting", &build_tc_weighting);
     m.def("prepare_default_weighting", &build_default_weighting);
-    m.def("prepare_default_tc_weighting", &build_default_tc_weighting);
     m.def("prepare_base_index", &build_base_index);
     m.def("prepare_kdtree_index", &build_kdtree_index);
     m.def("prepare_balanced_kdtree_index", &build_balanced_kdtree_index);
@@ -220,6 +222,7 @@ void bind_graph(nanobind::module_& m)
     m.def("prepare_isophast", &PreprocessTiledGraph5);
 
     m.def("build_base_graph", &build_base_graph);
+    m.def("build_tc_graph", &build_tc_graph);
     m.def("build_tiled_graph", &build_tiled_graph);
     m.def("build_ch_graph", &build_ch_graph);
     m.def("build_ch_graph_2", &build_ch_graph_2);

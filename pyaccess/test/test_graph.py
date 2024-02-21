@@ -1,7 +1,7 @@
 
 
 from .. import _pyaccess_ext
-from ..builder import GraphBuilder, new_weighting
+from ..builder import GraphBuilder, new_weighting, new_tc_weighting
 from ..accessibility import calc_range, OneToManyType
 
 nodes = [
@@ -41,6 +41,10 @@ edges = [
     (10, 12, 2),
     (11, 13, 2),
     (12, 13, 3)
+]
+turn_penalties = [
+    (13, 3, 7, 5),
+    (32, 11, 36, 3)
 ]
 
 def test_shortest_path():
@@ -84,6 +88,51 @@ def test_shortest_path():
     assert ranges[2] == 7
     assert ranges[3] == -9999
     assert ranges[4] == 8
+
+def test_shortest_path_tc():
+    # build graph
+    builder = GraphBuilder()
+    try:
+        for node in nodes:
+            builder.add_node(node)
+        for edge in edges:
+            node_a, node_b, length = edge
+            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+    except:
+        raise AssertionError("Error while building graph")
+    graph = builder.build_graph()
+
+    # build weighting
+    weighting = new_tc_weighting(graph)
+    for i in range(0, len(edges)):
+        _, _, length = edges[i]
+        weighting.set_edge_weight(2*i, length)
+        weighting.set_edge_weight(2*i+1, length)
+    for i in range(0, len(turn_penalties)):
+        from_, via_, to_, penalty = turn_penalties[i]
+        weighting.set_turn_cost(from_, via_, to_, penalty)
+    graph.add_weighting("default", weighting)
+
+    # test locations
+    sup_point = (8, 6) # node 8
+    dem_points = [
+        (10, 3), # node 10
+        (3, 1), # node 0
+        (2, 8), # node 2
+        (5, 9), # node 4
+        (13, 3)  # node 13
+    ]
+
+    # compute shortest paths
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10)
+
+    assert len(ranges) == 5
+    assert ranges[0] == 4
+    assert ranges[1] == 9
+    assert ranges[2] == 7
+    assert ranges[3] == -9999
+    assert ranges[4] == 9
 
 def test_contraction():
     # build graph

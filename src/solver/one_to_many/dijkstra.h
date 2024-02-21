@@ -56,3 +56,49 @@ public:
         calcRangeDijkstra(this->graph, s_id, flags, this->max_range);
     }
 };
+
+// RangeDijkstra with turn-costs
+class RangeDijkstraTC
+{
+private:
+    bool is_build;
+    IGraph* graph;
+    int max_range;
+
+public:
+    RangeDijkstraTC(IGraph* graph) : graph(graph)
+    {
+        this->is_build = false;
+        this->max_range = 10000000;
+    }
+    void addMaxRange(int range)
+    {
+        if (this->is_build) {
+            return;
+        }
+        this->max_range = range;
+    }
+    void addTarget(int id) {}
+
+    bool isBuild() { return this->is_build; }
+    void build()
+    {
+        if (this->is_build) {
+            return;
+        }
+        this->is_build = true;
+    }
+
+    EdgeBasedState makeComputeState() { return EdgeBasedState(this->graph->nodeCount(), this->graph->edgeCount()); }
+    void compute(int s_id, EdgeBasedState& state)
+    {
+        if (!this->is_build) {
+            return;
+        }
+        auto& node_flags = state.node_flags;
+        auto& edge_flags = state.edge_flags;
+        node_flags.soft_reset();
+        edge_flags.soft_reset();
+        calcRangeDijkstraTC(this->graph, s_id, node_flags, edge_flags, this->max_range);
+    }
+};

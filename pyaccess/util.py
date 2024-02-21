@@ -1,13 +1,16 @@
 from . import _pyaccess_ext
 from .graph import Graph
 
-def _build_graph(graph: Graph, weight: str) -> _pyaccess_ext.Graph:
+def _build_graph(graph: Graph, weight: str) -> _pyaccess_ext.Graph | _pyaccess_ext.TCGraph:
     b = graph._get_base()
     w = graph._get_weight(weight)
-    if not isinstance(w, _pyaccess_ext.Weighting):
-        raise ValueError("invalid weighting")
     i = graph._get_index()
-    g = _pyaccess_ext.build_base_graph(b, w, i)
+    if isinstance(w, _pyaccess_ext.Weighting):
+        g = _pyaccess_ext.build_base_graph(b, w, i)
+    elif isinstance(w, _pyaccess_ext.TCWeighting):
+        g = _pyaccess_ext.build_tc_graph(b, w, i)
+    else:
+        raise ValueError("invalid weighting")
     return g
 
 def _build_ch_graph(graph: Graph, ch: str) -> _pyaccess_ext.CHGraph:

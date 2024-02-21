@@ -957,6 +957,14 @@ class RangeDijkstra:
     def is_build(self) -> bool:
         ...
     
+class RangeDijkstraTC:
+    """
+    None
+    """
+
+    def is_build(self) -> bool:
+        ...
+    
 class RangePHAST:
     """
     None
@@ -1071,6 +1079,12 @@ class Shortcut:
     def weight(self, arg: int, /) -> None:
         ...
     
+class TCGraph(pyaccess._pyaccess_ext.IGraph):
+    """
+    None
+    """
+    ...
+
 class TCWeighting:
     """
     None
@@ -1137,6 +1151,9 @@ def build_grasp_solver(arg: pyaccess._pyaccess_ext.ITiledGraph, /) -> pyaccess._
 def build_range_dijkstra_solver(arg: pyaccess._pyaccess_ext.IGraph, /) -> pyaccess._pyaccess_ext.RangeDijkstra:
     ...
 
+def build_range_dijkstra_tc_solver(arg: pyaccess._pyaccess_ext.IGraph, /) -> pyaccess._pyaccess_ext.RangeDijkstraTC:
+    ...
+
 def build_range_phast_gs_solver(arg: pyaccess._pyaccess_ext.CHGraph2, /) -> pyaccess._pyaccess_ext.RangePHASTGS:
     ...
 
@@ -1152,13 +1169,16 @@ def build_range_rphast_gs_solver(arg: pyaccess._pyaccess_ext.CHGraph2, /) -> pya
 def build_range_rphast_solver(arg: pyaccess._pyaccess_ext.ICHGraph, /) -> pyaccess._pyaccess_ext.RangeRPHAST:
     ...
 
+def build_tc_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.TCWeighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, /) -> pyaccess._pyaccess_ext.TCGraph:
+    ...
+
 def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.TiledData, arg6: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
     ...
 
 @overload
-def calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
@@ -1204,6 +1224,13 @@ def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: numpy.typing.ND
     """
     ...
 
+@overload
+def calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: numpy.typing.NDArray, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
+    """
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    """
+    ...
+
 def calc_ch2_order(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Partition, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.IntVector:
     ...
 
@@ -1220,9 +1247,9 @@ def calc_mapped_order(arg0: pyaccess._pyaccess_ext.IntVector, arg1: pyaccess._py
     ...
 
 @overload
-def calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
     """
     ...
 
@@ -1269,9 +1296,16 @@ def calc_matrix_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: numpy.ty
     ...
 
 @overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+def calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*, *), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
     """
     ...
 
@@ -1314,6 +1348,13 @@ def calc_range_query(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: int, arg2:
 def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
     calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
     """
     ...
 
@@ -1417,6 +1458,12 @@ def new_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyac
 def new_id_mapping(arg: int, /) -> pyaccess._pyaccess_ext.IDMapping:
     ...
 
+def new_tc_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.TCWeighting:
+    ...
+
+def new_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:
+    ...
+
 def prepare_balanced_kdtree_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
     ...
 
@@ -1436,9 +1483,6 @@ def prepare_ch_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pya
     ...
 
 def prepare_ch_index_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.CHData, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.CHIndex:
-    ...
-
-def prepare_default_tc_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.TCWeighting:
     ...
 
 def prepare_default_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:

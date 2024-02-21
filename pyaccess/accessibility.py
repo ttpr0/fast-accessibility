@@ -27,7 +27,10 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             g = _build_graph(graph, weight)
-            solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if isinstance(g, _pyaccess_ext.Graph):
+                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            else:
+                solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case OneToManyType.RANGE_PHAST:
             if ch is None:
                 raise ValueError("no ch specified")
@@ -72,7 +75,10 @@ def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tu
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             g = _build_graph(graph, weight)
-            solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if isinstance(g, _pyaccess_ext.Graph):
+                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            else:
+                solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case OneToManyType.RANGE_PHAST:
             if ch is None:
                 raise ValueError("no ch specified")
@@ -107,7 +113,10 @@ def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points:
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             g = _build_graph(graph, weight)
-            solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if isinstance(g, _pyaccess_ext.Graph):
+                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            else:
+                solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case OneToManyType.RANGE_PHAST:
             if ch is None:
                 raise ValueError("no ch specified")
@@ -146,7 +155,10 @@ def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_p
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             g = _build_graph(graph, weight)
-            solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if isinstance(g, _pyaccess_ext.Graph):
+                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            else:
+                raise ValueError("Not implemented yet...")
         case _:
             raise NotImplementedError("")
 

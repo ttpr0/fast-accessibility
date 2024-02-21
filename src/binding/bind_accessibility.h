@@ -37,6 +37,7 @@ void bind_accessibility(nanobind::module_& m)
     m.def("calc_2sfca", &calc2SFCA<RangePHASTGS>);
     m.def("calc_2sfca", &calc2SFCA<RangeRPHASTGS>);
     m.def("calc_2sfca", &calc2SFCA<GRASP>);
+    m.def("calc_2sfca", &calc2SFCA<RangeDijkstraTC>);
 
     // range query functions
     m.def("calc_range_query", &calcRangeQuery<RangeDijkstra>);
@@ -46,6 +47,7 @@ void bind_accessibility(nanobind::module_& m)
     m.def("calc_range_query", &calcRangeQuery<RangePHASTGS>);
     m.def("calc_range_query", &calcRangeQuery<RangeRPHASTGS>);
     m.def("calc_range_query", &calcRangeQuery<GRASP>);
+    m.def("calc_range_query", &calcRangeQuery<RangeDijkstraTC>);
 
     // matrix query functions
     m.def("calc_matrix_query", &calcMatrixQuery<RangeDijkstra>);
@@ -55,6 +57,7 @@ void bind_accessibility(nanobind::module_& m)
     m.def("calc_matrix_query", &calcMatrixQuery<RangePHASTGS>);
     m.def("calc_matrix_query", &calcMatrixQuery<RangeRPHASTGS>);
     m.def("calc_matrix_query", &calcMatrixQuery<GRASP>);
+    m.def("calc_matrix_query", &calcMatrixQuery<RangeDijkstraTC>);
 
     // reachability functions
     m.def("calc_reachability", &calcReachability<RangeDijkstra>);

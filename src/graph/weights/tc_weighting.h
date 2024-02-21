@@ -26,4 +26,5 @@ public:
     void set_turn_cost(int from, int via, int to, int weight);
 };
 
+std::shared_ptr<TCWeighting> build_tc_weighting(const GraphBase& base);
 std::shared_ptr<TCWeighting> build_default_tc_weighting(const GraphBase& base);

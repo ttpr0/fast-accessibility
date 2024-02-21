@@ -38,9 +38,18 @@ class GraphBuilder:
         return new_graph(self._nodes, self._edges)
 
 def new_weighting(graph: Graph) -> _pyaccess_ext.Weighting:
+    """Creates a new weighting for the given graph.
+
+    Edge weights are initiallized to 1.
+    """
     base = graph._get_base()
-    return _pyaccess_ext.prepare_default_weighting(base)
+    return _pyaccess_ext.new_weighting(base)
 
 def new_tc_weighting(graph: Graph) -> _pyaccess_ext.TCWeighting:
+    """Creates a new turn-cost weighting for the given graph.
+
+    Edge weights are initiallized to 1.
+    Turn costs are initiallized to 0.
+    """
     base = graph._get_base()
-    return _pyaccess_ext.prepare_default_tc_weighting(base)
+    return _pyaccess_ext.new_tc_weighting(base)
