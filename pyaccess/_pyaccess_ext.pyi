@@ -395,6 +395,26 @@ class EdgeVector:
         """
         ...
     
+class ExponentialDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg: int, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
+        ...
+    
 FORWARD: Direction
 
 class FloatVector:
@@ -544,6 +564,26 @@ class GRASP:
     def is_build(self) -> bool:
         ...
     
+class GaussianDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg: int, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
+        ...
+    
 class Graph(pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -571,6 +611,26 @@ class GraphBase:
         ...
     
     def node_count(self) -> int:
+        ...
+    
+class GravityDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg0: int, arg1: float, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
         ...
     
 class HybridDecay(pyaccess._pyaccess_ext.IDistanceDecay):
@@ -786,6 +846,46 @@ class IntVector:
         """
         ...
     
+class InversePowerDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg: int, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
+        ...
+    
+class KernelDensityDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg0: int, arg1: float, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
+        ...
+    
 class LinearDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -947,6 +1047,26 @@ class Partition:
     """
 
     def get_node_tile(self, arg: int, /) -> int:
+        ...
+    
+class PolynomDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg0: int, arg1: pyaccess._pyaccess_ext.FloatVector, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
         ...
     
 class RangeDijkstra:

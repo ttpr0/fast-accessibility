@@ -12,8 +12,14 @@
 
 #include "../accessibility/distance_decay/binary_decay.h"
 #include "../accessibility/distance_decay/decay.h"
+#include "../accessibility/distance_decay/exponential_decay.h"
+#include "../accessibility/distance_decay/gaussian_decay.h"
+#include "../accessibility/distance_decay/gravity_decay.h"
 #include "../accessibility/distance_decay/hybrid_decay.h"
+#include "../accessibility/distance_decay/inverse_power_decay.h"
+#include "../accessibility/distance_decay/kernel_density_decay.h"
 #include "../accessibility/distance_decay/linear_decay.h"
+#include "../accessibility/distance_decay/polynom_decay.h"
 
 void bind_decay(nanobind::module_& m)
 {
@@ -34,4 +40,22 @@ void bind_decay(nanobind::module_& m)
 
     auto linear_decay = py::class_<LinearDecay, IDistanceDecay>(m, "LinearDecay");
     linear_decay.def(py::init<int>(), py::arg("max_dist"));
+
+    auto exponential_decay = py::class_<ExponentialDecay, IDistanceDecay>(m, "ExponentialDecay");
+    exponential_decay.def(py::init<int>());
+
+    auto gaussian_decay = py::class_<GaussianDecay, IDistanceDecay>(m, "GaussianDecay");
+    gaussian_decay.def(py::init<int>());
+
+    auto gravity_decay = py::class_<GravityDecay, IDistanceDecay>(m, "GravityDecay");
+    gravity_decay.def(py::init<int, float>());
+
+    auto inverse_power_decay = py::class_<InversePowerDecay, IDistanceDecay>(m, "InversePowerDecay");
+    inverse_power_decay.def(py::init<int>());
+
+    auto kernel_density_decay = py::class_<KernelDensityDecay, IDistanceDecay>(m, "KernelDensityDecay");
+    kernel_density_decay.def(py::init<int, float>());
+
+    auto polynom_decay = py::class_<PolynomDecay, IDistanceDecay>(m, "PolynomDecay");
+    polynom_decay.def(py::init<int, std::vector<float>>());
 }
