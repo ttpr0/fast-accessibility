@@ -39,16 +39,18 @@ class Graph:
     def _get_name(self) -> str:
         return self._name
 
-    def get_explorer(self, weight: str = "default", partition: str | None = None, ch: str | None = None, overlay: str | None = None) -> Explorer:
+    def get_explorer(self, weight: str | None = None, partition: str | None = None, ch: str | None = None, overlay: str | None = None) -> Explorer:
         """Creates a graph-explorer to traverse the graphs nodes, edges and shortcuts.
         """
         b = self._get_base()
-        w = self._get_weight(weight)
         i = self._get_index()
+        w = None
         p = None
         im = None
         c = None
         o = None
+        if weight is not None:
+            w = self._get_weight(weight)
         if partition is not None:
             p = self._get_partition(partition)
         if ch is not None:
@@ -61,7 +63,7 @@ class Graph:
             o, _, im = self._get_overlay(overlay)
             w = self._get_weight(self._get_overlay_weight(overlay))
             p = self._get_partition(self._get_overlay_partition(overlay))
-        return Explorer(b, w, i, p, im, c, o)
+        return Explorer(b, i, w, p, im, c, o)
 
     def store(self, name: str | None = None, path: str | None = None):
         """Stores the graph into the given path.

@@ -5,20 +5,20 @@ from . import _pyaccess_ext
 
 class Explorer:
     _base: _pyaccess_ext.GraphBase
-    _weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting
     _index: _pyaccess_ext.IGraphIndex
+    _weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None
     _partition: _pyaccess_ext.Partition | None
     _id_mapping: _pyaccess_ext.IDMapping | None
     _ch: _pyaccess_ext.CHData | None
     _tiled: _pyaccess_ext.TiledData | None
 
-    def __init__(self, base: _pyaccess_ext.GraphBase, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting, index: _pyaccess_ext.IGraphIndex | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None):
+    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex | None = None, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None):
         self._base = base
-        self._weight = weight
         if index is None:
             self._index = _pyaccess_ext.prepare_base_index(self._base)
         else:
             self._index = index
+        self._weight = weight
         self._partition = partition
         self._id_mapping = id_mapping
         if ch is not None and tiled is not None:
@@ -39,9 +39,13 @@ class Explorer:
         return self._base.get_edge(edge_id)
 
     def get_edge_weight(self, edge_id: int) -> int:
+        if self._weight is None:
+            raise ValueError("explorer does not contain weight information")
         return self._weight.get_edge_weight(edge_id)
 
     def get_turn_cost(self, from_edge_id: int, via_node_id: int, to_edge_id: int) -> int:
+        if self._weight is None:
+            raise ValueError("explorer does not contain weight information")
         if isinstance(self._weight, _pyaccess_ext.TCWeighting):
             return self._weight.get_turn_cost(from_edge_id, via_node_id, to_edge_id)
         else:
