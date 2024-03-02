@@ -18,6 +18,7 @@
 #include "solver/one_to_many/grasp.h"
 #include "solver/one_to_many/phast.h"
 #include "solver/one_to_many/rphast.h"
+#include "solver/one_to_many/transit.h"
 
 void bind_solver(nanobind::module_& m)
 {
@@ -66,4 +67,11 @@ void bind_solver(nanobind::module_& m)
     range_dijkstra_tc.def("is_build", &RangeDijkstraTC::isBuild);
     m.def(
         "build_range_dijkstra_tc_solver", [](IGraph* graph) { return RangeDijkstraTC(graph); }, py::keep_alive<1, 0>());
+
+    auto transit_dijkstra = py::class_<TransitDijkstra>(m, "TransitDijkstra");
+    transit_dijkstra.def("is_build", &TransitDijkstra::isBuild);
+    transit_dijkstra.def("set_min_departure", &TransitDijkstra::setMinDeparture);
+    transit_dijkstra.def("set_max_departure", &TransitDijkstra::setMaxDeparture);
+    m.def(
+        "build_transit_dijkstra_solver", [](TransitGraph& graph) { return TransitDijkstra(graph); }, py::keep_alive<1, 0>());
 }

@@ -28,6 +28,7 @@ add_executable(${exe_name}
     src/graph/ch_graph.cpp
     src/graph/ch_graph_2.cpp
     src/graph/tiled_graph.cpp
+    src/graph/transit_graph.cpp
     src/graph/structs/adjacency.cpp
     src/graph/preproc/build_ch_index.cpp
     src/graph/preproc/node_ordering.cpp
@@ -38,6 +39,7 @@ add_executable(${exe_name}
     src/graph/base/graph_base.cpp
     src/graph/weights/weighting.cpp
     src/graph/weights/tc_weighting.cpp
+    src/graph/weights/transit_weighting.cpp
     src/graph/io/cell_index_io.cpp
     src/graph/io/ch_data_io.cpp
     src/graph/io/graph_base_io.cpp
@@ -75,6 +77,7 @@ add_library(${lib_name} SHARED
     src/graph/ch_graph.cpp
     src/graph/ch_graph_2.cpp
     src/graph/tiled_graph.cpp
+    src/graph/transit_graph.cpp
     src/graph/structs/adjacency.cpp
     src/graph/preproc/build_ch_index.cpp
     src/graph/preproc/node_ordering.cpp
@@ -85,6 +88,7 @@ add_library(${lib_name} SHARED
     src/graph/base/graph_base.cpp
     src/graph/weights/weighting.cpp
     src/graph/weights/tc_weighting.cpp
+    src/graph/weights/transit_weighting.cpp
     src/graph/io/cell_index_io.cpp
     src/graph/io/ch_data_io.cpp
     src/graph/io/graph_base_io.cpp

@@ -74,6 +74,13 @@ struct Shortcut
     Data<4> payload;
 };
 
+struct Connection
+{
+    int stopA;
+    int stopB;
+    int route;
+};
+
 // struct CHEdge
 // {
 //     int from;

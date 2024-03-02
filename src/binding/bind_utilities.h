@@ -3,16 +3,18 @@
 #include <iostream>
 #include <vector>
 
-#include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/bind_vector.h>
-#include <nanobind/stl/shared_ptr.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/tuple.h>
-#include <nanobind/stl/unique_ptr.h>
 
 #include "../graph/structs/geom.h"
 #include "../graph/util/map_coords.h"
+
+NB_MAKE_OPAQUE(std::vector<int>);
+NB_MAKE_OPAQUE(std::vector<float>);
+NB_MAKE_OPAQUE(std::vector<Coord>);
+NB_MAKE_OPAQUE(std::vector<Node>);
+NB_MAKE_OPAQUE(std::vector<Edge>);
+NB_MAKE_OPAQUE(std::vector<Connection>);
 
 void bind_utilities(nanobind::module_& m)
 {
@@ -34,6 +36,7 @@ void bind_utilities(nanobind::module_& m)
         "Insert Coordinate with (lon, lat).");
     py::bind_vector<vector<Node>>(m, "NodeVector");
     py::bind_vector<vector<Edge>>(m, "EdgeVector");
+    py::bind_vector<vector<Connection>>(m, "ConnectionVector");
 
     auto coord = py::class_<Coord>(m, "Coord");
     coord.def(py::init<>());

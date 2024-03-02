@@ -20,6 +20,7 @@
 #include "solver/one_to_many/grasp.h"
 #include "solver/one_to_many/phast.h"
 #include "solver/one_to_many/rphast.h"
+#include "solver/one_to_many/transit.h"
 
 void bind_accessibility(nanobind::module_& m)
 {
@@ -48,6 +49,7 @@ void bind_accessibility(nanobind::module_& m)
     m.def("calc_range_query", &calcRangeQuery<RangeRPHASTGS>);
     m.def("calc_range_query", &calcRangeQuery<GRASP>);
     m.def("calc_range_query", &calcRangeQuery<RangeDijkstraTC>);
+    m.def("calc_range_query", &calcRangeQuery<TransitDijkstra>);
 
     // matrix query functions
     m.def("calc_matrix_query", &calcMatrixQuery<RangeDijkstra>);

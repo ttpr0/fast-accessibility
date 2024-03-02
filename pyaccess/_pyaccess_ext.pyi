@@ -66,6 +66,159 @@ class CellIndex:
     """
     ...
 
+class Connection:
+    """
+    None
+    """
+
+    @overload
+    def __init__(self, arg0: int, arg1: int, arg2: int, /) -> None:
+        """
+        __init__(self, arg0: int, arg1: int, arg2: int, /) -> None
+        """
+        ...
+    
+    @overload
+    def __init__(self) -> None:
+        """
+        __init__(self) -> None
+        """
+        ...
+    
+    @property
+    def route(self) -> int:
+        ...
+    @route.setter
+    def route(self, arg: int, /) -> None:
+        ...
+    
+    @property
+    def stop_a(self) -> int:
+        ...
+    @stop_a.setter
+    def stop_a(self, arg: int, /) -> None:
+        ...
+    
+    @property
+    def stop_b(self) -> int:
+        ...
+    @stop_b.setter
+    def stop_b(self, arg: int, /) -> None:
+        ...
+    
+class ConnectionVector:
+    """
+    None
+    """
+
+    def __bool__(self) -> bool:
+        """
+        Check whether the vector is nonempty
+        """
+        ...
+    
+    @overload
+    def __delitem__(self, arg: slice, /) -> None:
+        """
+        __delitem__(self, arg: slice, /) -> None
+        """
+        ...
+    
+    @overload
+    def __delitem__(self, arg: int, /) -> None:
+        """
+        __delitem__(self, arg: int, /) -> None
+        """
+        ...
+    
+    @overload
+    def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.ConnectionVector:
+        """
+        __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.ConnectionVector
+        """
+        ...
+    
+    @overload
+    def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Connection:
+        """
+        __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Connection
+        """
+        ...
+    
+    @overload
+    def __init__(self, arg: Iterable[pyaccess._pyaccess_ext.Connection], /) -> None:
+        """
+        Construct from an iterable object
+        """
+        ...
+    
+    @overload
+    def __init__(self) -> None:
+        """
+        Default constructor
+        """
+        ...
+    
+    @overload
+    def __init__(self, arg: pyaccess._pyaccess_ext.ConnectionVector) -> None:
+        """
+        Copy constructor
+        """
+        ...
+    
+    def __iter__(self) -> iterator:
+        ...
+    
+    def __len__(self) -> int:
+        ...
+    
+    def __repr__(self) -> str:
+        ...
+    
+    @overload
+    def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.ConnectionVector, /) -> None:
+        """
+        __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.ConnectionVector, /) -> None
+        """
+        ...
+    
+    @overload
+    def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Connection, /) -> None:
+        """
+        __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Connection, /) -> None
+        """
+        ...
+    
+    def append(self, arg: pyaccess._pyaccess_ext.Connection, /) -> None:
+        """
+        Append `arg` to the end of the list.
+        """
+        ...
+    
+    def clear(self) -> None:
+        """
+        Remove all items from list.
+        """
+        ...
+    
+    def extend(self, arg: pyaccess._pyaccess_ext.ConnectionVector, /) -> None:
+        """
+        Extend `self` by appending elements from `arg`.
+        """
+        ...
+    
+    def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Connection, /) -> None:
+        """
+        Insert object `arg1` before index `arg0`.
+        """
+        ...
+    
+    def pop(self, index: int = -1) -> pyaccess._pyaccess_ext.Connection:
+        """
+        Remove and return item at `index` (default last).
+        """
+        ...
+    
 class Coord:
     """
     None
@@ -1245,6 +1398,43 @@ class TiledGraph(pyaccess._pyaccess_ext.ITiledGraph, pyaccess._pyaccess_ext.IGra
     """
     ...
 
+class TransitData:
+    """
+    None
+    """
+    ...
+
+class TransitDijkstra:
+    """
+    None
+    """
+
+    def is_build(self) -> bool:
+        ...
+    
+    def set_max_departure(self, arg: int, /) -> None:
+        ...
+    
+    def set_min_departure(self, arg: int, /) -> None:
+        ...
+    
+class TransitGraph:
+    """
+    None
+    """
+    ...
+
+class TransitWeighting:
+    """
+    None
+    """
+
+    def get_connection_weight(self, arg0: int, arg1: int, /) -> Optional[tuple[int, int]]:
+        ...
+    
+    def set_connection_schedule(self, arg0: int, arg1: list[tuple[int, int]], /) -> None:
+        ...
+    
 class Weighting:
     """
     None
@@ -1293,6 +1483,12 @@ def build_tc_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyacc
     ...
 
 def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.TiledData, arg6: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
+    ...
+
+def build_transit_dijkstra_solver(arg: pyaccess._pyaccess_ext.TransitGraph, /) -> pyaccess._pyaccess_ext.TransitDijkstra:
+    ...
+
+def build_transit_graph(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.IDMapping, arg2: pyaccess._pyaccess_ext.TransitData, arg3: pyaccess._pyaccess_ext.TransitWeighting, /) -> pyaccess._pyaccess_ext.TransitGraph:
     ...
 
 @overload
@@ -1423,9 +1619,9 @@ def calc_matrix_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: numpy.typing.NDA
     ...
 
 @overload
-def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+def calc_range_query(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
-    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    calc_range_query(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
     """
     ...
 
@@ -1475,6 +1671,13 @@ def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: int, arg2
 def calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
     """
     calc_range_query(arg0: pyaccess._pyaccess_ext.GRASP, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+    """
+    ...
+
+@overload
+def calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: int, arg2: numpy.typing.NDArray, arg3: int, /) -> numpy.typing.NDArray:
+    """
+    calc_range_query(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: int, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: int, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
     """
     ...
 
@@ -1581,6 +1784,9 @@ def new_id_mapping(arg: int, /) -> pyaccess._pyaccess_ext.IDMapping:
 def new_tc_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.TCWeighting:
     ...
 
+def new_transit_weighting(arg: pyaccess._pyaccess_ext.TransitData, /) -> pyaccess._pyaccess_ext.TransitWeighting:
+    ...
+
 def new_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:
     ...
 
@@ -1618,6 +1824,9 @@ def prepare_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
     ...
 
 def prepare_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.TiledData:
+    ...
+
+def prepare_transit(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.NodeVector, arg2: pyaccess._pyaccess_ext.ConnectionVector, arg3: int, /) -> tuple[pyaccess._pyaccess_ext.TransitData, pyaccess._pyaccess_ext.IDMapping]:
     ...
 
 def remove_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:

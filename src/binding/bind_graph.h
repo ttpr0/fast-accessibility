@@ -26,8 +26,11 @@
 #include "../graph/preproc/partition/partition.h"
 #include "../graph/preproc/remove_unconnected.h"
 #include "../graph/preproc/tiled/tiled.h"
+#include "../graph/preproc/transit/transit.h"
 #include "../graph/structs/geom.h"
+#include "../graph/transit_graph.h"
 #include "../graph/weights/tc_weighting.h"
+#include "../graph/weights/transit_weighting.h"
 #include "../graph/weights/weighting.h"
 
 void bind_graph(nanobind::module_& m)
@@ -88,6 +91,17 @@ void bind_graph(nanobind::module_& m)
     shortcut.def_rw("from_", &Shortcut::from);
     shortcut.def_rw("to_", &Shortcut::to);
     shortcut.def_rw("weight", &Shortcut::weight);
+
+    auto connection = py::class_<Connection>(m, "Connection");
+    connection.def(py::init<>());
+    connection.def("__init__", [](Connection& c, int stop_a, int stop_b, int route) {
+        c.stopA = stop_a;
+        c.stopB = stop_b;
+        c.route = route;
+    });
+    connection.def_rw("stop_a", &Connection::stopA);
+    connection.def_rw("stop_b", &Connection::stopB);
+    connection.def_rw("route", &Connection::route);
 
     //*******************************************
     // graph base components
@@ -169,6 +183,25 @@ void bind_graph(nanobind::module_& m)
 
     auto cell_index = py::class_<_CellIndex>(m, "CellIndex");
 
+    auto transit_data = py::class_<TransitData>(m, "TransitData");
+
+    auto transit_weighting = py::class_<TransitWeighting>(m, "TransitWeighting");
+    transit_weighting.def("get_connection_weight", [](TransitWeighting& tw, int connection, int from) -> std::optional<std::tuple<int, int>> {
+        auto w = tw.get_next_weight(connection, from);
+        if (w) {
+            return std::make_tuple(w->departure, w->arrival);
+        } else {
+            return std::nullopt;
+        }
+    });
+    transit_weighting.def("set_connection_schedule", [](TransitWeighting& tw, int connection, std::vector<std::tuple<int, int>> schedule) {
+        std::vector<ConnectionWeight> weights;
+        for (auto& s : schedule) {
+            weights.push_back(ConnectionWeight(std::get<0>(s), std::get<1>(s), 0));
+        }
+        tw.set_weights(connection, weights);
+    });
+
     //*******************************************
     // graph classes
     //*******************************************
@@ -181,6 +214,7 @@ void bind_graph(nanobind::module_& m)
     auto ch_graph = py::class_<CHGraph, ICHGraph>(m, "CHGraph");
     auto ch_graph_2 = py::class_<CHGraph2, IGraph>(m, "CHGraph2");
     auto tiled_graph = py::class_<TiledGraph, ITiledGraph>(m, "TiledGraph");
+    auto transit_graph = py::class_<TransitGraph>(m, "TransitGraph");
 
     //*******************************************
     // graph utility methods
@@ -212,6 +246,7 @@ void bind_graph(nanobind::module_& m)
     m.def("new_id_mapping", &new_id_mapping);
     m.def("new_weighting", &build_weighting);
     m.def("new_tc_weighting", &build_tc_weighting);
+    m.def("new_transit_weighting", &build_transit_weighting);
     m.def("prepare_default_weighting", &build_default_weighting);
     m.def("prepare_base_index", &build_base_index);
     m.def("prepare_kdtree_index", &build_kdtree_index);
@@ -220,12 +255,14 @@ void bind_graph(nanobind::module_& m)
     m.def("prepare_tiled", &PreprocessTiledGraph3);
     m.def("prepare_cell_index", &PrepareGRASPCellIndex2);
     m.def("prepare_isophast", &PreprocessTiledGraph5);
+    m.def("prepare_transit", &build_transit_data);
 
     m.def("build_base_graph", &build_base_graph);
     m.def("build_tc_graph", &build_tc_graph);
     m.def("build_tiled_graph", &build_tiled_graph);
     m.def("build_ch_graph", &build_ch_graph);
     m.def("build_ch_graph_2", &build_ch_graph_2);
+    m.def("build_transit_graph", &build_transit_graph);
 
     m.def("remove_unconnected", &remove_unconnected);
     m.def("remove_nodes", &_remove_nodes);

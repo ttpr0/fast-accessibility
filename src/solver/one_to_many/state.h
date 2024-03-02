@@ -30,3 +30,20 @@ public:
         return node.dist;
     }
 };
+
+class TransitState
+{
+public:
+    Flags<DistFlag> node_flags;
+    Flags<DistFlag> edge_flags;
+    Flags<TransitFlag> stop_flags;
+
+    TransitState(int node_count, int edge_count, int stop_count) : node_flags(node_count, {10000000, false}), edge_flags(edge_count, {10000000, false}), stop_flags(stop_count, {})
+    {}
+
+    int getDistance(int id)
+    {
+        auto& node = this->node_flags[id];
+        return node.dist;
+    }
+};

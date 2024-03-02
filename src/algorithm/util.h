@@ -19,6 +19,11 @@ struct DistFlag
     bool visited;
 };
 
+struct TransitFlag
+{
+    std::vector<std::tuple<int, int>> trips;
+};
+
 template <typename T>
 class Flags
 {
