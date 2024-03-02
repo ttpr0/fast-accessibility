@@ -1402,8 +1402,22 @@ class TransitData:
     """
     None
     """
-    ...
 
+    def connection_count(self) -> int:
+        ...
+    
+    def get_adjacent_connections(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
+        ...
+    
+    def get_connection(self, arg: int, /) -> pyaccess._pyaccess_ext.Connection:
+        ...
+    
+    def get_stop(self, arg: int, /) -> pyaccess._pyaccess_ext.Node:
+        ...
+    
+    def stop_count(self) -> int:
+        ...
+    
 class TransitDijkstra:
     """
     None

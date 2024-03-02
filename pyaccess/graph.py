@@ -10,6 +10,7 @@ from .components.base import BaseObject, BaseObject_from_metadata, BaseObject_ne
 from .components.weight import WeightObject, WeightObject_from_metadata, WeightObject_new
 from .components.partition import PartitionObject, PartitionObject_from_metadata, PartitionObject_new
 from .components.tiled import TiledObject, TiledObject_new, TiledObject_from_metadata
+from .components.transit import TransitObject, TransitObject_new, TransitObject_from_metadata
 from .explorer import Explorer
 
 class Graph:
@@ -21,8 +22,9 @@ class Graph:
     _partitions: dict[str, PartitionObject]
     _ch: dict[str, CHObject]
     _tiled: dict[str, TiledObject]
+    _transit: dict[str, TransitObject]
 
-    def __init__(self, _base_path: str, _name: str, base: BaseObject, weights: dict[str, WeightObject], partitions: dict[str, PartitionObject], ch: dict[str, CHObject], tiled: dict[str, TiledObject]):
+    def __init__(self, _base_path: str, _name: str, base: BaseObject, weights: dict[str, WeightObject], partitions: dict[str, PartitionObject], ch: dict[str, CHObject], tiled: dict[str, TiledObject], transit: dict[str, TransitObject]):
         self._base_path = _base_path
         self._name = _name
 
@@ -32,6 +34,7 @@ class Graph:
         self._partitions = partitions
         self._ch = ch
         self._tiled = tiled
+        self._transit = transit
 
     def _get_path(self) -> str:
         return self._base_path
@@ -39,7 +42,7 @@ class Graph:
     def _get_name(self) -> str:
         return self._name
 
-    def get_explorer(self, weight: str | None = None, partition: str | None = None, ch: str | None = None, overlay: str | None = None) -> Explorer:
+    def get_explorer(self, weight: str | None = None, partition: str | None = None, ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None) -> Explorer:
         """Creates a graph-explorer to traverse the graphs nodes, edges and shortcuts.
         """
         b = self._get_base()
@@ -49,6 +52,9 @@ class Graph:
         im = None
         c = None
         o = None
+        t = None
+        sm = None
+        tw = None
         if weight is not None:
             w = self._get_weight(weight)
         if partition is not None:
@@ -59,11 +65,16 @@ class Graph:
             part = self._get_ch_partition(ch)
             if part is not None:
                 p = self._get_partition(part)
-        if overlay is not None:
+        elif overlay is not None:
             o, _, im = self._get_overlay(overlay)
             w = self._get_weight(self._get_overlay_weight(overlay))
             p = self._get_partition(self._get_overlay_partition(overlay))
-        return Explorer(b, i, w, p, im, c, o)
+        elif transit is not None:
+            t, sm = self._get_transit(transit)
+            w = self._get_weight(self._get_transit_base_weight(transit))
+            if transit_weight is not None:
+                tw = self._get_transit_weighting(transit, transit_weight)
+        return Explorer(b, i, w, p, im, c, o, t, sm, tw)
 
     def store(self, name: str | None = None, path: str | None = None):
         """Stores the graph into the given path.
@@ -92,6 +103,10 @@ class Graph:
         for t, o in self._tiled.items():
             meta["speed_ups"]["tiled"][t] = o.get_metadata()
             o.store(f"{self._base_path}/{self._name}_tiled_{t}")
+        meta["transit"] = {}
+        for t, o in self._transit.items():
+            meta["transit"][t] = o.get_metadata()
+            o.store(f"{self._base_path}/{self._name}_transit_{t}")
         with open(f"{self._base_path}/{self._name}-meta", "w") as file:
             file.write(json.dumps(meta))
 
@@ -113,6 +128,9 @@ class Graph:
         for name, tiled in self._tiled.items():
             tiled.delete(f"{self._base_path}/{self._name}_tiled_{name}")
         self._tiled = {}
+        for name, transit in self._transit.items():
+            transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
+        self._transit = {}
 
     def optimize_base(self):
         """removes all unconnected components and reorders graph with DFS-Ordering
@@ -135,6 +153,9 @@ class Graph:
         for t, o in self._tiled.items():
             o.delete(f"{self._base_path}/{self._name}_tiled_{t}")
         self._tiled = {}
+        for name, transit in self._transit.items():
+            transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
+        self._transit = {}
 
     def add_default_weighting(self, name: str = "default"):
         """Adds a new default weighting to the graph.
@@ -221,6 +242,28 @@ class Graph:
         tiled_obj = TiledObject_new(weight, partition, tiled_data, cell_index, id_mapping)
         self._tiled[name] = tiled_obj
 
+    def add_public_transit(self, name: str, stops: _pyaccess_ext.NodeVector, connections: _pyaccess_ext.ConnectionVector, weight: str = "default", max_transfer_range: int = 900):
+        """Adds public transit overlay.
+        """
+        b = self._get_base()
+        w = self._get_weight(weight)
+        i = self._get_index()
+        if isinstance(w, _pyaccess_ext.Weighting):
+            g = _pyaccess_ext.build_base_graph(b, w, i)
+        else:
+            g = _pyaccess_ext.build_tc_graph(b, w, i)
+        transit_data, id_mapping = _pyaccess_ext.prepare_transit(g, stops, connections, max_transfer_range)
+        transit_obj = TransitObject_new(weight, transit_data, id_mapping)
+        self._transit[name] = transit_obj
+
+    def add_transit_weighting(self, name: str, weights: _pyaccess_ext.TransitWeighting, transit: str):
+        """Adds a transit weighting.
+        """
+        if transit not in self._transit:
+            raise ValueError(f"transit {transit} does not exist")
+        t = self._transit[transit]
+        t.add_weighting(name, weights)
+
     def remove_weighting(self, name: str):
         """Removes and deletes a weighting and all dependant contractions and overlays.
         """
@@ -284,6 +327,23 @@ class Graph:
         o = self._tiled[name]
         o.delete(f"{self._base_path}/{self._name}_tiled_{name}")
         del self._tiled[name]
+
+    def remove_public_transit(self, name: str):
+        """Removes and deletes an public-transit-overlay.
+        """
+        if name not in self._transit:
+            raise ValueError(f"transit-overlay {name} does not exist")
+        o = self._transit[name]
+        o.delete(f"{self._base_path}/{self._name}_transit_{name}")
+        del self._transit[name]
+
+    def remove_transit_weighting(self, name: str, transit: str):
+        """Removes and deletes a transit weighting.
+        """
+        if transit not in self._transit:
+            raise ValueError(f"transit {transit} does not exist")
+        t = self._transit[transit]
+        t.delete_weighting(name)
 
     def _get_base(self) -> _pyaccess_ext.GraphBase:
         if not self._base.is_loaded():
@@ -355,6 +415,25 @@ class Graph:
     def _get_overlay_partition(self, name: str) -> str:
         tiled = self._tiled[name]
         return tiled.get_base_partition()
+    
+    def _get_transit(self, name: str) -> tuple[_pyaccess_ext.TransitData, _pyaccess_ext.IDMapping]:
+        transit = self._transit[name]
+        if not transit.is_loaded():
+            transit.load(f"{self._base_path}/{self._name}_transit_{name}")
+        transit_data = transit.get_transit_data()
+        id_mapping = transit.get_id_mapping()
+        return transit_data, id_mapping
+    
+    def _get_transit_base_weight(self, name: str) -> str:
+        transit = self._transit[name]
+        return transit.get_base_weigth()
+
+    def _get_transit_weighting(self, name: str, weighting: str) -> _pyaccess_ext.TransitWeighting:
+        transit = self._transit[name]
+        if not transit.is_weighting_loaded(weighting):
+            transit.load_weighting(f"{self._base_path}/{self._name}_transit_{name}", weighting)
+        return transit.get_weighting(weighting)
+
 
 def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) -> Graph:
     """Creates a new graph from nodes and edges.
@@ -362,7 +441,7 @@ def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) 
     Use graph.store(...) to store and load_graph() to load a graph from a directory.
     """
     base = BaseObject_new(nodes, edges)
-    return Graph("", "", base, {}, {}, {}, {})
+    return Graph("", "", base, {}, {}, {}, {}, {})
 
 def load_graph(name: str, path: str) -> Graph:
     """Loads graph from a directory.
@@ -385,4 +464,7 @@ def load_graph(name: str, path: str) -> Graph:
     tiled = {}
     for t, m in meta["speed_ups"]["tiled"].items():
         tiled[t] = TiledObject_from_metadata(m)
-    return Graph(path, name, base, weights, partitions, ch, tiled)
+    transit = {}
+    for t, m in meta["transit"].items():
+        transit[t] = TransitObject_from_metadata(m)
+    return Graph(path, name, base, weights, partitions, ch, tiled, transit)

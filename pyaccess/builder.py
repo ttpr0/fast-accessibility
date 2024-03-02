@@ -53,3 +53,11 @@ def new_tc_weighting(graph: Graph) -> _pyaccess_ext.TCWeighting:
     """
     base = graph._get_base()
     return _pyaccess_ext.new_tc_weighting(base)
+
+def new_transit_weighting(graph: Graph, transit: str) -> _pyaccess_ext.TransitWeighting:
+    """Creates a new transit weighting for the given transit-overlay of the graph.
+
+    Schedules are empty by default.
+    """
+    data, _ = graph._get_transit(transit)
+    return _pyaccess_ext.new_transit_weighting(data)

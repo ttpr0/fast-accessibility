@@ -4,7 +4,7 @@ import numpy as np
 
 from . import _pyaccess_ext
 from .graph import Graph
-from .util import _build_graph, _build_ch_graph, _build_overlay_graph, _build_ch_graph_2
+from .util import _build_graph, _build_ch_graph, _build_overlay_graph, _build_ch_graph_2, _build_transit_graph
 
 class OneToManyType(Enum):
     RANGE_DIJKSTRA = 0
@@ -69,16 +69,22 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
     access = _pyaccess_ext.calc_2sfca(solver, dem_nodes, dem_weights, sup_nodes, sup_weights, decay)
     return access.tolist()
 
-def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None) -> list[int]:
+def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> list[int]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            g = _build_graph(graph, weight)
-            if isinstance(g, _pyaccess_ext.Graph):
-                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if transit is not None and transit_weight is not None:
+                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
+                solver.set_min_departure(min_departure)
+                solver.set_max_departure(max_departure)
             else:
-                solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
+                g = _build_graph(graph, weight)
+                if isinstance(g, _pyaccess_ext.Graph):
+                    solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+                else:
+                    solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case OneToManyType.RANGE_PHAST:
             if ch is None:
                 raise ValueError("no ch specified")

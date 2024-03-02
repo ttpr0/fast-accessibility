@@ -47,3 +47,16 @@ def _build_overlay_graph(graph: Graph, overlay: str) -> _pyaccess_ext.TiledGraph
     p = graph._get_partition(graph._get_overlay_partition(overlay))
     g = _pyaccess_ext.build_tiled_graph(b, w, i, p, id_m, t_d, t_i)
     return g
+
+def _build_transit_graph(graph: Graph, transit: str, transit_weight: str) -> tuple[_pyaccess_ext.TransitGraph, _pyaccess_ext.IGraph]:
+    b = graph._get_base()
+    w = graph._get_weight(graph._get_transit_base_weight(transit))
+    i = graph._get_index()
+    if isinstance(w, _pyaccess_ext.Weighting):
+        g = _pyaccess_ext.build_base_graph(b, w, i)
+    else:
+        g = _pyaccess_ext.build_tc_graph(b, w, i)
+    t_d, id_m = graph._get_transit(transit)
+    t_w = graph._get_transit_weighting(transit, transit_weight)
+    tg = _pyaccess_ext.build_transit_graph(g, id_m, t_d, t_w)
+    return tg, g

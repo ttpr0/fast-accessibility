@@ -1,7 +1,7 @@
 import numpy as np
 
 from .. import _pyaccess_ext
-from ..builder import GraphBuilder, new_weighting
+from ..builder import GraphBuilder, new_weighting, new_transit_weighting
 from ..accessibility import calc_range, OneToManyType
 from ..util import _build_graph
 
@@ -117,36 +117,28 @@ def test_transit_path():
         weighting.set_edge_weight(2*i, length)
         weighting.set_edge_weight(2*i+1, length)
     graph.add_weighting("default", weighting)
-
-    # build base graph
-    g = _build_graph(graph, "default")
     
     # build transit data
-    stops_list = []
+    stops_list = _pyaccess_ext.NodeVector()
     for stop in stops:
         s = _pyaccess_ext.Node()
         s.loc = _pyaccess_ext.Coord()
         s.loc.lon = stop[0]
         s.loc.lat = stop[1]
         stops_list.append(s)
-    conns_list = []
+    conns_list = _pyaccess_ext.ConnectionVector()
     for conn in conns:
         c = _pyaccess_ext.Connection(conn[0], conn[1], conn[2])
         conns_list.append(c)
-    transit_data, id_mapping = _pyaccess_ext.prepare_transit(g, _pyaccess_ext.NodeVector(stops_list), _pyaccess_ext.ConnectionVector(conns_list), 5)
-    transit_weight = _pyaccess_ext.new_transit_weighting(transit_data)
+    graph.add_public_transit("transit", stops_list, conns_list, "default", 5)
+    transit_weight = new_transit_weighting(graph, "transit")
     for conn in schedule:
         trips = schedule[conn]
         t = []
         for trip in trips:
             t.append((trip[0], trip[1]))
         transit_weight.set_connection_schedule(conn, t)
-
-    # build transit solver
-    tg = _pyaccess_ext.build_transit_graph(g, id_mapping, transit_data, transit_weight)
-    solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
-    solver.set_min_departure(8)
-    solver.set_max_departure(12)
+    graph.add_transit_weighting("default", transit_weight, "transit")
 
     # test locations
     sup_point = (8, 6) # node 8
@@ -157,16 +149,9 @@ def test_transit_path():
         (5, 9), # node 4
         (13, 3)  # node 13
     ]
-    dem_lon = np.zeros((len(dem_points),), dtype=np.float32)
-    dem_lat = np.zeros((len(dem_points),), dtype=np.float32)
-    for i in range(len(dem_points)):
-        dem_lon[i], dem_lat[i] = dem_points[i]
-    dem_nodes = _pyaccess_ext.map_to_closest(dem_lon, dem_lat, g)
-    sup_node = _pyaccess_ext.map_to_closest(sup_point, g)
 
     # compute shortest paths
-    ranges = _pyaccess_ext.calc_range_query(solver, sup_node, dem_nodes, 10)
-    ranges = ranges.tolist()
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10, transit="transit", transit_weight="default", min_departure=8, max_departure=12)
 
     assert len(ranges) == 5
     assert ranges[0] == 4

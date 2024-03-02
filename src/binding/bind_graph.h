@@ -184,6 +184,23 @@ void bind_graph(nanobind::module_& m)
     auto cell_index = py::class_<_CellIndex>(m, "CellIndex");
 
     auto transit_data = py::class_<TransitData>(m, "TransitData");
+    transit_data.def("stop_count", &TransitData::stopCount);
+    transit_data.def("connection_count", &TransitData::connectionCount);
+    transit_data.def("get_stop", &TransitData::getStop);
+    transit_data.def("get_connection", &TransitData::getConnection);
+    transit_data.def("get_adjacent_connections", [](TransitData& transit, int stop, Direction dir) {
+        py::list l;
+        auto accessor = transit.adjacency.getNeighbours(stop, dir);
+        while (accessor.next()) {
+            int conn_id = accessor.getEdgeID();
+            std::array<char, 8> data = accessor.getData();
+            if (data[0] > 100) {
+                continue;
+            }
+            l.append(py::int_(conn_id));
+        }
+        return l;
+    });
 
     auto transit_weighting = py::class_<TransitWeighting>(m, "TransitWeighting");
     transit_weighting.def("get_connection_weight", [](TransitWeighting& tw, int connection, int from) -> std::optional<std::tuple<int, int>> {
