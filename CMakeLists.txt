@@ -47,6 +47,7 @@ add_executable(${exe_name}
     src/graph/io/partition_io.cpp
     src/graph/io/tiled_data_io.cpp
     src/graph/io/weighting_io.cpp
+    src/graph/io/transit_data_io.cpp
     src/graph/io/loader.cpp
     src/graph/mod/adjacency_mod.cpp
     src/graph/mod/ch_mod.cpp
@@ -96,6 +97,7 @@ add_library(${lib_name} SHARED
     src/graph/io/partition_io.cpp
     src/graph/io/tiled_data_io.cpp
     src/graph/io/weighting_io.cpp
+    src/graph/io/transit_data_io.cpp
     src/graph/mod/adjacency_mod.cpp
     src/graph/mod/ch_mod.cpp
     src/graph/mod/graph_base_mod.cpp

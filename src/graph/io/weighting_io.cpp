@@ -79,3 +79,47 @@ void store_tc_weights(const TCWeighting& weight, const std::string& file)
 
     writeFile(file, writer.bytes());
 }
+
+std::shared_ptr<TransitWeighting> load_transit_weights(const std::string& file)
+{
+    auto arr = readAllFile(file);
+    auto reader = BufferReader(arr);
+
+    int conn_count = reader.read<int>();
+    std::vector<std::vector<ConnectionWeight>> weights(conn_count);
+    for (int i = 0; i < conn_count; i++) {
+        int schedule_count = reader.read<int>();
+        std::vector<ConnectionWeight> schedule(schedule_count);
+        for (int j = 0; j < schedule_count; j++) {
+            int dep = reader.read<int>();
+            int arr = reader.read<int>();
+            int trip = reader.read<int>();
+            schedule[j] = {dep, arr, trip};
+        }
+        weights[i] = std::move(schedule);
+    }
+
+    return std::make_shared<TransitWeighting>(std::move(weights));
+}
+
+void store_transit_weights(const TransitWeighting& weight, const std::string& file)
+{
+    auto writer = BufferWriter();
+
+    int conn_count = weight.transit_weights.size();
+    writer.write<int>(conn_count);
+
+    for (int i = 0; i < conn_count; i++) {
+        auto& schedule = weight.transit_weights[i];
+        int schedule_count = schedule.size();
+        writer.write<int>(schedule_count);
+        for (int j = 0; j < schedule_count; j++) {
+            auto [dep, arr, trip] = schedule[j];
+            writer.write<int>(dep);
+            writer.write<int>(arr);
+            writer.write<int>(trip);
+        }
+    }
+
+    writeFile(file, writer.bytes());
+}

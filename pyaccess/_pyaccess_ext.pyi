@@ -1747,6 +1747,12 @@ def load_tc_weights(arg: str, /) -> pyaccess._pyaccess_ext.TCWeighting:
 def load_tiled_data(arg: str, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
+def load_transit_data(arg: str, /) -> pyaccess._pyaccess_ext.TransitData:
+    ...
+
+def load_transit_weights(arg: str, /) -> pyaccess._pyaccess_ext.TransitWeighting:
+    ...
+
 @overload
 def map_to_closest(arg0: tuple, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int:
     """
@@ -1933,5 +1939,11 @@ def store_tc_weights(arg0: pyaccess._pyaccess_ext.TCWeighting, arg1: str, /) -> 
     ...
 
 def store_tiled_data(arg0: pyaccess._pyaccess_ext.TiledData, arg1: str, /) -> None:
+    ...
+
+def store_transit_data(arg0: pyaccess._pyaccess_ext.TransitData, arg1: str, /) -> None:
+    ...
+
+def store_transit_weights(arg0: pyaccess._pyaccess_ext.TransitWeighting, arg1: str, /) -> None:
     ...
 

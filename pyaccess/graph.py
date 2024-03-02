@@ -343,7 +343,7 @@ class Graph:
         if transit not in self._transit:
             raise ValueError(f"transit {transit} does not exist")
         t = self._transit[transit]
-        t.delete_weighting(name)
+        t.delete_weighting(name, f"{self._base_path}/{self._name}_transit_{name}")
 
     def _get_base(self) -> _pyaccess_ext.GraphBase:
         if not self._base.is_loaded():
@@ -431,7 +431,7 @@ class Graph:
     def _get_transit_weighting(self, name: str, weighting: str) -> _pyaccess_ext.TransitWeighting:
         transit = self._transit[name]
         if not transit.is_weighting_loaded(weighting):
-            transit.load_weighting(f"{self._base_path}/{self._name}_transit_{name}", weighting)
+            transit.load_weighting(weighting, f"{self._base_path}/{self._name}_transit_{name}")
         return transit.get_weighting(weighting)
 
 

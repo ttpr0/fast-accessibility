@@ -13,6 +13,7 @@
 #include "../graph/io/id_mapping_io.h"
 #include "../graph/io/partition_io.h"
 #include "../graph/io/tiled_data_io.h"
+#include "../graph/io/transit_data_io.h"
 #include "../graph/io/weighting_io.h"
 #include "../graph/mod/ch_mod.h"
 #include "../graph/mod/graph_base_mod.h"
@@ -240,20 +241,24 @@ void bind_graph(nanobind::module_& m)
     m.def("load_graph_base", &load_graph_base);
     m.def("load_edge_weights", &load_edge_weights);
     m.def("load_tc_weights", &load_tc_weights);
+    m.def("load_transit_weights", &load_transit_weights);
     m.def("load_node_partition", &load_node_partition);
     m.def("load_ch_data", &load_ch_data);
     m.def("load_tiled_data", &load_tiled_data);
     m.def("load_cell_index", &load_cell_index);
     m.def("load_id_mapping", &load_id_mapping);
+    m.def("load_transit_data", &load_transit_data);
 
     m.def("store_graph_base", &store_graph_base);
     m.def("store_edge_weights", &store_edge_weights);
     m.def("store_tc_weights", &store_tc_weights);
+    m.def("store_transit_weights", &store_transit_weights);
     m.def("store_node_partition", &store_node_partition);
     m.def("store_ch_data", &store_ch_data);
     m.def("store_tiled_data", &store_tiled_data);
     m.def("store_cell_index", &store_cell_index);
     m.def("store_id_mapping", &store_id_mapping);
+    m.def("store_transit_data", &store_transit_data);
 
     m.def("prepare_ch", &calc_contraction);
     m.def("prepare_ch2", &calc_contraction_tiled);
