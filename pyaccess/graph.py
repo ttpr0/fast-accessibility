@@ -14,8 +14,8 @@ from .components.transit import TransitObject, TransitObject_new, TransitObject_
 from .explorer import Explorer
 
 class Graph:
-    _base_path: str
-    _name: str
+    _base_path: str | None
+    _name: str | None
 
     _base: BaseObject
     _weights: dict[str, WeightObject]
@@ -24,7 +24,7 @@ class Graph:
     _tiled: dict[str, TiledObject]
     _transit: dict[str, TransitObject]
 
-    def __init__(self, _base_path: str, _name: str, base: BaseObject, weights: dict[str, WeightObject], partitions: dict[str, PartitionObject], ch: dict[str, CHObject], tiled: dict[str, TiledObject], transit: dict[str, TransitObject]):
+    def __init__(self, _base_path: str | None, _name: str | None, base: BaseObject, weights: dict[str, WeightObject], partitions: dict[str, PartitionObject], ch: dict[str, CHObject], tiled: dict[str, TiledObject], transit: dict[str, TransitObject]):
         self._base_path = _base_path
         self._name = _name
 
@@ -36,10 +36,10 @@ class Graph:
         self._tiled = tiled
         self._transit = transit
 
-    def _get_path(self) -> str:
+    def _get_path(self) -> str | None:
         return self._base_path
 
-    def _get_name(self) -> str:
+    def _get_name(self) -> str | None:
         return self._name
 
     def get_explorer(self, weight: str | None = None, partition: str | None = None, ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None) -> Explorer:
@@ -83,6 +83,8 @@ class Graph:
             self._base_path = path
         if name is not None:
             self._name = name
+        if self._base_path is None or self._name is None:
+            raise ValueError("No path or name given.")
         meta = {}
         meta["base"] = self._base.get_metadata()
         self._base.store(f"{self._base_path}/{self._name}")
@@ -113,6 +115,8 @@ class Graph:
     def delete(self):
         """Deletes the graph and all components (removing everything from disk).
         """
+        if self._base_path is None or self._name is None:
+            raise ValueError("Can't delete graph with unknown name and path.")
         if os.path.isfile(f"{self._base_path}/{self._name}-meta"):
             os.remove(f"{self._base_path}/{self._name}-meta")
         self._base.delete(f"{self._base_path}/{self._name}")
@@ -135,26 +139,33 @@ class Graph:
     def optimize_base(self):
         """removes all unconnected components and reorders graph with DFS-Ordering
         """
+        change_stored = self._base_path is None or self._name is None
         if not self._base.is_loaded():
-            self._base.load(f"{self._base_path}/{self._name}")
+            if change_stored:
+                self._base.load(f"{self._base_path}/{self._name}")
         self._base.remove_unconnected()
         base = self._base.get_base()
         mapping = _pyaccess_ext.calc_dfs_order(base)
         self._base.reorder(Ordering.DFS_ORDERING, mapping)
-        for w, o in self._weights.items():
-            o.delete(f"{self._base_path}/{self._name}_{w}")
+        if change_stored:
+            for w, o in self._weights.items():
+                o.delete(f"{self._base_path}/{self._name}_{w}")
         self._weights = {}
-        for p, o in self._partitions.items():
-            o.delete(f"{self._base_path}/{self._name}_partition_{p}")
+        if change_stored:
+            for p, o in self._partitions.items():
+                o.delete(f"{self._base_path}/{self._name}_partition_{p}")
         self._partitions = {}
-        for c, o in self._ch.items():
-            o.delete(f"{self._base_path}/{self._name}_ch_{c}")
+        if change_stored:
+            for c, o in self._ch.items():
+                o.delete(f"{self._base_path}/{self._name}_ch_{c}")
         self._ch = {}
-        for t, o in self._tiled.items():
-            o.delete(f"{self._base_path}/{self._name}_tiled_{t}")
+        if change_stored:
+            for t, o in self._tiled.items():
+                o.delete(f"{self._base_path}/{self._name}_tiled_{t}")
         self._tiled = {}
-        for name, transit in self._transit.items():
-            transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
+        if change_stored:
+            for name, transit in self._transit.items():
+                transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
         self._transit = {}
 
     def add_default_weighting(self, name: str = "default"):
@@ -214,7 +225,7 @@ class Graph:
     def add_grasp_overlay(self, name: str, weight: str, partition: str):
         """Computes grasp overlay from the given weighting and partition.
         """
-        if name in self._ch:
+        if name in self._tiled:
             raise ValueError(f"overlay {name} already exists")
         b = self._get_base()
         w = self._get_weight(weight)
@@ -270,7 +281,8 @@ class Graph:
         if name not in self._weights:
             raise ValueError(f"weighting {name} does not exist")
         o = self._weights[name]
-        o.delete(f"{self._base_path}/{self._name}_{name}")
+        if self._base_path is not None and self._name is not None:
+            o.delete(f"{self._base_path}/{self._name}_{name}")
         del self._weights[name]
         rm_ch = []
         for c, o in self._ch.items():
@@ -293,7 +305,8 @@ class Graph:
         if name not in self._partitions:
             raise ValueError(f"partition {name} does not exist")
         o = self._partitions[name]
-        o.delete(f"{self._base_path}/{self._name}_partition_{name}")
+        if self._base_path is not None and self._name is not None:
+            o.delete(f"{self._base_path}/{self._name}_partition_{name}")
         del self._partitions[name]
         rm_ch = []
         for c, o in self._ch.items():
@@ -316,7 +329,8 @@ class Graph:
         if name not in self._ch:
             raise ValueError(f"ch {name} does not exist")
         o = self._ch[name]
-        o.delete(f"{self._base_path}/{self._name}_ch_{name}")
+        if self._base_path is not None and self._name is not None:
+            o.delete(f"{self._base_path}/{self._name}_ch_{name}")
         del self._ch[name]
 
     def remove_overlay(self, name: str):
@@ -325,7 +339,8 @@ class Graph:
         if name not in self._tiled:
             raise ValueError(f"overlay {name} does not exist")
         o = self._tiled[name]
-        o.delete(f"{self._base_path}/{self._name}_tiled_{name}")
+        if self._base_path is not None and self._name is not None:
+            o.delete(f"{self._base_path}/{self._name}_tiled_{name}")
         del self._tiled[name]
 
     def remove_public_transit(self, name: str):
@@ -334,7 +349,8 @@ class Graph:
         if name not in self._transit:
             raise ValueError(f"transit-overlay {name} does not exist")
         o = self._transit[name]
-        o.delete(f"{self._base_path}/{self._name}_transit_{name}")
+        if self._base_path is not None and self._name is not None:
+            o.delete(f"{self._base_path}/{self._name}_transit_{name}")
         del self._transit[name]
 
     def remove_transit_weighting(self, name: str, transit: str):
@@ -343,15 +359,19 @@ class Graph:
         if transit not in self._transit:
             raise ValueError(f"transit {transit} does not exist")
         t = self._transit[transit]
-        t.delete_weighting(name, f"{self._base_path}/{self._name}_transit_{name}")
+        t.remove_weighting(name)
 
     def _get_base(self) -> _pyaccess_ext.GraphBase:
         if not self._base.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load base with unknown name and path.")
             self._base.load(f"{self._base_path}/{self._name}")
         return self._base.get_base()
 
     def _get_index(self) -> _pyaccess_ext.IGraphIndex:
         if not self._base.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load index with unknown name and path.")
             self._base.load(f"{self._base_path}/{self._name}")
         if not self._base.has_index():
             self._base.build_index()
@@ -360,6 +380,8 @@ class Graph:
     def _get_weight(self, name: str) -> _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting:
         w = self._weights[name]
         if not w.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load weight with unknown name and path.")
             w.load(f"{self._base_path}/{self._name}_{name}")
         weight = w.get_weight()
         return weight
@@ -367,12 +389,16 @@ class Graph:
     def _get_partition(self, name: str) -> _pyaccess_ext.Partition:
         p = self._partitions[name]
         if not p.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load partition with unknown name and path.")
             p.load(f"{self._base_path}/{self._name}_partition_{name}")
         return p.get_partition()
 
     def _get_ch(self, name: str) -> tuple[_pyaccess_ext.CHData, _pyaccess_ext.CHIndex, _pyaccess_ext.IDMapping]:
         ch = self._ch[name]
         if not ch.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load contraction with unknown name and path.")
             ch.load(f"{self._base_path}/{self._name}_ch_{name}")
         if not ch.has_ch_index():
             base = self._get_base()
@@ -402,6 +428,8 @@ class Graph:
     def _get_overlay(self, name: str) -> tuple[_pyaccess_ext.TiledData, _pyaccess_ext.CellIndex, _pyaccess_ext.IDMapping]:
         tiled = self._tiled[name]
         if not tiled.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load overlay with unknown name and path.")
             tiled.load(f"{self._base_path}/{self._name}_tiled_{name}")
         tiled_data = tiled.get_tiled_data()
         id_mapping = tiled.get_id_mapping()
@@ -419,6 +447,8 @@ class Graph:
     def _get_transit(self, name: str) -> tuple[_pyaccess_ext.TransitData, _pyaccess_ext.IDMapping]:
         transit = self._transit[name]
         if not transit.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load public transit with unknown name and path.")
             transit.load(f"{self._base_path}/{self._name}_transit_{name}")
         transit_data = transit.get_transit_data()
         id_mapping = transit.get_id_mapping()
@@ -430,8 +460,10 @@ class Graph:
 
     def _get_transit_weighting(self, name: str, weighting: str) -> _pyaccess_ext.TransitWeighting:
         transit = self._transit[name]
-        if not transit.is_weighting_loaded(weighting):
-            transit.load_weighting(weighting, f"{self._base_path}/{self._name}_transit_{name}")
+        if not transit.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load public transit with unknown name and path.")
+            transit.load(f"{self._base_path}/{self._name}_transit_{name}")
         return transit.get_weighting(weighting)
 
 
@@ -441,7 +473,7 @@ def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) 
     Use graph.store(...) to store and load_graph() to load a graph from a directory.
     """
     base = BaseObject_new(nodes, edges)
-    return Graph("", "", base, {}, {}, {}, {}, {})
+    return Graph(None, None, base, {}, {}, {}, {}, {})
 
 def load_graph(name: str, path: str) -> Graph:
     """Loads graph from a directory.

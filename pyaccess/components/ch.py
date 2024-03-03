@@ -55,9 +55,11 @@ class CHObject:
         self.has_changed = False
 
     def delete(self, path: str):
-        if not os.path.isfile(f"{path}-ch_data"):
-            os.remove(f"{path}-ch_data")
-        if not os.path.isfile(f"{path}-id_mapping"):
+        if os.path.isfile(f"{path}-ch_data-ch_graph"):
+            os.remove(f"{path}-ch_data-ch_graph")
+            os.remove(f"{path}-ch_data-shortcut")
+            os.remove(f"{path}-ch_data-level")
+        if os.path.isfile(f"{path}-id_mapping"):
             os.remove(f"{path}-id_mapping")
         self.ch_data = None
         self.ch_index = None

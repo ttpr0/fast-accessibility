@@ -39,7 +39,7 @@ class PartitionObject:
         self.has_changed = False
 
     def delete(self, path: str):
-        if not os.path.isfile(f"{path}"):
+        if os.path.isfile(f"{path}"):
             os.remove(f"{path}")
         self.weight = None
 

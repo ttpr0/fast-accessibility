@@ -13,6 +13,8 @@ class TransitObject:
     weightings: dict[str, _pyaccess_ext.TransitWeighting | None]
 
     has_changed: bool
+    added_weightings: list[str]
+    removed_weightings: list[str]
 
     def __init__(self, base_weight: str, transit_data: _pyaccess_ext.TransitData | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, weightings: dict[str, _pyaccess_ext.TransitWeighting | None] = {}):
         self.base_weight = base_weight
@@ -25,6 +27,8 @@ class TransitObject:
             self.has_changed = False
         else:
             self.has_changed = True
+        self.added_weightings = []
+        self.removed_weightings = []
 
     def load(self, path: str):
         if not os.path.isfile(f"{path}-id_mapping"):
@@ -33,46 +37,38 @@ class TransitObject:
             self.transit_data = _pyaccess_ext.load_transit_data(f"{path}-transit_data")
         if self.id_mapping is None or self.has_changed == True:
             self.id_mapping = _pyaccess_ext.load_id_mapping(f"{path}-id_mapping")
+        for w in self.weightings:
+            if self.weightings[w] is not None or self.has_changed == True:
+                self.weightings[w] = _pyaccess_ext.load_transit_weights(f"{path}-weight-{w}")
 
     def is_loaded(self) -> bool:
         if self.transit_data is None or self.id_mapping is None:
             return False
         return True
 
-    def load_weighting(self, name: str, path: str):
-        if self.weightings[name] is None or self.has_changed == True:
-            self.weightings[name] = _pyaccess_ext.load_transit_weights(f"{path}-weight-{name}")
-
-    def is_weighting_loaded(self, name: str) -> bool:
-        if name not in self.weightings:
-            raise ValueError(f"weighting {name} does not exist")
-        return self.weightings[name] != None
-
-    def add_weighting(self, name: str, weighting: _pyaccess_ext.TransitWeighting):
-        if name in self.weightings:
-            raise ValueError(f"weighting {name} already exists")
-        self.weightings[name] = weighting
-
-    def delete_weighting(self, name: str, path: str):
-        if name not in self.weightings:
-            raise ValueError(f"weighting {name} does not exist")
-        if os.path.isfile(f"{path}-weight-{name}"):
-            os.remove(f"{path}-weight-{name}")
-        del self.weightings[name]
-
     def store(self, path: str):
         if self.transit_data is None or self.id_mapping is None:
             raise NotImplementedError("storing unloaded transit-object not possibile")
-        if not self.has_changed:
-            return
-        _pyaccess_ext.store_transit_data(self.transit_data, f"{path}-transit_data")
-        _pyaccess_ext.store_id_mapping(self.id_mapping, f"{path}-id_mapping")
-        for w in self.weightings:
-            weights = self.weightings[w]
-            if weights is None:
-                continue
-            _pyaccess_ext.store_transit_weights(weights, f"{path}-weight-{w}")
-        self.has_changed = False
+        for w in self.removed_weightings:
+            if os.path.isfile(f"{path}-weight-{w}"):
+                os.remove(f"{path}-weight-{w}")
+        self.removed_weightings = []
+        if self.has_changed:
+            _pyaccess_ext.store_transit_data(self.transit_data, f"{path}-transit_data")
+            _pyaccess_ext.store_id_mapping(self.id_mapping, f"{path}-id_mapping")
+            for w in self.weightings:
+                weights = self.weightings[w]
+                if weights is None:
+                    continue
+                _pyaccess_ext.store_transit_weights(weights, f"{path}-weight-{w}")
+            self.has_changed = False
+        else:
+            for w in self.added_weightings:
+                weights = self.weightings[w]
+                if weights is None:
+                    continue
+                _pyaccess_ext.store_transit_weights(weights, f"{path}-weight-{w}")
+            self.added_weightings = []
 
     def delete(self, path: str):
         if os.path.isfile(f"{path}-transit_data-comps"):
@@ -85,7 +81,23 @@ class TransitObject:
         for w in self.weightings:
             if os.path.isfile(f"{path}-weight-{w}"):
                 os.remove(f"{path}-weight-{w}")
+        for w in self.removed_weightings:
+            if os.path.isfile(f"{path}-weight-{w}"):
+                os.remove(f"{path}-weight-{w}")
+        self.removed_weightings = []
         self.weightings = {}
+
+    def add_weighting(self, name: str, weighting: _pyaccess_ext.TransitWeighting):
+        if name in self.weightings:
+            raise ValueError(f"weighting {name} already exists")
+        self.weightings[name] = weighting
+        self.added_weightings.append(name)
+
+    def remove_weighting(self, name: str):
+        if name not in self.weightings:
+            raise ValueError(f"weighting {name} does not exist")
+        del self.weightings[name]
+        self.removed_weightings.append(name)
 
     def get_base_weigth(self) -> str:
         return self.base_weight

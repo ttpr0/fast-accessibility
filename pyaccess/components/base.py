@@ -47,9 +47,9 @@ class BaseObject:
         self.has_changed = False
 
     def delete(self, path: str):
-        if not os.path.isfile(f"{path}-nodes"):
+        if os.path.isfile(f"{path}-nodes"):
             os.remove(f"{path}-nodes")
-        if not os.path.isfile(f"{path}-edges"):
+        if os.path.isfile(f"{path}-edges"):
             os.remove(f"{path}-edges")
         self.base = None
         self.index = None
