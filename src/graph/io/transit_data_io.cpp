@@ -10,7 +10,7 @@
 
 std::shared_ptr<TransitData> load_transit_data(const std::string& file)
 {
-    auto arr = readAllFile(file);
+    auto arr = readAllFile(file + "-comps");
     auto reader = BufferReader(arr);
 
     auto stops = reader.read_vector<Node>();

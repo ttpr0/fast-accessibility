@@ -56,7 +56,7 @@ class GTFSStop:
     lon: float
     lat: float
     typ: int
-    parent_id: int
+    parent_id: int | None
 
     def __init__(self, id, lon, lat, typ, parent):
         self.stop_id = id
@@ -65,8 +65,12 @@ class GTFSStop:
         self.typ = typ
         self.parent_id = parent
 
-    def has_parant(self) -> bool:
-        return self.typ >= 3
+    def has_parent(self) -> bool:
+        return self.parent_id is not None
+    
+    def get_parent(self) -> int:
+        assert self.parent_id is not None
+        return self.parent_id
 
     def get_lon_lat(self) -> tuple[float, float]:
         return self.lon, self.lat
@@ -81,30 +85,43 @@ def read_stop_locations(path: str, filter: MultiPolygon) -> dict[int, GTFSStop]:
     stops: dict[int, GTFSStop] = {}
     for i in range(stop_ids.size):
         id = int(stop_ids[i])
-        lon = stop_lon[i]
-        lat = stop_lat[i]
-        parent = stop_parents[i]
-        typ = location_type[i]
-        if np.isnan(lon) or np.isnan(lat) or typ >= 3:
-            if np.isnan(parent):
-                continue
-            stops[id] = GTFSStop(id, 0, 0, int(typ), int(parent))
+        _lon = stop_lon[i]
+        _lat = stop_lat[i]
+        _parent = stop_parents[i]
+        _typ = location_type[i]
+        if np.isnan(_typ):
+            typ = 0
         else:
-            lon = float(lon)
-            lat = float(lat)
+            typ = int(_typ)
+        if np.isnan(_lon) or np.isnan(_lat) or typ >= 2:
+            if np.isnan(_parent):
+                continue
+            stops[id] = GTFSStop(id, 0, 0, typ, int(_parent))
+        else:
+            lon = float(_lon)
+            lat = float(_lat)
             if not contains_xy(filter, lon, lat):
                 continue
-            stops[id] = GTFSStop(id, lon, lat, 0, 0)
+            if np.isnan(_parent):
+                parent = None
+            else:
+                parent = int(_parent)
+            stops[id] = GTFSStop(id, lon, lat, int(typ), parent)
 
     delete = []
     for id, stop in stops.items():
-        if stop.lat == 0:
+        if stop.has_parent():
+            parent_id = stop.get_parent()
             if stop.parent_id not in stops:
                 delete.append(id)
                 continue
-            parent_stop = stops[stop.parent_id]
-            stop.lon = parent_stop.lon
-            stop.lat = parent_stop.lat
+            if stop.typ == 4:
+                parent = stops[parent_id]
+                if parent.has_parent():
+                    stop.parent_id = parent.get_parent()
+                if stop.parent_id not in stops:
+                    delete.append(id)
+                    continue
     for d in delete:
         del stops[d]
     return stops
@@ -199,38 +216,23 @@ def read_trips(path: str, stops: dict[int, GTFSStop], services: dict[int, GTFSSe
 
     return trips
 
-
-# class TransitStop:
-#     __slots__ = ["stop_id", "lon", "lat", "neighbours"]
-#     stop_id: int
-#     lon: float
-#     lat: float
-#     # neighbour -> [(day, departure, arival), ...]
-#     neighbours: dict[int, list[tuple[int, int, int]]]
-
-#     def __init__(self, stop_id, lon, lat):
-#         self.stop_id = stop_id
-#         self.lon = lon
-#         self.lat = lat
-#         self.neighbours = {}
-
-#     def add_neighbour(self, other_id: int, days: list[int], dep: int, ar: int):
-#         for day in days:
-#             d_neigh = self.neighbours
-#             if other_id not in d_neigh:
-#                 d_neigh[other_id] = []
-#             trips = d_neigh[other_id]
-#             trips.append((day, dep, ar))
-
-
 def build_transit_graph(trips: dict[int, GTFSTrip], stops: dict[int, GTFSStop], services: dict[int, GTFSService]) -> tuple[NodeVector, ConnectionVector, dict[str, list[list[tuple[int, int]]]]]:
     stops_vec = NodeVector()
     stop_mapping = {}
-    for i, (stop_id, stop) in enumerate(stops.items()):
-        stop_mapping[stop_id] = i
-        node = Node()
-        node.loc = Coord(stop.lon, stop.lat)
-        stops_vec.append(node)
+    skiped = []
+    for stop_id, stop in stops.items():
+        if stop.has_parent():
+            skiped.append(stop_id)
+        else:
+            new_id = len(stops_vec)
+            stop_mapping[stop_id] = new_id
+            node = Node()
+            node.loc = Coord(stop.lon, stop.lat)
+            stops_vec.append(node)
+    for stop_id in skiped:
+        stop = stops[stop_id]
+        parent_id = stop.get_parent()
+        stop_mapping[stop_id] = stop_mapping[parent_id]
 
     conns_vec = ConnectionVector()
     conn_mapping = {}

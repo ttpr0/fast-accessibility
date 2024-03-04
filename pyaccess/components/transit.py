@@ -38,7 +38,7 @@ class TransitObject:
         if self.id_mapping is None or self.has_changed == True:
             self.id_mapping = _pyaccess_ext.load_id_mapping(f"{path}-id_mapping")
         for w in self.weightings:
-            if self.weightings[w] is not None or self.has_changed == True:
+            if self.weightings[w] is None or self.has_changed == True:
                 self.weightings[w] = _pyaccess_ext.load_transit_weights(f"{path}-weight-{w}")
 
     def is_loaded(self) -> bool:
