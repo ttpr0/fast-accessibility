@@ -221,7 +221,7 @@ public:
         if (this->is_build) {
             return;
         }
-        auto down_edges_subset = preprocessGSRPHAST(this->graph, std::move(this->node_queue));
+        this->down_edges_subset = preprocessGSRPHAST(this->graph, std::move(this->node_queue));
         this->is_build = true;
     }
 

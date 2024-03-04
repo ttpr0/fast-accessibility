@@ -180,7 +180,7 @@ static std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> Prepr
     int ind = 0;
     for (auto tile : tiles) {
         ind += 1;
-        printf("Process Tile: %i/%i", ind, (int)tiles.size());
+        printf("Process Tile: %i/%i \n", ind, (int)tiles.size());
         // get all down edges or shortcuts
         std::vector<Shortcut> index_edges;
         for (int i = 0; i < ch_data->shortcuts.size(); i++) {

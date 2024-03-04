@@ -1,7 +1,7 @@
 import osmium as osm
 import math
-from ._pyaccess_ext import Node as GraphNode, Edge as GraphEdge, Coord, CoordVector, NodeVector, EdgeVector, RoadType
-from .graph import Graph, new_graph
+from .._pyaccess_ext import Node as GraphNode, Edge as GraphEdge, Coord, CoordVector, NodeVector, EdgeVector, RoadType
+from ..graph import Graph, new_graph
 
 class Point:
     __slots__ = "lon", "lat"

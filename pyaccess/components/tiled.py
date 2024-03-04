@@ -33,8 +33,8 @@ class TiledObject:
             self.has_changed = True
 
     def load(self, path: str):
-        if not os.path.isfile(f"{path}-ch_data"):
-            raise NotImplementedError("unable to find ch-object")
+        if not os.path.isfile(f"{path}-tiled_data-skip_shortcuts"):
+            raise NotImplementedError("unable to find overlay-object")
         if self.tiled_data is None or self.has_changed == True:
             self.tiled_data = _pyaccess_ext.load_tiled_data(f"{path}-tiled_data")
         if self.cell_index is None or self.has_changed == True:

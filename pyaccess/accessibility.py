@@ -21,7 +21,7 @@ GRASP = OneToManyType.GRASP
 
 OneToManySolver: TypeAlias = _pyaccess_ext.RangeDijkstra | _pyaccess_ext.RangePHAST | _pyaccess_ext.RangeRPHAST
 
-def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None) -> list[float]:
+def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None, overlay: str | None = None) -> list[float]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
@@ -46,6 +46,11 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
                 raise ValueError("no ch specified")
             g = _build_ch_graph_2(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_gs_solver(g)
+        case OneToManyType.GRASP:
+            if overlay is None:
+                raise ValueError("no overlay specified")
+            g = _build_overlay_graph(graph, overlay)
+            solver = _pyaccess_ext.build_grasp_solver(g)
         case _:
             raise NotImplementedError("")
 

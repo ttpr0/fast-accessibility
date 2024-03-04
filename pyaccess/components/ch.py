@@ -111,7 +111,7 @@ class CHObject:
             "ordering": int(self.id_ordering),
         }
         if self.base_partition is not None:
-            meta["parition"] = self.base_partition
+            meta["partition"] = self.base_partition
         return meta
 
     def reorder(self, ordering: Ordering, mapping: _pyaccess_ext.IntVector):
