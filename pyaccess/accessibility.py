@@ -21,16 +21,22 @@ GRASP = OneToManyType.GRASP
 
 OneToManySolver: TypeAlias = _pyaccess_ext.RangeDijkstra | _pyaccess_ext.RangePHAST | _pyaccess_ext.RangeRPHAST
 
-def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None, overlay: str | None = None) -> list[float]:
+def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> list[float]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            g = _build_graph(graph, weight)
-            if isinstance(g, _pyaccess_ext.Graph):
-                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if transit is not None and transit_weight is not None:
+                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
+                solver.set_min_departure(min_departure)
+                solver.set_max_departure(max_departure)
             else:
-                solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
+                g = _build_graph(graph, weight)
+                if isinstance(g, _pyaccess_ext.Graph):
+                    solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+                else:
+                    solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case OneToManyType.RANGE_PHAST:
             if ch is None:
                 raise ValueError("no ch specified")
@@ -100,6 +106,11 @@ def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tu
                 raise ValueError("no ch specified")
             g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_solver(g)
+        case OneToManyType.RANGE_RPHAST_GS:
+            if ch is None:
+                raise ValueError("no ch specified")
+            g = _build_ch_graph_2(graph, ch)
+            solver = _pyaccess_ext.build_range_rphast_gs_solver(g)
         case OneToManyType.GRASP:
             if overlay is None:
                 raise ValueError("no overlay specified")
@@ -118,16 +129,22 @@ def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tu
     ranges = _pyaccess_ext.calc_range_query(solver, sup_node, dem_nodes, max_range)
     return ranges.tolist()
 
-def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None) -> np.ndarray:
+def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> np.ndarray:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            g = _build_graph(graph, weight)
-            if isinstance(g, _pyaccess_ext.Graph):
-                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if transit is not None and transit_weight is not None:
+                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
+                solver.set_min_departure(min_departure)
+                solver.set_max_departure(max_departure)
             else:
-                solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
+                g = _build_graph(graph, weight)
+                if isinstance(g, _pyaccess_ext.Graph):
+                    solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+                else:
+                    solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case OneToManyType.RANGE_PHAST:
             if ch is None:
                 raise ValueError("no ch specified")
@@ -138,6 +155,11 @@ def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points:
                 raise ValueError("no ch specified")
             g = _build_ch_graph(graph, ch)
             solver = _pyaccess_ext.build_range_rphast_solver(g)
+        case OneToManyType.RANGE_RPHAST_GS:
+            if ch is None:
+                raise ValueError("no ch specified")
+            g = _build_ch_graph_2(graph, ch)
+            solver = _pyaccess_ext.build_range_rphast_gs_solver(g)
         case OneToManyType.GRASP:
             if overlay is None:
                 raise ValueError("no overlay specified")
@@ -160,16 +182,22 @@ def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points:
     matrix = _pyaccess_ext.calc_matrix_query(solver, sup_node, dem_nodes, max_range)
     return matrix
 
-def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default") -> list[float]:
+def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> list[float]:
     g: _pyaccess_ext.IGraph
 
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
-            g = _build_graph(graph, weight)
-            if isinstance(g, _pyaccess_ext.Graph):
-                solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+            if transit is not None and transit_weight is not None:
+                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
+                solver.set_min_departure(min_departure)
+                solver.set_max_departure(max_departure)
             else:
-                raise ValueError("Not implemented yet...")
+                g = _build_graph(graph, weight)
+                if isinstance(g, _pyaccess_ext.Graph):
+                    solver = _pyaccess_ext.build_range_dijkstra_solver(g)
+                else:
+                    solver = _pyaccess_ext.build_range_dijkstra_tc_solver(g)
         case _:
             raise NotImplementedError("")
 
