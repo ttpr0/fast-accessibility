@@ -1,0 +1,13 @@
+[build-system]
+requires = ["scikit-build-core >=0.4.3", "nanobind >=1.3.2"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pyaccess"
+version = "0.0.1"
+description = "A minimal python binding for the accessibility calculations"
+requires-python = ">=3.8"
+
+[tool.scikit-build]
+wheel.packages = ["pyaccess"]
+sdist.exclude = ["test", "__pycache__"]

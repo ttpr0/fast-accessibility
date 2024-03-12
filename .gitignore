@@ -1,0 +1,51 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+*.pyd
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Python files
+__pycache__
+
+# Build Directories
+/build
+/.vs
+/.vscode
+/out
+
+# External Headers
+/include/*
+!/include/pyaccess
+
+# Install Directories
+/pyaccess/include
+/pyaccess/lib
+/pyaccess/cmake
+
+# Resources
+/graphs
+/data
