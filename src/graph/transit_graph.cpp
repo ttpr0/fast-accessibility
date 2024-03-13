@@ -6,19 +6,15 @@
 // transit-graph
 //*******************************************
 
-TransitGraph build_transit_graph(IGraph& base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
+TransitGraph build_transit_graph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
                                  std::shared_ptr<TransitWeighting> transit_weighting)
 {
     return {base_graph, id_mapping, transit, transit_weighting};
 }
 
-TransitGraph::TransitGraph(IGraph& base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit, std::shared_ptr<TransitWeighting> transit_weighting)
-    : base_graph(base_graph), id_mapping(id_mapping), transit(transit), transit_weighting(transit_weighting)
-{}
-
 IGraph& TransitGraph::getBaseGraph()
 {
-    return this->base_graph;
+    return *this->base_graph;
 }
 int TransitGraph::mapToBaseNode(int stop)
 {

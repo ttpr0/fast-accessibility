@@ -5,17 +5,6 @@
 // ch-graph
 //*******************************************
 
-CHGraph2::CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                   std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
-    : base(std::move(base)),
-      weights(std::move(weights)),
-      index(std::move(index)),
-      partition(std::move(partition)),
-      id_mapping(std::move(id_mapping)),
-      ch(std::move(ch)),
-      ch_index(std::move(ch_index))
-{}
-
 int CHGraph2::nodeCount()
 {
     return this->base->nodeCount();
@@ -40,15 +29,6 @@ Coord CHGraph2::getNodeGeom(int node)
 {
     int m_node = this->id_mapping->get_source(node);
     return this->base->getNodeGeom(m_node);
-}
-int CHGraph2::getClosestNode(Coord point)
-{
-    auto [id, ok] = this->index->getClosestNode(point);
-    if (ok) {
-        int m_id = this->id_mapping->get_target(id);
-        return m_id;
-    }
-    return -1;
 }
 
 void CHGraph2::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)

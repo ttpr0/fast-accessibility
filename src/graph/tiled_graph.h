@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "../util/function_ref.h"
 #include "./base/graph_base.h"
 #include "./base/graph_index.h"
 #include "./base/id_mapping.h"
@@ -14,7 +15,6 @@
 #include "./speed_ups/partition.h"
 #include "./speed_ups/tiled_data.h"
 #include "./structs/adjacency.h"
-#include "../util/function_ref.h"
 
 //*******************************************
 // tiled-graph
@@ -25,7 +25,6 @@ class TiledGraph : public ITiledGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
-    std::shared_ptr<IGraphIndex> index;
     std::shared_ptr<Partition> partition;
 
     // additional components
@@ -34,15 +33,21 @@ public:
     // cell-index
     std::shared_ptr<_CellIndex> cell_index;
 
-    TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-               std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index);
+    TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<_IDMapping> id_mapping,
+               std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index)
+        : base(std::move(base)),
+          weights(std::move(weights)),
+          partition(std::move(partition)),
+          id_mapping(std::move(id_mapping)),
+          tiled(std::move(tiled)),
+          cell_index(std::move(cell_index))
+    {}
 
     int nodeCount();
     int edgeCount();
     Node getNode(int node);
     Edge getEdge(int edge);
     Coord getNodeGeom(int node);
-    int getClosestNode(Coord point);
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
@@ -60,5 +65,5 @@ public:
 // build tiled-graph
 //*******************************************
 
-TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                             std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index);
+TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<_IDMapping> id_mapping,
+                             std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index);

@@ -851,7 +851,60 @@ class IGraphIndex:
     None
     """
 
-    def get_closest_node(self, arg: pyaccess._pyaccess_ext.Coord, /) -> tuple[int, bool]:
+    @overload
+    def get_closest_node(self, arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> int:
+        """
+        get_closest_node(self, arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> int
+        """
+        ...
+    
+    @overload
+    def get_closest_node(self, arg: pyaccess._pyaccess_ext.Coord, /) -> int:
+        """
+        get_closest_node(self, arg: pyaccess._pyaccess_ext.Coord, /) -> int
+        """
+        ...
+    
+    @overload
+    def get_closest_node(self, arg0: float, arg1: float, /) -> int:
+        """
+        get_closest_node(self, arg0: float, arg1: float, /) -> int
+        """
+        ...
+    
+    @overload
+    def get_closest_node(self, arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> int:
+        """
+        get_closest_node(self, arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> int
+        """
+        ...
+    
+    @overload
+    def map_to_closest(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> numpy.typing.NDArray:
+        """
+        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg2: pyaccess._pyaccess_ext.IDMapping, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+        """
+        ...
+    
+    @overload
+    def map_to_closest(self, arg: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.IntVector:
+        """
+        map_to_closest(self, arg: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.IntVector
+        """
+        ...
+    
+    @overload
+    def map_to_closest(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, /) -> numpy.typing.NDArray:
+        """
+        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
+        """
+        ...
+    
+    @overload
+    def map_to_closest(self, arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.IntVector:
+        """
+        map_to_closest(self, arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.IntVector
+        """
         ...
     
 class ITiledGraph(pyaccess._pyaccess_ext.IGraph):
@@ -1460,13 +1513,13 @@ class Weighting:
     def set_edge_weight(self, arg0: int, arg1: int, /) -> None:
         ...
     
-def build_base_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, /) -> pyaccess._pyaccess_ext.Graph:
+def build_base_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, /) -> pyaccess._pyaccess_ext.Graph:
     ...
 
-def build_ch_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.IDMapping, arg4: pyaccess._pyaccess_ext.CHData, arg5: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph:
+def build_ch_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IDMapping, arg3: pyaccess._pyaccess_ext.CHData, arg4: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph:
     ...
 
-def build_ch_graph_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.CHData, arg6: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph2:
+def build_ch_graph_2(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, arg3: pyaccess._pyaccess_ext.IDMapping, arg4: pyaccess._pyaccess_ext.CHData, arg5: pyaccess._pyaccess_ext.CHIndex, /) -> pyaccess._pyaccess_ext.CHGraph2:
     ...
 
 def build_grasp_solver(arg: pyaccess._pyaccess_ext.ITiledGraph, /) -> pyaccess._pyaccess_ext.GRASP:
@@ -1493,10 +1546,10 @@ def build_range_rphast_gs_solver(arg: pyaccess._pyaccess_ext.CHGraph2, /) -> pya
 def build_range_rphast_solver(arg: pyaccess._pyaccess_ext.ICHGraph, /) -> pyaccess._pyaccess_ext.RangeRPHAST:
     ...
 
-def build_tc_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.TCWeighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, /) -> pyaccess._pyaccess_ext.TCGraph:
+def build_tc_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.TCWeighting, /) -> pyaccess._pyaccess_ext.TCGraph:
     ...
 
-def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.IGraphIndex, arg3: pyaccess._pyaccess_ext.Partition, arg4: pyaccess._pyaccess_ext.IDMapping, arg5: pyaccess._pyaccess_ext.TiledData, arg6: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
+def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, arg3: pyaccess._pyaccess_ext.IDMapping, arg4: pyaccess._pyaccess_ext.TiledData, arg5: pyaccess._pyaccess_ext.CellIndex, /) -> pyaccess._pyaccess_ext.TiledGraph:
     ...
 
 def build_transit_dijkstra_solver(arg: pyaccess._pyaccess_ext.TransitGraph, /) -> pyaccess._pyaccess_ext.TransitDijkstra:
@@ -1802,48 +1855,6 @@ def load_transit_data(arg: str, /) -> pyaccess._pyaccess_ext.TransitData:
 def load_transit_weights(arg: str, /) -> pyaccess._pyaccess_ext.TransitWeighting:
     ...
 
-@overload
-def map_to_closest(arg0: tuple, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int:
-    """
-    map_to_closest(arg0: tuple, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int
-    """
-    ...
-
-@overload
-def map_to_closest(arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IGraph, /) -> pyaccess._pyaccess_ext.IntVector:
-    """
-    map_to_closest(arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IGraph, /) -> pyaccess._pyaccess_ext.IntVector
-    """
-    ...
-
-@overload
-def map_to_closest(arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int:
-    """
-    map_to_closest(arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IGraph, /) -> int
-    """
-    ...
-
-@overload
-def map_to_closest(arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, arg2: pyaccess._pyaccess_ext.IGraph, /) -> numpy.typing.NDArray:
-    """
-    map_to_closest(arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg2: pyaccess._pyaccess_ext.IGraph, /) -> numpy.ndarray[dtype=int32, shape=(*), order='C']
-    """
-    ...
-
-@overload
-def map_to_closest(arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IGraph, /) -> int:
-    """
-    map_to_closest(arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IGraph, /) -> int
-    """
-    ...
-
-@overload
-def map_to_closest(arg0: list, arg1: pyaccess._pyaccess_ext.IGraph, /) -> pyaccess._pyaccess_ext.IntVector:
-    """
-    map_to_closest(arg0: list, arg1: pyaccess._pyaccess_ext.IGraph, /) -> pyaccess._pyaccess_ext.IntVector
-    """
-    ...
-
 def new_graph_base(arg0: pyaccess._pyaccess_ext.NodeVector, arg1: pyaccess._pyaccess_ext.EdgeVector, /) -> pyaccess._pyaccess_ext.GraphBase:
     ...
 
@@ -1860,9 +1871,6 @@ def new_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyacces
     ...
 
 def prepare_balanced_kdtree_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
-    ...
-
-def prepare_base_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
     ...
 
 def prepare_cell_index(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.CellIndex:
@@ -1895,7 +1903,7 @@ def prepare_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
 def prepare_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
-def prepare_transit(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.NodeVector, arg2: pyaccess._pyaccess_ext.ConnectionVector, arg3: int, /) -> tuple[pyaccess._pyaccess_ext.TransitData, pyaccess._pyaccess_ext.IDMapping]:
+def prepare_transit(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.IGraphIndex, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.ConnectionVector, arg4: int, /) -> tuple[pyaccess._pyaccess_ext.TransitData, pyaccess._pyaccess_ext.IDMapping]:
     ...
 
 def remove_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:

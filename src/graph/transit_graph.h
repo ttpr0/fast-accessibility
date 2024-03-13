@@ -21,14 +21,17 @@
 class TransitGraph
 {
 public:
-    IGraph& base_graph;
+    std::shared_ptr<IGraph> base_graph;
 
     // additional components
     std::shared_ptr<_IDMapping> id_mapping;
     std::shared_ptr<TransitData> transit;
     std::shared_ptr<TransitWeighting> transit_weighting;
 
-    TransitGraph(IGraph& base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit, std::shared_ptr<TransitWeighting> transit_weighting);
+    TransitGraph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
+                 std::shared_ptr<TransitWeighting> transit_weighting)
+        : base_graph(base_graph), id_mapping(id_mapping), transit(transit), transit_weighting(transit_weighting)
+    {}
 
     IGraph& getBaseGraph();
     int mapToBaseNode(int stop);
@@ -50,5 +53,5 @@ public:
 // build transit-graph
 //*******************************************
 
-TransitGraph build_transit_graph(IGraph& base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
+TransitGraph build_transit_graph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
                                  std::shared_ptr<TransitWeighting> transit_weighting);

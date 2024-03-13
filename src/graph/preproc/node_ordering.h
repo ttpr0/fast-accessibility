@@ -100,8 +100,7 @@ static std::vector<int> _dfs_order_values(IGraph& g)
 static std::vector<int> build_base_order(std::shared_ptr<GraphBase> base)
 {
     auto weight = build_weighting(*base);
-    auto index = build_base_index(*base);
-    auto graph = build_base_graph(base, weight, index);
+    auto graph = build_base_graph(base, weight);
 
     MappingBuilder builder(base->nodeCount());
     auto order_values = _dfs_order_values(graph);
@@ -114,8 +113,7 @@ static std::vector<int> build_base_order(std::shared_ptr<GraphBase> base)
 static std::vector<int> build_ch_order(std::shared_ptr<GraphBase> base, std::shared_ptr<CHData> ch, std::shared_ptr<_IDMapping> id_mapping)
 {
     auto weight = build_weighting(*base);
-    auto index = build_base_index(*base);
-    auto graph = build_base_graph(base, weight, index);
+    auto graph = build_base_graph(base, weight);
 
     MappingBuilder builder(base->nodeCount());
     auto order_values = _dfs_order_values(graph);
@@ -130,8 +128,7 @@ static std::vector<int> build_ch_order(std::shared_ptr<GraphBase> base, std::sha
 static std::vector<int> build_ch2_order(std::shared_ptr<GraphBase> base, std::shared_ptr<Partition> partition, std::shared_ptr<CHData> ch, std::shared_ptr<_IDMapping> id_mapping)
 {
     auto weight = build_weighting(*base);
-    auto index = build_base_index(*base);
-    auto graph = build_base_graph(base, weight, index);
+    auto graph = build_base_graph(base, weight);
 
     MappingBuilder builder(base->nodeCount());
     auto order_values = _dfs_order_values(graph);

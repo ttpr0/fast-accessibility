@@ -10,8 +10,8 @@
 #include "../../structs/adjacency.h"
 #include "../../weights/weighting.h"
 
-static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> build_transit_data(IGraph& graph, std::vector<Node> stops, std::vector<Connection> connections,
-                                                                                                int max_range)
+static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> build_transit_data(IGraph& graph, IGraphIndex& index, std::vector<Node> stops,
+                                                                                                std::vector<Connection> connections, int max_range)
 {
     // build id-mapping
     auto mapping = std::vector<std::array<int, 2>>(graph.nodeCount());
@@ -20,7 +20,7 @@ static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> bui
     }
     for (int i = 0; i < stops.size(); i++) {
         auto stop = stops[i];
-        int c_id = graph.getClosestNode(stop.location);
+        auto c_id = index.getClosestNode(stop.location);
         if (c_id == -1) {
             continue;
         }

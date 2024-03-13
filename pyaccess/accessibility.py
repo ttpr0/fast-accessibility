@@ -22,12 +22,10 @@ GRASP = OneToManyType.GRASP
 OneToManySolver: TypeAlias = _pyaccess_ext.RangeDijkstra | _pyaccess_ext.RangePHAST | _pyaccess_ext.RangeRPHAST
 
 def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: list[int], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", partition: str | None = None, ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> list[float]:
-    g: _pyaccess_ext.IGraph
-
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             if transit is not None and transit_weight is not None:
-                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                tg = _build_transit_graph(graph, transit, transit_weight)
                 solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
                 solver.set_min_departure(min_departure)
                 solver.set_max_departure(max_departure)
@@ -68,8 +66,8 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
     sup_lat = np.zeros((len(sup_points),), dtype=np.float32)
     for i in range(len(sup_points)):
         sup_lon[i], sup_lat[i] = sup_points[i]
-    dem_nodes = _pyaccess_ext.map_to_closest(dem_lon, dem_lat, g)
-    sup_nodes = _pyaccess_ext.map_to_closest(sup_lon, sup_lat, g)
+    dem_nodes = graph._map_to_closest(dem_lon, dem_lat, ch=ch, overlay=overlay)
+    sup_nodes = graph._map_to_closest(sup_lon, sup_lat, ch=ch, overlay=overlay)
     dem_weights = np.zeros((len(dem_points),), dtype=np.int32)
     for i in range(len(dem_points)):
         dem_weights[i] = dem_weight[i]
@@ -81,12 +79,10 @@ def calc_2sfca(graph: Graph, dem_points: list[tuple[float, float]], dem_weight: 
     return access.tolist()
 
 def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> list[int]:
-    g: _pyaccess_ext.IGraph
-
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             if transit is not None and transit_weight is not None:
-                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                tg = _build_transit_graph(graph, transit, transit_weight)
                 solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
                 solver.set_min_departure(min_departure)
                 solver.set_max_departure(max_departure)
@@ -123,19 +119,17 @@ def calc_range(graph: Graph, sup_point: tuple[float, float], dem_points: list[tu
     dem_lat = np.zeros((len(dem_points),), dtype=np.float32)
     for i in range(len(dem_points)):
         dem_lon[i], dem_lat[i] = dem_points[i]
-    dem_nodes = _pyaccess_ext.map_to_closest(dem_lon, dem_lat, g)
-    sup_node = _pyaccess_ext.map_to_closest(sup_point, g)
+    dem_nodes = graph._map_to_closest(dem_lon, dem_lat, ch=ch, overlay=overlay)
+    sup_node = graph._get_closest(sup_point[0], sup_point[1], ch=ch, overlay=overlay)
 
     ranges = _pyaccess_ext.calc_range_query(solver, sup_node, dem_nodes, max_range)
     return ranges.tolist()
 
 def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points: list[tuple[float, float]], max_range: int = 900, algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", ch: str | None = None, overlay: str | None = None, transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> np.ndarray:
-    g: _pyaccess_ext.IGraph
-
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             if transit is not None and transit_weight is not None:
-                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                tg =_build_transit_graph(graph, transit, transit_weight)
                 solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
                 solver.set_min_departure(min_departure)
                 solver.set_max_departure(max_departure)
@@ -176,19 +170,17 @@ def calc_matrix(graph: Graph, sup_points: list[tuple[float, float]], dem_points:
     sup_lat = np.zeros((len(sup_points),), dtype=np.float32)
     for i in range(len(sup_points)):
         sup_lon[i], sup_lat[i] = sup_points[i]
-    dem_nodes = _pyaccess_ext.map_to_closest(dem_lon, dem_lat, g)
-    sup_node = _pyaccess_ext.map_to_closest(sup_lon, sup_lat, g)
+    dem_nodes = graph._map_to_closest(dem_lon, dem_lat, ch=ch, overlay=overlay)
+    sup_nodes = graph._map_to_closest(sup_lon, sup_lat, ch=ch, overlay=overlay)
 
-    matrix = _pyaccess_ext.calc_matrix_query(solver, sup_node, dem_nodes, max_range)
+    matrix = _pyaccess_ext.calc_matrix_query(solver, sup_nodes, dem_nodes, max_range)
     return matrix
 
 def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_points: list[tuple[float, float]], sup_weight: list[int], decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900), algorithm: OneToManyType = RANGE_DIJKSTRA, weight: str = "default", transit: str | None = None, transit_weight: str | None = None, min_departure: int = 0, max_departure: int = 1000000) -> list[float]:
-    g: _pyaccess_ext.IGraph
-
     match algorithm:
         case OneToManyType.RANGE_DIJKSTRA:
             if transit is not None and transit_weight is not None:
-                tg, g =_build_transit_graph(graph, transit, transit_weight)
+                tg =_build_transit_graph(graph, transit, transit_weight)
                 solver = _pyaccess_ext.build_transit_dijkstra_solver(tg)
                 solver.set_min_departure(min_departure)
                 solver.set_max_departure(max_departure)
@@ -209,8 +201,8 @@ def calc_reachability(graph: Graph, dem_points: list[tuple[float, float]], sup_p
     sup_lat = np.zeros((len(sup_points),), dtype=np.float32)
     for i in range(len(sup_points)):
         sup_lon[i], sup_lat[i] = sup_points[i]
-    dem_nodes = _pyaccess_ext.map_to_closest(dem_lon, dem_lat, g)
-    sup_nodes = _pyaccess_ext.map_to_closest(sup_lon, sup_lat, g)
+    dem_nodes = graph._map_to_closest(dem_lon, dem_lat)
+    sup_nodes = graph._map_to_closest(sup_lon, sup_lat)
     sup_weights = np.zeros((len(sup_points),), dtype=np.int32)
     for i in range(len(sup_points)):
         sup_weights[i] = sup_weight[i]

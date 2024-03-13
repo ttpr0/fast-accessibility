@@ -135,7 +135,14 @@ void bind_graph(nanobind::module_& m)
     tc_weighting.def("set_turn_cost", &TCWeighting::set_turn_cost);
 
     auto i_graph_index = py::class_<IGraphIndex>(m, "IGraphIndex");
-    i_graph_index.def("get_closest_node", &IGraphIndex::getClosestNode);
+    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(Coord)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(float, float)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(Coord, const _IDMapping&)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(float, float, const _IDMapping&)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("map_to_closest", static_cast<std::vector<int> (IGraphIndex::*)(const std::vector<Coord>&)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", static_cast<Vector<int> (IGraphIndex::*)(VectorView<float>, VectorView<float>)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", static_cast<std::vector<int> (IGraphIndex::*)(const std::vector<Coord>&, const _IDMapping&)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", static_cast<Vector<int> (IGraphIndex::*)(VectorView<float>, VectorView<float>, const _IDMapping&)>(&IGraphIndex::mapToClosest));
 
     auto id_mapping = py::class_<_IDMapping>(m, "IDMapping");
     id_mapping.def("get_source", &_IDMapping::get_source);
@@ -270,7 +277,6 @@ void bind_graph(nanobind::module_& m)
     m.def("new_tc_weighting", &build_tc_weighting);
     m.def("new_transit_weighting", &build_transit_weighting);
     m.def("prepare_default_weighting", &build_default_weighting);
-    m.def("prepare_base_index", &build_base_index);
     m.def("prepare_kdtree_index", &build_kdtree_index);
     m.def("prepare_balanced_kdtree_index", &build_balanced_kdtree_index);
     m.def("prepare_partition", &calc_partition);

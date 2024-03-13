@@ -81,6 +81,17 @@ struct Connection
     int route;
 };
 
+struct NodeAttributes {
+    char type;
+};
+
+struct EdgeAttributes {
+    RoadType type;
+    float length;
+    int maxspeed;
+    bool oneway;
+};
+
 // struct CHEdge
 // {
 //     int from;

@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "../util/function_ref.h"
 #include "./base/graph_index.h"
 #include "./base/id_mapping.h"
 #include "./base_graph.h"
@@ -12,7 +13,6 @@
 #include "./speed_ups/ch_index.h"
 #include "./speed_ups/partition.h"
 #include "./structs/adjacency.h"
-#include "../util/function_ref.h"
 
 //*******************************************
 // ch-graph
@@ -23,7 +23,6 @@ class CHGraph : public ICHGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
-    std::shared_ptr<IGraphIndex> index;
 
     // additional components
     std::shared_ptr<_IDMapping> id_mapping;
@@ -31,15 +30,16 @@ public:
     // ch-index
     std::shared_ptr<_CHIndex> ch_index;
 
-    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<_IDMapping> id_mapping,
-            std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
+    CHGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch,
+            std::shared_ptr<_CHIndex> ch_index)
+        : base(std::move(base)), weights(std::move(weights)), id_mapping(std::move(id_mapping)), ch(std::move(ch)), ch_index(std::move(ch_index))
+    {}
 
     int nodeCount();
     int edgeCount();
     Node getNode(int node);
     Edge getEdge(int edge);
     Coord getNodeGeom(int node);
-    int getClosestNode(Coord point);
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
@@ -57,7 +57,6 @@ class CHGraph2 : public IGraph
 public:
     std::shared_ptr<GraphBase> base;
     std::shared_ptr<Weighting> weights;
-    std::shared_ptr<IGraphIndex> index;
     std::shared_ptr<Partition> partition;
 
     // additional components
@@ -66,15 +65,16 @@ public:
     // ch-index
     std::shared_ptr<_CHIndex> ch_index;
 
-    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-             std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
+    CHGraph2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<_IDMapping> id_mapping,
+             std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index)
+        : base(std::move(base)), weights(std::move(weights)), partition(std::move(partition)), id_mapping(std::move(id_mapping)), ch(std::move(ch)), ch_index(std::move(ch_index))
+    {}
 
     int nodeCount();
     int edgeCount();
     Node getNode(int node);
     Edge getEdge(int edge);
     Coord getNodeGeom(int node);
-    int getClosestNode(Coord point);
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func);
     int getEdgeWeight(EdgeRef edge);
@@ -93,7 +93,7 @@ public:
 // build ch-graph
 //*******************************************
 
-CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<_IDMapping> id_mapping,
+CHGraph build_ch_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<_IDMapping> id_mapping,
                        std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);
-CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
+CHGraph2 build_ch_graph_2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition,
                           std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<CHData> ch, std::shared_ptr<_CHIndex> ch_index);

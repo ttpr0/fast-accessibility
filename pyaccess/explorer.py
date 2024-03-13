@@ -15,12 +15,9 @@ class Explorer:
     _stop_mapping: _pyaccess_ext.IDMapping | None
     _transit_weight: _pyaccess_ext.TransitWeighting | None
 
-    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex | None = None, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None, transit: _pyaccess_ext.TransitData | None = None, stop_mapping: _pyaccess_ext.IDMapping | None = None, transit_weight: _pyaccess_ext.TransitWeighting | None = None):
+    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None, transit: _pyaccess_ext.TransitData | None = None, stop_mapping: _pyaccess_ext.IDMapping | None = None, transit_weight: _pyaccess_ext.TransitWeighting | None = None):
         self._base = base
-        if index is None:
-            self._index = _pyaccess_ext.prepare_base_index(self._base)
-        else:
-            self._index = index
+        self._index = index
         self._weight = weight
         self._partition = partition
         self._id_mapping = id_mapping
@@ -64,8 +61,8 @@ class Explorer:
 
     def get_closest_node(self, location: tuple[float, float]) -> int:
         coord = _pyaccess_ext.Coord(location[0], location[1])
-        node, ok = self._index.get_closest_node(coord)
-        if not ok:
+        node = self._index.get_closest_node(coord)
+        if node == -1:
             raise ValueError(f"no node near the given location (lon: {location[0]}, lat: {location[1]}) found")
         return node
 
@@ -97,11 +94,16 @@ class Explorer:
         raise ValueError("explorer does not contain shortcut information")
 
     def get_shortcut(self, shortcut_id: int) -> _pyaccess_ext.Shortcut:
+        shc = None
         if self._ch is not None:
-            return self._ch.get_shortcut(shortcut_id)
+            shc = self._ch.get_shortcut(shortcut_id)
         if self._tiled is not None:
-            return self._tiled.get_shortcut(shortcut_id)
-        raise ValueError("explorer does not contain shortcut information")
+            shc = self._tiled.get_shortcut(shortcut_id)
+        if shc is None or self._id_mapping is None:
+            raise ValueError("explorer does not contain shortcut information")
+        shc.from_ = self._id_mapping.get_source(shc.from_)
+        shc.to_ = self._id_mapping.get_source(shc.to_)
+        return shc
 
     def get_adjacent_shortcuts(self, node_id: int, direction: _pyaccess_ext.Direction) -> list[int]:
         if self._ch is not None and self._id_mapping is not None:

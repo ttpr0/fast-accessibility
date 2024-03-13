@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any
 import os
 import json
+import numpy as np
 
 from . import _pyaccess_ext
 from .components import Ordering
@@ -260,10 +261,10 @@ class Graph:
         w = self._get_weight(weight)
         i = self._get_index()
         if isinstance(w, _pyaccess_ext.Weighting):
-            g = _pyaccess_ext.build_base_graph(b, w, i)
+            g = _pyaccess_ext.build_base_graph(b, w)
         else:
-            g = _pyaccess_ext.build_tc_graph(b, w, i)
-        transit_data, id_mapping = _pyaccess_ext.prepare_transit(g, stops, connections, max_transfer_range)
+            g = _pyaccess_ext.build_tc_graph(b, w)
+        transit_data, id_mapping = _pyaccess_ext.prepare_transit(g, i, stops, connections, max_transfer_range)
         transit_obj = TransitObject_new(weight, transit_data, id_mapping)
         self._transit[name] = transit_obj
 
@@ -417,6 +418,14 @@ class Graph:
         ch_index = ch.get_ch_index()
         return ch_data, ch_index, id_mapping
 
+    def _get_ch_id_mapping(self, name: str) -> _pyaccess_ext.IDMapping:
+        ch = self._ch[name]
+        if not ch.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load contraction with unknown name and path.")
+            ch.load(f"{self._base_path}/{self._name}_ch_{name}")
+        return ch.get_id_mapping()
+
     def _get_ch_weight(self, name: str) -> str:
         ch = self._ch[name]
         return ch.get_base_weigth()
@@ -435,6 +444,14 @@ class Graph:
         id_mapping = tiled.get_id_mapping()
         cell_index = tiled.get_cell_index()
         return tiled_data, cell_index, id_mapping
+
+    def _get_overlay_id_mapping(self, name: str) -> _pyaccess_ext.IDMapping:
+        tiled = self._tiled[name]
+        if not tiled.is_loaded():
+            if self._base_path is None or self._name is None:
+                raise ValueError("Can't load overlay with unknown name and path.")
+            tiled.load(f"{self._base_path}/{self._name}_tiled_{name}")
+        return tiled.get_id_mapping()
 
     def _get_overlay_weight(self, name: str) -> str:
         tiled = self._tiled[name]
@@ -466,6 +483,29 @@ class Graph:
             transit.load(f"{self._base_path}/{self._name}_transit_{name}")
         return transit.get_weighting(weighting)
 
+    def _map_to_closest(self, lon: np.ndarray, lat: np.ndarray, ch: str | None = None, overlay: str | None = None) -> np.ndarray:
+        i = self._get_index()
+        if ch is not None and overlay is not None:
+            raise ValueError("Can't simultaniasly use ch and overlay")
+        if ch is not None:
+            id_m = self._get_ch_id_mapping(ch)
+            return i.map_to_closest(lon, lat, id_m)
+        if overlay is not None:
+            id_m = self._get_overlay_id_mapping(overlay)
+            return i.map_to_closest(lon, lat, id_m)
+        return i.map_to_closest(lon, lat)
+
+    def _get_closest(self, lon: float, lat: float, ch: str | None = None, overlay: str | None = None) -> int:
+        i = self._get_index()
+        if ch is not None and overlay is not None:
+            raise ValueError("Can't simultaniasly use ch and overlay")
+        if ch is not None:
+            id_m = self._get_ch_id_mapping(ch)
+            return i.get_closest_node(lon, lat, id_m)
+        if overlay is not None:
+            id_m = self._get_overlay_id_mapping(overlay)
+            return i.get_closest_node(lon, lat, id_m)
+        return i.get_closest_node(lon, lat)
 
 def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) -> Graph:
     """Creates a new graph from nodes and edges.

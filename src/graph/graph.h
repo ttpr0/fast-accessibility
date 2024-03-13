@@ -24,7 +24,6 @@ public:
     virtual Node getNode(int node) = 0;
     virtual Edge getEdge(int edge) = 0;
     virtual Coord getNodeGeom(int node) = 0;
-    virtual int getClosestNode(Coord point) = 0;
     virtual void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) = 0;
     virtual int getEdgeWeight(EdgeRef edge) = 0;
     virtual int getTurnCost(EdgeRef from, int via, EdgeRef to) = 0;

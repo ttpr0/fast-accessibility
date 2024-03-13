@@ -32,8 +32,9 @@ namespace nanobench = ankerl::nanobench;
 
 int convert_start(IGraph* base_graph, IGraph* this_graph, int start)
 {
-    int this_start = this_graph->getClosestNode(base_graph->getNodeGeom(start));
-    return this_start;
+    // int this_start = this_graph->getClosestNode(base_graph->getNodeGeom(start));
+    // return this_start;
+    return 0;
 }
 
 void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& base_targets, std::vector<bool>& this_targets)
@@ -43,7 +44,8 @@ void convert_targets(IGraph* base_graph, IGraph* this_graph, std::vector<bool>& 
     }
     for (int i = 0; i < base_graph->nodeCount(); i++) {
         if (base_targets[i]) {
-            int node = this_graph->getClosestNode(base_graph->getNodeGeom(i));
+            // int node = this_graph->getClosestNode(base_graph->getNodeGeom(i));
+            int node = -1;
             if (node == -1) {
                 continue;
             }

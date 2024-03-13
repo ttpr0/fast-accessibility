@@ -230,8 +230,7 @@ std::shared_ptr<CHData> calc_partial_contraction(std::shared_ptr<GraphBase> base
 
     // compute node priorities
     std::cout << "computing priorities..." << std::endl;
-    auto index = build_base_index(*base);
-    Graph b_graph = build_base_graph(base, weights, index);
+    Graph b_graph = build_base_graph(base, weights);
     auto is_border = _get_is_border(b_graph, *partition);
     std::vector<int> node_priorities(graph.nodeCount());
     std::priority_queue<pq<std::tuple<int, int>, int>> contraction_order;
@@ -374,8 +373,7 @@ static std::shared_ptr<CHData> calc_contraction_tiled(std::shared_ptr<GraphBase>
 
     // compute node priorities
     std::cout << "computing priorities..." << std::endl;
-    auto index = build_base_index(*base);
-    Graph b_graph = build_base_graph(base, weights, index);
+    Graph b_graph = build_base_graph(base, weights);
     auto is_border = _get_is_border(b_graph, *partition);
     std::vector<int> node_priorities(graph.nodeCount());
     std::priority_queue<pq<std::tuple<int, int>, int>> contraction_order;

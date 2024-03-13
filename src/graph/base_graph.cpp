@@ -8,14 +8,10 @@
 // base-graph
 //*******************************************
 
-Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index)
+Graph build_base_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights)
 {
-    return {std::move(base), std::move(weights), std::move(index)};
+    return {std::move(base), std::move(weights)};
 }
-
-Graph::Graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index)
-    : base(std::move(base)), weights(std::move(weights)), index(std::move(index))
-{}
 
 int Graph::nodeCount()
 {
@@ -36,14 +32,6 @@ Edge Graph::getEdge(int edge)
 Coord Graph::getNodeGeom(int node)
 {
     return this->base->getNodeGeom(node);
-}
-int Graph::getClosestNode(Coord point)
-{
-    auto [id, ok] = this->index->getClosestNode(point);
-    if (ok) {
-        return id;
-    }
-    return -1;
 }
 void Graph::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)
 {
@@ -83,14 +71,10 @@ int Graph::getOtherNode(EdgeRef edge, int node)
 // turn-cost-graph
 //*******************************************
 
-TCGraph build_tc_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<TCWeighting> weights, std::shared_ptr<IGraphIndex> index)
+TCGraph build_tc_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<TCWeighting> weights)
 {
-    return {std::move(base), std::move(weights), std::move(index)};
+    return {std::move(base), std::move(weights)};
 }
-
-TCGraph::TCGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<TCWeighting> weights, std::shared_ptr<IGraphIndex> index)
-    : base(std::move(base)), weights(std::move(weights)), index(std::move(index))
-{}
 
 int TCGraph::nodeCount()
 {
@@ -111,14 +95,6 @@ Edge TCGraph::getEdge(int edge)
 Coord TCGraph::getNodeGeom(int node)
 {
     return this->base->getNodeGeom(node);
-}
-int TCGraph::getClosestNode(Coord point)
-{
-    auto [id, ok] = this->index->getClosestNode(point);
-    if (ok) {
-        return id;
-    }
-    return -1;
 }
 void TCGraph::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)
 {

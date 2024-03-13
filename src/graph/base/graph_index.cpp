@@ -5,26 +5,76 @@
 // graph index
 //*******************************************
 
-std::tuple<int, bool> BaseGraphIndex::getClosestNode(Coord point)
+int KDTreeIndex::getClosestNode(Coord point)
 {
-    int closest = -1;
-    int min_dist = 100000;
-    for (int i = 0; i < this->nodes.size(); i++) {
-        Coord other = this->nodes[i].location;
-        float d_lon = other.lon - point.lon;
-        float d_lat = other.lat - point.lat;
-        float dist = sqrt(d_lon * d_lon + d_lat * d_lat);
-        if (dist < min_dist) {
-            min_dist = dist;
-            closest = i;
-        }
+    auto [node, ok] = this->tree.get_closest(point.lon, point.lat, 0.01);
+    if (!ok) {
+        return -1;
     }
-    return std::make_tuple(closest, true);
+    return node;
+}
+int KDTreeIndex::getClosestNode(float lon, float lat)
+{
+    auto [node, ok] = this->tree.get_closest(lon, lat, 0.01);
+    if (!ok) {
+        return -1;
+    }
+    return node;
+}
+int KDTreeIndex::getClosestNode(Coord point, const _IDMapping& id_mapping)
+{
+    auto [node, ok] = this->tree.get_closest(point.lon, point.lat, 0.01);
+    if (!ok) {
+        return -1;
+    }
+    auto m_node = id_mapping.get_target(node);
+    return m_node;
+}
+int KDTreeIndex::getClosestNode(float lon, float lat, const _IDMapping& id_mapping)
+{
+    auto [node, ok] = this->tree.get_closest(lon, lat, 0.01);
+    if (!ok) {
+        return -1;
+    }
+    auto m_node = id_mapping.get_target(node);
+    return m_node;
 }
 
-std::tuple<int, bool> KDTreeIndex::getClosestNode(Coord point)
+std::vector<int> KDTreeIndex::mapToClosest(const std::vector<Coord>& coords)
 {
-    return this->tree.get_closest(point.lon, point.lat, 0.01);
+    std::vector<int> closest(coords.size());
+    for (int i = 0; i < coords.size(); i++) {
+        auto node = this->getClosestNode(coords[i]);
+        closest[i] = node;
+    }
+    return closest;
+}
+Vector<int> KDTreeIndex::mapToClosest(VectorView<float> lons, VectorView<float> lats)
+{
+    Vector<int> closest(lons.rows());
+    for (int i = 0; i < lons.rows(); i++) {
+        auto node = this->getClosestNode({lons(i), lats(i)});
+        closest(i) = node;
+    }
+    return closest;
+}
+std::vector<int> KDTreeIndex::mapToClosest(const std::vector<Coord>& coords, const _IDMapping& id_mapping)
+{
+    std::vector<int> closest(coords.size());
+    for (int i = 0; i < coords.size(); i++) {
+        auto node = this->getClosestNode(coords[i], id_mapping);
+        closest[i] = node;
+    }
+    return closest;
+}
+Vector<int> KDTreeIndex::mapToClosest(VectorView<float> lons, VectorView<float> lats, const _IDMapping& id_mapping)
+{
+    Vector<int> closest(lons.rows());
+    for (int i = 0; i < lons.rows(); i++) {
+        auto node = this->getClosestNode({lons(i), lats(i)}, id_mapping);
+        closest(i) = node;
+    }
+    return closest;
 }
 
 KDTree build_kdtree(std::vector<Node>& nodes)
@@ -49,10 +99,6 @@ KDTree build_balanced_kdtree(std::vector<Node>& nodes)
     return tree;
 }
 
-std::shared_ptr<IGraphIndex> build_base_index(GraphBase& base)
-{
-    return std::make_shared<BaseGraphIndex>(base.nodes);
-}
 std::shared_ptr<IGraphIndex> build_kdtree_index(GraphBase& base)
 {
     return std::make_shared<KDTreeIndex>(build_kdtree(base.nodes));

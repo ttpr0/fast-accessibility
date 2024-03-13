@@ -22,8 +22,7 @@
 // Creates tiled-graph with full-shortcut cliques.
 static std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
-    auto index = build_base_index(*base);
-    Graph graph = build_base_graph(base, weights, index);
+    Graph graph = build_base_graph(base, weights);
 
     // init components
     std::vector<Shortcut> skip_shortcuts;
@@ -79,8 +78,7 @@ static std::shared_ptr<TiledData> PreprocessTiledGraph3(std::shared_ptr<GraphBas
 //
 static std::shared_ptr<_CellIndex> PrepareGRASPCellIndex2(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition)
 {
-    auto index = build_base_index(*base);
-    Graph graph = build_base_graph(base, weights, index);
+    Graph graph = build_base_graph(base, weights);
 
     // init components
     std::unordered_map<short, std::vector<Shortcut>> fwd_index_edges;
@@ -125,8 +123,7 @@ static std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> Prepr
     auto ch_data = calc_partial_contraction(base, weights, partition);
 
     printf("Set border nodes to maxlevel: \n");
-    auto index = build_base_index(*base);
-    Graph graph = build_base_graph(base, weights, index);
+    Graph graph = build_base_graph(base, weights);
     auto is_border = _get_is_border(graph, *partition);
     short max_level = 0;
     auto& node_levels = ch_data->node_levels;

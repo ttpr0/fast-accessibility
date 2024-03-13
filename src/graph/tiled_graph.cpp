@@ -8,22 +8,11 @@
 // tiled-graph
 //******************************************
 
-TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                             std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index)
+TiledGraph build_tiled_graph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<Partition> partition, std::shared_ptr<_IDMapping> id_mapping,
+                             std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index)
 {
-    return {std::move(base), std::move(weights), std::move(index), std::move(partition), std::move(id_mapping), std::move(tiled), std::move(cell_index)};
+    return {std::move(base), std::move(weights), std::move(partition), std::move(id_mapping), std::move(tiled), std::move(cell_index)};
 }
-
-TiledGraph::TiledGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights, std::shared_ptr<IGraphIndex> index, std::shared_ptr<Partition> partition,
-                       std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TiledData> tiled, std::shared_ptr<_CellIndex> cell_index)
-    : base(std::move(base)),
-      weights(std::move(weights)),
-      index(std::move(index)),
-      partition(std::move(partition)),
-      id_mapping(std::move(id_mapping)),
-      tiled(std::move(tiled)),
-      cell_index(std::move(cell_index))
-{}
 
 int TiledGraph::nodeCount()
 {
@@ -49,15 +38,6 @@ Coord TiledGraph::getNodeGeom(int node)
 {
     int m_node = this->id_mapping->get_source(node);
     return this->base->getNodeGeom(m_node);
-}
-int TiledGraph::getClosestNode(Coord point)
-{
-    auto [id, ok] = this->index->getClosestNode(point);
-    if (ok) {
-        int m_id = this->id_mapping->get_target(id);
-        return m_id;
-    }
-    return -1;
 }
 
 void TiledGraph::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func)
