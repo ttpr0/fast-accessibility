@@ -9,13 +9,16 @@
 #include "./util.h"
 
 // computes distances to nodes until "max_range" using dijkstra
-void calcRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_range)
+void calcRangeDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range)
 {
-    auto& start_flag = flags[start];
-    start_flag.dist = 0;
-
     std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = flags[s.node];
+        start_flag.dist = s.dist;
+
+        heap.push({s.node, s.dist});
+    }
 
     while (true) {
         if (heap.empty()) {
@@ -50,28 +53,31 @@ void calcRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_ran
     }
 }
 
-void calcRangeDijkstraTC(IGraph* g, int start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range)
+void calcRangeDijkstraTC(IGraph* g, DSnap start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range)
 {
-    auto& start_flag = node_flags[start];
-    start_flag.dist = 0;
-
     std::priority_queue<pq_item> heap;
-    g->forAdjacentEdges(start, FORWARD, ADJACENT_EDGES, [&edge_flags, &node_flags, &g, &heap, &max_range](EdgeRef ref) {
-        int edge_id = ref.edge_id;
-        int next_node_id = ref.other_id;
-        int edge_dist = g->getEdgeWeight(ref);
-        if (edge_dist > max_range) {
-            return;
-        }
-        auto& edge_flag = edge_flags[edge_id];
-        edge_flag.dist = edge_dist;
-        heap.push({edge_id, edge_dist});
-        auto& node_flag = node_flags[next_node_id];
-        if (edge_dist < node_flag.dist) {
-            node_flag.dist = edge_dist;
-            node_flag.visited = true;
-        }
-    });
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = node_flags[s.node];
+        start_flag.dist = s.dist;
+
+        g->forAdjacentEdges(s.node, FORWARD, ADJACENT_EDGES, [&edge_flags, &node_flags, &g, &heap, &max_range, s](EdgeRef ref) {
+            int edge_id = ref.edge_id;
+            int next_node_id = ref.other_id;
+            int edge_dist = s.dist + g->getEdgeWeight(ref);
+            if (edge_dist > max_range) {
+                return;
+            }
+            auto& edge_flag = edge_flags[edge_id];
+            edge_flag.dist = edge_dist;
+            heap.push({edge_id, edge_dist});
+            auto& node_flag = node_flags[next_node_id];
+            if (edge_dist < node_flag.dist) {
+                node_flag.dist = edge_dist;
+                node_flag.visited = true;
+            }
+        });
+    }
 
     while (true) {
         if (heap.empty()) {

@@ -20,10 +20,14 @@ struct TransitItem
 };
 
 // computes one-to-many distances using forward-dijkstra and public-transit
-void calcTransitDijkstra(TransitGraph& g, int start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, Flags<TransitFlag>& stop_flags, int max_range, int from, int to)
+void calcTransitDijkstra(TransitGraph& g, DSnap start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, Flags<TransitFlag>& stop_flags, int max_range, int from, int to)
 {
     // step 1: range-dijkstra from start
-    calcBaseRange(g.getBaseGraph(), {{start, 0}}, node_flags, edge_flags, max_range);
+    std::vector<std::tuple<int, int>> starts;
+    for (int i = 0; i < start.len(); i++) {
+        starts.push_back({start[i].node, start[i].dist});
+    }
+    calcBaseRange(g.getBaseGraph(), starts, node_flags, edge_flags, max_range);
 
     // step 2: transit-dijkstra from all found stops
     std::priority_queue<pq<TransitItem, int>> heap;
@@ -86,7 +90,7 @@ void calcTransitDijkstra(TransitGraph& g, int start, Flags<DistFlag>& node_flags
     }
 
     // step 3: range-dijkstra from all stops
-    std::vector<std::tuple<int, int>> starts;
+    starts.clear();
     for (int i = 0; i < g.stopCount(); i++) {
         auto& flag = stop_flags[i];
         if (flag.trips.empty()) {

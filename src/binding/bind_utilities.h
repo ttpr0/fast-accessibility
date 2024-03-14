@@ -6,6 +6,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/bind_vector.h>
 
+#include "../algorithm/util.h"
 #include "../graph/structs/geom.h"
 
 NB_MAKE_OPAQUE(std::vector<int>);
@@ -14,6 +15,7 @@ NB_MAKE_OPAQUE(std::vector<Coord>);
 NB_MAKE_OPAQUE(std::vector<Node>);
 NB_MAKE_OPAQUE(std::vector<Edge>);
 NB_MAKE_OPAQUE(std::vector<Connection>);
+NB_MAKE_OPAQUE(std::vector<DSnap>);
 
 void bind_utilities(nanobind::module_& m)
 {
@@ -36,6 +38,7 @@ void bind_utilities(nanobind::module_& m)
     py::bind_vector<vector<Node>>(m, "NodeVector");
     py::bind_vector<vector<Edge>>(m, "EdgeVector");
     py::bind_vector<vector<Connection>>(m, "ConnectionVector");
+    py::bind_vector<vector<DSnap>>(m, "SnapVector");
 
     auto coord = py::class_<Coord>(m, "Coord");
     coord.def(py::init<>());
@@ -43,21 +46,18 @@ void bind_utilities(nanobind::module_& m)
     coord.def_rw("lon", &Coord::lon);
     coord.def_rw("lat", &Coord::lat);
 
-    // m.def("map_to_closest", [](py::list& l, IGraph& graph) {
-    //     std::vector<int> closest(l.size());
-    //     for (int i = 0; i < l.size(); i++) {
-    //         py::tuple t = py::cast<py::tuple>(l[i]);
-    //         py::handle lon = t[0];
-    //         py::handle lat = t[1];
-    //         Coord c = {py::cast<float>(lon), py::cast<float>(lat)};
-    //         closest[i] = graph.getClosestNode(c);
-    //     }
-    //     return closest;
-    // });
-    // m.def("map_to_closest", [](py::tuple& t, IGraph& graph) {
-    //     py::handle lon = t[0];
-    //     py::handle lat = t[1];
-    //     Coord c = {py::cast<float>(lon), py::cast<float>(lat)};
-    //     return graph.getClosestNode(c);
-    // });
+    auto snap = py::class_<Snap>(m, "Snap");
+    snap.def(py::init<>());
+    snap.def(py::init<int, int>());
+    snap.def_rw("node", &Snap::node);
+    snap.def_rw("dist", &Snap::dist);
+
+    auto dsnap = py::class_<DSnap>(m, "DSnap");
+    dsnap.def(py::init<>());
+    dsnap.def(py::init<int>());
+    dsnap.def(py::init<Snap>());
+    dsnap.def(py::init<Snap, Snap>());
+    dsnap.def("len", &DSnap::len);
+    dsnap.def("__getitem__", [](DSnap& snap, int index) { return snap[index]; });
+    dsnap.def("__setitem__", [](DSnap& snap, int index, Snap item) { snap[index] = item; });
 }

@@ -483,7 +483,7 @@ class Graph:
             transit.load(f"{self._base_path}/{self._name}_transit_{name}")
         return transit.get_weighting(weighting)
 
-    def _map_to_closest(self, lon: np.ndarray, lat: np.ndarray, ch: str | None = None, overlay: str | None = None) -> np.ndarray:
+    def _map_to_closest(self, lon: np.ndarray, lat: np.ndarray, ch: str | None = None, overlay: str | None = None) -> _pyaccess_ext.SnapVector:
         i = self._get_index()
         if ch is not None and overlay is not None:
             raise ValueError("Can't simultaniasly use ch and overlay")
@@ -495,7 +495,7 @@ class Graph:
             return i.map_to_closest(lon, lat, id_m)
         return i.map_to_closest(lon, lat)
 
-    def _get_closest(self, lon: float, lat: float, ch: str | None = None, overlay: str | None = None) -> int:
+    def _get_closest(self, lon: float, lat: float, ch: str | None = None, overlay: str | None = None) -> _pyaccess_ext.DSnap:
         i = self._get_index()
         if ch is not None and overlay is not None:
             raise ValueError("Can't simultaniasly use ch and overlay")

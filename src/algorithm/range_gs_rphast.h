@@ -10,14 +10,18 @@
 #include "./util.h"
 
 // RangeRPHAST with graph-partitioning
-void calcGSRPHAST(CHGraph2* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<Shortcut>& down_edges_subset, std::vector<bool>& contains_targets,
+void calcGSRPHAST(CHGraph2* g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<Shortcut>& down_edges_subset, std::vector<bool>& contains_targets,
                   std::vector<bool>& is_found)
 {
-    auto& start_flag = flags[start];
-    start_flag.dist = 0;
-
     std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = flags[s.node];
+        start_flag.dist = s.dist;
+
+        heap.push({s.node, s.dist});
+    }
+
     while (true) {
         if (heap.empty()) {
             break;

@@ -9,16 +9,20 @@
 #include "./util.h"
 
 // reGRASP and isoGRASP combination
-void calcGRASP(ITiledGraph* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
+void calcGRASP(ITiledGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
 {
-    auto& start_flag = flags[start];
-    start_flag.dist = 0;
-
-    short start_tile = g->getNodeTile(start);
-    is_found[start_tile] = true;
-
     std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    short start_tile;
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = flags[s.node];
+        start_flag.dist = s.dist;
+
+        start_tile = g->getNodeTile(s.node);
+        is_found[start_tile] = true;
+
+        heap.push({s.node, s.dist});
+    }
 
     // routing loop
     while (true) {

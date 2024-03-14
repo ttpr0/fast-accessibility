@@ -135,14 +135,14 @@ void bind_graph(nanobind::module_& m)
     tc_weighting.def("set_turn_cost", &TCWeighting::set_turn_cost);
 
     auto i_graph_index = py::class_<IGraphIndex>(m, "IGraphIndex");
-    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(Coord)>(&IGraphIndex::getClosestNode));
-    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(float, float)>(&IGraphIndex::getClosestNode));
-    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(Coord, const _IDMapping&)>(&IGraphIndex::getClosestNode));
-    i_graph_index.def("get_closest_node", static_cast<int (IGraphIndex::*)(float, float, const _IDMapping&)>(&IGraphIndex::getClosestNode));
-    i_graph_index.def("map_to_closest", static_cast<std::vector<int> (IGraphIndex::*)(const std::vector<Coord>&)>(&IGraphIndex::mapToClosest));
-    i_graph_index.def("map_to_closest", static_cast<Vector<int> (IGraphIndex::*)(VectorView<float>, VectorView<float>)>(&IGraphIndex::mapToClosest));
-    i_graph_index.def("map_to_closest", static_cast<std::vector<int> (IGraphIndex::*)(const std::vector<Coord>&, const _IDMapping&)>(&IGraphIndex::mapToClosest));
-    i_graph_index.def("map_to_closest", static_cast<Vector<int> (IGraphIndex::*)(VectorView<float>, VectorView<float>, const _IDMapping&)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("get_closest_node", static_cast<DSnap (IGraphIndex::*)(Coord)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("get_closest_node", static_cast<DSnap (IGraphIndex::*)(float, float)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("get_closest_node", static_cast<DSnap (IGraphIndex::*)(Coord, const _IDMapping&)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("get_closest_node", static_cast<DSnap (IGraphIndex::*)(float, float, const _IDMapping&)>(&IGraphIndex::getClosestNode));
+    i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(const std::vector<Coord>&)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(VectorView<float>, VectorView<float>)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(const std::vector<Coord>&, const _IDMapping&)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(VectorView<float>, VectorView<float>, const _IDMapping&)>(&IGraphIndex::mapToClosest));
 
     auto id_mapping = py::class_<_IDMapping>(m, "IDMapping");
     id_mapping.def("get_source", &_IDMapping::get_source);

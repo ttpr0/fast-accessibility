@@ -34,7 +34,7 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id) {}
+    void addTarget(DSnap target) {}
 
     bool isBuild() { return this->is_build; }
     void build()
@@ -46,14 +46,14 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcRangeDijkstra(this->graph, s_id, flags, this->max_range);
+        calcRangeDijkstra(this->graph, start, flags, this->max_range);
     }
 };
 
@@ -78,7 +78,7 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id) {}
+    void addTarget(DSnap target) {}
 
     bool isBuild() { return this->is_build; }
     void build()
@@ -90,7 +90,7 @@ public:
     }
 
     EdgeBasedState makeComputeState() { return EdgeBasedState(this->graph->nodeCount(), this->graph->edgeCount()); }
-    void compute(int s_id, EdgeBasedState& state)
+    void compute(DSnap start, EdgeBasedState& state)
     {
         if (!this->is_build) {
             return;
@@ -99,6 +99,6 @@ public:
         auto& edge_flags = state.edge_flags;
         node_flags.soft_reset();
         edge_flags.soft_reset();
-        calcRangeDijkstraTC(this->graph, s_id, node_flags, edge_flags, this->max_range);
+        calcRangeDijkstraTC(this->graph, start, node_flags, edge_flags, this->max_range);
     }
 };

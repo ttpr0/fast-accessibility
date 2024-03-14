@@ -26,7 +26,7 @@ public:
     PHAST(ICHGraph* graph) : graph(graph) { this->is_build = false; }
 
     void addMaxRange(int range) {}
-    void addTarget(int id) {}
+    void addTarget(DSnap target) {}
 
     bool isBuild() { return this->is_build; }
     void build()
@@ -38,14 +38,14 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcPHAST(this->graph, s_id, flags);
+        calcPHAST(this->graph, start, flags);
     }
 };
 
@@ -71,7 +71,7 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id) {}
+    void addTarget(DSnap target) {}
 
     bool isBuild() { return this->is_build; }
     void build()
@@ -83,14 +83,14 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcRangePHAST(this->graph, s_id, flags, this->max_range);
+        calcRangePHAST(this->graph, start, flags, this->max_range);
     }
 };
 
@@ -118,13 +118,15 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id)
+    void addTarget(DSnap target)
     {
         if (this->is_build) {
             return;
         }
-        short tile = this->graph->getNodeTile(id);
-        this->active_tiles[tile] = true;
+        for (int i = 0; i < target.len(); i++) {
+            short tile = this->graph->getNodeTile(target[i].node);
+            this->active_tiles[tile] = true;
+        }
     }
 
     bool isBuild() { return this->is_build; }
@@ -137,7 +139,7 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
@@ -147,6 +149,6 @@ public:
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcGSPHAST(this->graph, s_id, flags, this->max_range, this->active_tiles, this->found_tiles);
+        calcGSPHAST(this->graph, start, flags, this->max_range, this->active_tiles, this->found_tiles);
     }
 };

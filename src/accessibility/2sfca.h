@@ -18,17 +18,17 @@
 #include "./distance_decay/decay.h"
 
 template <class S>
-Vector<float> _calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_weights, VectorView<int> sup_nodes, VectorView<int> sup_weights, IDistanceDecay& decay)
+Vector<float> _calc2SFCA(S& alg, std::vector<DSnap>& dem_nodes, VectorView<int> dem_weights, std::vector<DSnap>& sup_nodes, VectorView<int> sup_weights, IDistanceDecay& decay)
 {
     int max_dist = decay.get_max_distance();
 
     if (!alg.isBuild()) {
         // preprare solver
         alg.addMaxRange(max_dist);
-        for (int i = 0; i < dem_nodes.rows(); i++) {
-            auto id = dem_nodes(i);
-            if (id >= 0) {
-                alg.addTarget(id);
+        for (int i = 0; i < dem_nodes.size(); i++) {
+            auto snap = dem_nodes[i];
+            if (snap.len() > 0) {
+                alg.addTarget(snap);
             }
         }
 
@@ -37,31 +37,31 @@ Vector<float> _calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_
     }
 
     // create array containing accessibility results
-    Vector<float> access(dem_nodes.rows());
+    Vector<float> access(dem_nodes.size());
     access.setZero();
 
     auto state = alg.makeComputeState();
     std::mutex m;
 #pragma omp parallel for firstprivate(state)
-    for (int i = 0; i < sup_nodes.rows(); i++) {
+    for (int i = 0; i < sup_nodes.size(); i++) {
         // get supply information
-        int s_id = sup_nodes(i);
-        if (s_id < 0) {
+        auto s_snap = sup_nodes[i];
+        if (s_snap.len() == 0) {
             continue;
         }
         int s_weight = sup_weights(i);
 
         // compute distances
-        alg.compute(s_id, state);
+        alg.compute(s_snap, state);
 
         // compute R-value for facility
         float demand_sum = 0.0;
-        for (int i = 0; i < dem_nodes.rows(); i++) {
-            int d_node = dem_nodes(i);
-            if (d_node == -1) {
+        for (int i = 0; i < dem_nodes.size(); i++) {
+            auto d_snap = dem_nodes[i];
+            if (d_snap.len() == 0) {
                 continue;
             }
-            int d_dist = state.getDistance(d_node);
+            int d_dist = state.getDistance(d_snap);
             if (d_dist >= max_dist) {
                 continue;
             }
@@ -71,12 +71,12 @@ Vector<float> _calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_
         float R = s_weight / demand_sum;
         // add new access to reachable demand points
         m.lock();
-        for (int i = 0; i < dem_nodes.rows(); i++) {
-            int d_node = dem_nodes(i);
-            if (d_node == -1) {
+        for (int i = 0; i < dem_nodes.size(); i++) {
+            auto d_snap = dem_nodes[i];
+            if (d_snap.len() == 0) {
                 continue;
             }
-            int d_dist = state.getDistance(d_node);
+            int d_dist = state.getDistance(d_snap);
             if (d_dist >= max_dist) {
                 continue;
             }
@@ -89,17 +89,17 @@ Vector<float> _calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_
 }
 
 template <class S>
-Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_weights, VectorView<int> sup_nodes, VectorView<int> sup_weights, IDistanceDecay& decay)
+Vector<float> calc2SFCA(S& alg, std::vector<DSnap>& dem_nodes, VectorView<int> dem_weights, std::vector<DSnap>& sup_nodes, VectorView<int> sup_weights, IDistanceDecay& decay)
 {
     int max_dist = decay.get_max_distance();
 
     if (!alg.isBuild()) {
         // preprare solver
         alg.addMaxRange(max_dist);
-        for (int i = 0; i < dem_nodes.rows(); i++) {
-            auto id = dem_nodes(i);
-            if (id >= 0) {
-                alg.addTarget(id);
+        for (int i = 0; i < dem_nodes.size(); i++) {
+            auto snap = dem_nodes[i];
+            if (snap.len() > 0) {
+                alg.addTarget(snap);
             }
         }
 
@@ -108,7 +108,7 @@ Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_w
     }
 
     // create array containing accessibility results
-    Vector<float> access(dem_nodes.rows());
+    Vector<float> access(dem_nodes.size());
     access.setZero();
 
     auto state = alg.makeComputeState();
@@ -116,27 +116,27 @@ Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_w
 #pragma omp parallel firstprivate(state)
     {
         // create array containing accessibility results
-        std::vector<float> partial_access(dem_nodes.rows(), 0);
+        std::vector<float> partial_access(dem_nodes.size(), 0);
 #pragma omp for
-        for (int i = 0; i < sup_nodes.rows(); i++) {
+        for (int i = 0; i < sup_nodes.size(); i++) {
             // get supply information
-            int s_id = sup_nodes(i);
-            if (s_id < 0) {
+            auto s_snap = sup_nodes[i];
+            if (s_snap.len() == 0) {
                 continue;
             }
             int s_weight = sup_weights(i);
 
             // compute distances
-            alg.compute(s_id, state);
+            alg.compute(s_snap, state);
 
             // compute R-value for facility
             float demand_sum = 0.0;
-            for (int i = 0; i < dem_nodes.rows(); i++) {
-                int d_node = dem_nodes(i);
-                if (d_node == -1) {
+            for (int i = 0; i < dem_nodes.size(); i++) {
+                auto d_snap = dem_nodes[i];
+                if (d_snap.len() == 0) {
                     continue;
                 }
-                int d_dist = state.getDistance(d_node);
+                int d_dist = state.getDistance(d_snap);
                 if (d_dist > max_dist) {
                     continue;
                 }
@@ -145,12 +145,12 @@ Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_w
             }
             float R = s_weight / demand_sum;
             // add new access to reachable demand points
-            for (int i = 0; i < dem_nodes.rows(); i++) {
-                int d_node = dem_nodes(i);
-                if (d_node == -1) {
+            for (int i = 0; i < dem_nodes.size(); i++) {
+                auto d_snap = dem_nodes[i];
+                if (d_snap.len() == 0) {
                     continue;
                 }
-                int d_dist = state.getDistance(d_node);
+                int d_dist = state.getDistance(d_snap);
                 if (d_dist > max_dist) {
                     continue;
                 }
@@ -160,7 +160,7 @@ Vector<float> calc2SFCA(S& alg, VectorView<int> dem_nodes, VectorView<int> dem_w
         }
 
         m.lock();
-        for (int i = 0; i < dem_nodes.rows(); i++) {
+        for (int i = 0; i < dem_nodes.size(); i++) {
             access(i) += partial_access[i];
         }
         m.unlock();

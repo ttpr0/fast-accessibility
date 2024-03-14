@@ -20,7 +20,16 @@ static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> bui
     }
     for (int i = 0; i < stops.size(); i++) {
         auto stop = stops[i];
-        auto c_id = index.getClosestNode(stop.location);
+        auto dsnap = index.getClosestNode(stop.location);
+        int c_id = -1;
+        int min_dist = 100000000;
+        for (int j = 0; j < dsnap.len(); j++) {
+            auto snap = dsnap[j];
+            if (snap.dist < min_dist) {
+                c_id = snap.node;
+                min_dist = snap.dist;
+            }
+        }
         if (c_id == -1) {
             continue;
         }

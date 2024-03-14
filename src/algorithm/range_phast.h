@@ -10,13 +10,17 @@
 #include "./util.h"
 
 // simple RangePHAST
-void calcRangePHAST(ICHGraph* g, int start, Flags<DistFlag>& flags, int max_range)
+void calcRangePHAST(ICHGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range)
 {
-    auto& start_flag = flags[start];
-    start_flag.dist = 0;
-
     std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = flags[s.node];
+        start_flag.dist = s.dist;
+
+        heap.push({s.node, s.dist});
+    }
+
     while (true) {
         if (heap.empty()) {
             break;

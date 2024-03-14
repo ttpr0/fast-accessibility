@@ -11,15 +11,15 @@
 #include "../util/matrix.h"
 
 template <class S>
-Matrix<int> calcMatrixQuery(S& alg, VectorView<int> start_nodes, VectorView<int> target_nodes, int max_range)
+Matrix<int> calcMatrixQuery(S& alg, std::vector<DSnap>& start_nodes, std::vector<DSnap>& target_nodes, int max_range)
 {
     if (!alg.isBuild()) {
         // prepare solver
         alg.addMaxRange(max_range);
-        for (int i = 0; i < target_nodes.rows(); i++) {
-            auto id = target_nodes(i);
-            if (id >= 0) {
-                alg.addTarget(id);
+        for (int i = 0; i < target_nodes.size(); i++) {
+            auto snap = target_nodes[i];
+            if (snap.len() > 0) {
+                alg.addTarget(snap);
             }
         }
 
@@ -28,29 +28,29 @@ Matrix<int> calcMatrixQuery(S& alg, VectorView<int> start_nodes, VectorView<int>
     }
 
     // create matrix containing accessibility results
-    Matrix<int> ranges(start_nodes.rows(), target_nodes.rows());
+    Matrix<int> ranges(start_nodes.size(), target_nodes.size());
 
     auto state = alg.makeComputeState();
 #pragma omp parallel for firstprivate(state)
-    for (int i = 0; i < start_nodes.rows(); i++) {
+    for (int i = 0; i < start_nodes.size(); i++) {
         // get start id
-        int s_id = start_nodes(i);
-        if (s_id < 0) {
-            for (int j = 0; j < target_nodes.rows(); j++) {
+        auto s_snap = start_nodes[i];
+        if (s_snap.len() == 0) {
+            for (int j = 0; j < target_nodes.size(); j++) {
                 ranges(i, j) = -9999;
             }
             continue;
         }
         // compute ranges
-        alg.compute(s_id, state);
+        alg.compute(s_snap, state);
         // extract ranges of targets
-        for (int j = 0; j < target_nodes.rows(); j++) {
-            int t_id = target_nodes(j);
-            if (t_id == -1) {
+        for (int j = 0; j < target_nodes.size(); j++) {
+            auto t_snap = target_nodes[j];
+            if (t_snap.len() == 0) {
                 ranges(i, j) = -9999;
                 continue;
             }
-            auto dist = state.getDistance(t_id);
+            auto dist = state.getDistance(t_snap);
             if (dist > max_range) {
                 ranges(i, j) = -9999;
             } else {

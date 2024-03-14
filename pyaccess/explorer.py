@@ -62,9 +62,15 @@ class Explorer:
     def get_closest_node(self, location: tuple[float, float]) -> int:
         coord = _pyaccess_ext.Coord(location[0], location[1])
         node = self._index.get_closest_node(coord)
-        if node == -1:
+        if node.len() == 0:
             raise ValueError(f"no node near the given location (lon: {location[0]}, lat: {location[1]}) found")
-        return node
+        if node.len() > 1:
+            if node[0].dist < node[1].dist:
+                return node[0].node
+            else:
+                return node[1].node
+        else:
+            return node[0].node
 
     def get_adjacent_edges(self, node_id: int, direction: _pyaccess_ext.Direction) -> list[int]:
         edges = self._base.get_adjacent_edges(node_id, direction)

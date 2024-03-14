@@ -38,7 +38,7 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id) {}
+    void addTarget(DSnap target) {}
     void setMinDeparture(int departure) { this->min_departure = departure; }
     void setMaxDeparture(int departure) { this->max_departure = departure; }
 
@@ -52,7 +52,7 @@ public:
     }
 
     TransitState makeComputeState() { return TransitState(this->graph.getBaseGraph().nodeCount(), this->graph.getBaseGraph().edgeCount(), this->graph.stopCount()); }
-    void compute(int s_id, TransitState& state)
+    void compute(DSnap start, TransitState& state)
     {
         if (!this->is_build) {
             return;
@@ -63,6 +63,6 @@ public:
         node_flags.soft_reset();
         edge_flags.soft_reset();
         stop_flags.soft_reset();
-        calcTransitDijkstra(this->graph, s_id, node_flags, edge_flags, stop_flags, this->max_range, this->min_departure, this->max_departure);
+        calcTransitDijkstra(this->graph, start, node_flags, edge_flags, stop_flags, this->max_range, this->min_departure, this->max_departure);
     }
 };

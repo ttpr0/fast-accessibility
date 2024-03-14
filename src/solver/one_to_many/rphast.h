@@ -41,12 +41,14 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id)
+    void addTarget(DSnap target)
     {
         if (this->is_build) {
             return;
         }
-        this->node_queue.push(id);
+        for (int i = 0; i < target.len(); i++) {
+            this->node_queue.push(target[i].node);
+        }
     }
 
     bool isBuild() { return this->is_build; }
@@ -60,14 +62,14 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcRPHAST(this->graph, s_id, flags, this->down_edges_subset);
+        calcRPHAST(this->graph, start, flags, this->down_edges_subset);
     }
 };
 
@@ -95,12 +97,14 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id)
+    void addTarget(DSnap target)
     {
         if (this->is_build) {
             return;
         }
-        this->node_queue.push(id);
+        for (int i = 0; i < target.len(); i++) {
+            this->node_queue.push(target[i].node);
+        }
     }
 
     bool isBuild() { return this->is_build; }
@@ -114,14 +118,14 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset);
+        calcRangeRPHAST(this->graph, start, flags, this->max_range, this->down_edges_subset);
     }
 };
 
@@ -149,12 +153,14 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id)
+    void addTarget(DSnap target)
     {
         if (this->is_build) {
             return;
         }
-        this->node_queue.push({id, 0});
+        for (int i = 0; i < target.len(); i++) {
+            this->node_queue.push({target[i].node, target[i].dist});
+        }
     }
 
     bool isBuild() { return this->is_build; }
@@ -168,14 +174,14 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcRangeRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset);
+        calcRangeRPHAST(this->graph, start, flags, this->max_range, this->down_edges_subset);
     }
 };
 
@@ -205,14 +211,17 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id)
+    void addTarget(DSnap target)
     {
         if (this->is_build) {
             return;
         }
-        this->node_queue.push(id);
-        short tile = this->graph->getNodeTile(id);
-        this->active_tiles[tile] = true;
+        for (int i = 0; i < target.len(); i++) {
+            int id = target[i].node;
+            this->node_queue.push(id);
+            short tile = this->graph->getNodeTile(id);
+            this->active_tiles[tile] = true;
+        }
     }
 
     bool isBuild() { return this->is_build; }
@@ -226,7 +235,7 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
@@ -236,7 +245,7 @@ public:
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
+        calcGSRPHAST(this->graph, start, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
     }
 };
 
@@ -266,14 +275,18 @@ public:
         }
         this->max_range = range;
     }
-    void addTarget(int id)
+    void addTarget(DSnap target)
     {
         if (this->is_build) {
             return;
         }
-        this->node_queue.push({id, 0});
-        short tile = this->graph->getNodeTile(id);
-        this->active_tiles[tile] = true;
+        for (int i = 0; i < target.len(); i++) {
+            int id = target[i].node;
+            int dist = target[i].dist;
+            this->node_queue.push({id, dist});
+            short tile = this->graph->getNodeTile(id);
+            this->active_tiles[tile] = true;
+        }
     }
 
     bool isBuild() { return this->is_build; }
@@ -287,7 +300,7 @@ public:
     }
 
     NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
-    void compute(int s_id, NodeBasedState& state)
+    void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
             return;
@@ -297,6 +310,6 @@ public:
         }
         auto& flags = state.flags;
         flags.soft_reset();
-        calcGSRPHAST(this->graph, s_id, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
+        calcGSRPHAST(this->graph, start, flags, this->max_range, this->down_edges_subset, this->active_tiles, this->found_tiles);
     }
 };

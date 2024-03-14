@@ -9,13 +9,17 @@
 #include "./util.h"
 
 // computes dijkstra forward search until all targets are found
-void calcRestrictedDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, std::vector<bool>& targets, int target_count)
+void calcRestrictedDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, std::vector<bool>& targets, int target_count)
 {
-    auto& start_flag = flags[start];
-    start_flag.dist = 0;
-
     std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = flags[s.node];
+        start_flag.dist = s.dist;
+
+        heap.push({s.node, s.dist});
+    }
+
     int found_count = 0;
     while (true) {
         if (heap.empty()) {
@@ -54,13 +58,17 @@ void calcRestrictedDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, std::v
 }
 
 // computes dijkstra forward search until "max_range" is reached or all targets are found
-void calcRestrictedRangeDijkstra(IGraph* g, int start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& targets, int target_count)
+void calcRestrictedRangeDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& targets, int target_count)
 {
-    auto& start_flag = flags[start];
-    start_flag.dist = 0;
-
     std::priority_queue<pq_item> heap;
-    heap.push({start, 0});
+    for (int i = 0; i < start.len(); i++) {
+        auto s = start[i];
+        auto& start_flag = flags[s.node];
+        start_flag.dist = s.dist;
+
+        heap.push({s.node, s.dist});
+    }
+
     int found_count = 0;
     while (true) {
         if (heap.empty()) {
