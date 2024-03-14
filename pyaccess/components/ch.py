@@ -33,7 +33,7 @@ class CHObject:
             self.has_changed = True
 
     def load(self, path: str):
-        if not os.path.isfile(f"{path}-ch_data-ch_graph"):
+        if not os.path.isfile(f"{path}-ch_data"):
             raise NotImplementedError("unable to find ch-object")
         if self.ch_data is None or self.has_changed == True:
             self.ch_data = _pyaccess_ext.load_ch_data(f"{path}-ch_data")
@@ -55,10 +55,8 @@ class CHObject:
         self.has_changed = False
 
     def delete(self, path: str):
-        if os.path.isfile(f"{path}-ch_data-ch_graph"):
-            os.remove(f"{path}-ch_data-ch_graph")
-            os.remove(f"{path}-ch_data-shortcut")
-            os.remove(f"{path}-ch_data-level")
+        if os.path.isfile(f"{path}-ch_data"):
+            os.remove(f"{path}-ch_data")
         if os.path.isfile(f"{path}-id_mapping"):
             os.remove(f"{path}-id_mapping")
         self.ch_data = None

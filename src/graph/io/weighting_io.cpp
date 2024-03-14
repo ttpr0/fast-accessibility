@@ -1,7 +1,7 @@
 #include <tuple>
 #include <vector>
 
-#include "./util.h"
+#include "../../util/io.h"
 #include "./weighting_io.h"
 
 std::shared_ptr<Weighting> load_edge_weights(const std::string& file)
@@ -49,7 +49,7 @@ std::shared_ptr<TCWeighting> load_tc_weights(const std::string& file)
     for (int i = 0; i < node_count; i++) {
         turn_refs[i] = std::make_tuple(reader.read<int>(), reader.read<char>(), reader.read<char>());
     }
-    auto turn_weights = reader.read_vector<char>();
+    auto turn_weights = reader.read<std::vector<char>>();
 
     return std::make_shared<TCWeighting>(std::move(edge_weights), std::move(edge_indices), std::move(turn_refs), std::move(turn_weights));
 }
@@ -75,7 +75,7 @@ void store_tc_weights(const TCWeighting& weight, const std::string& file)
         writer.write<char>(rows);
         writer.write<char>(cols);
     }
-    writer.write_vector<char>(weight.turn_weights);
+    writer.write(weight.turn_weights);
 
     writeFile(file, writer.bytes());
 }

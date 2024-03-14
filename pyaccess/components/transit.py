@@ -71,9 +71,8 @@ class TransitObject:
             self.added_weightings = []
 
     def delete(self, path: str):
-        if os.path.isfile(f"{path}-transit_data-comps"):
-            os.remove(f"{path}-transit_data-comps")
-            os.remove(f"{path}-transit_data-adjacency")
+        if os.path.isfile(f"{path}-transit_data"):
+            os.remove(f"{path}-transit_data")
         if os.path.isfile(f"{path}-id_mapping"):
             os.remove(f"{path}-id_mapping")
         self.transit_data = None

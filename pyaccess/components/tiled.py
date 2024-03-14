@@ -33,7 +33,7 @@ class TiledObject:
             self.has_changed = True
 
     def load(self, path: str):
-        if not os.path.isfile(f"{path}-tiled_data-skip_shortcuts"):
+        if not os.path.isfile(f"{path}-tiled_data"):
             raise NotImplementedError("unable to find overlay-object")
         if self.tiled_data is None or self.has_changed == True:
             self.tiled_data = _pyaccess_ext.load_tiled_data(f"{path}-tiled_data")
@@ -58,10 +58,8 @@ class TiledObject:
         self.has_changed = False
 
     def delete(self, path: str):
-        if os.path.isfile(f"{path}-tiled_data-skip_shortcuts"):
-            os.remove(f"{path}-tiled_data-skip_shortcuts")
-            os.remove(f"{path}-tiled_data-skip_topology")
-            os.remove(f"{path}-tiled_data-tiles_types")
+        if os.path.isfile(f"{path}-tiled_data"):
+            os.remove(f"{path}-tiled_data")
         if os.path.isfile(f"{path}-cell_index"):
             os.remove(f"{path}-cell_index")
         if os.path.isfile(f"{path}-id_mapping"):

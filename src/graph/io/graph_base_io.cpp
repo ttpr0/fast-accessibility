@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "../../util/io.h"
 #include "../base/graph_index.h"
 #include "../base_graph.h"
 #include "../ch_graph.h"
@@ -7,9 +8,7 @@
 #include "../structs/geom.h"
 #include "../structs/structs.h"
 #include "../tiled_graph.h"
-#include "./adjaceny_io.h"
 #include "./graph_base_io.h"
-#include "./util.h"
 
 std::shared_ptr<GraphBase> load_graph_base(const std::string& file)
 {

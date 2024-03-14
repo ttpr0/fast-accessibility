@@ -1,9 +1,9 @@
 #include <vector>
 
+#include "../../util/io.h"
 #include "../structs/adjacency.h"
 #include "../structs/structs.h"
 #include "./cell_index_io.h"
-#include "./util.h"
 
 std::shared_ptr<_CellIndex> load_cell_index(const std::string& file)
 {

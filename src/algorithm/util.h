@@ -99,7 +99,7 @@ struct DSnap
         this->snaps[1] = snap2;
     }
 
-    int len()
+    int len() const
     {
         if (snaps[0].node == -1) {
             return 0;
@@ -110,5 +110,5 @@ struct DSnap
         return 2;
     }
 
-    Snap operator[](int i) { return this->snaps[i]; }
+    Snap operator[](int i) const { return this->snaps[i]; }
 };

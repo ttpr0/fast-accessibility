@@ -3,32 +3,20 @@
 #include <array>
 #include <vector>
 
+#include "../../util/io.h"
 #include "./enums.h"
 #include "./structs.h"
+#include "./table.h"
 
 //*******************************************
 // adjacency structs
 //*******************************************
-
-struct _NodeEntry
-{
-    int fwd_start;
-    short fwd_count;
-    int bwd_start;
-    short bwd_count;
-};
 
 struct _EdgeEntry
 {
     int edge_id;
     int other_id;
     std::array<char, 8> data;
-};
-
-struct _DynamicNodeEntry
-{
-    std::vector<_EdgeEntry> fwd_edges;
-    std::vector<_EdgeEntry> bwd_edges;
 };
 
 //*******************************************
@@ -42,14 +30,10 @@ class AdjacencyAccessor;
 class AdjacencyArray
 {
 public:
-    std::vector<_NodeEntry> node_entries;
-    std::vector<_EdgeEntry> fwd_edge_entries;
-    std::vector<_EdgeEntry> bwd_edge_entries;
+    StaticTable<_EdgeEntry> fwd_entries;
+    StaticTable<_EdgeEntry> bwd_entries;
 
-    AdjacencyArray(std::vector<_NodeEntry> node_entries, std::vector<_EdgeEntry> fwd_entries,
-                   std::vector<_EdgeEntry> bwd_entries)
-        : node_entries(node_entries), fwd_edge_entries(fwd_entries), bwd_edge_entries(bwd_entries)
-    {}
+    AdjacencyArray(StaticTable<_EdgeEntry> fwd_entries, StaticTable<_EdgeEntry> bwd_entries) : fwd_entries(fwd_entries), bwd_entries(bwd_entries) {}
 
     // return the node degree for given direction
     short getDegree(int node, Direction dir) const;
@@ -59,17 +43,13 @@ public:
 class AdjacencyList
 {
 public:
-    std::vector<_DynamicNodeEntry> node_entries;
+    DynamicTable<_EdgeEntry> fwd_entries;
+    DynamicTable<_EdgeEntry> bwd_entries;
 
     AdjacencyList(int node_count)
     {
-        std::vector<_DynamicNodeEntry> topology(node_count);
-
-        for (int i = 0; i < node_count; i++) {
-            topology[i] = _DynamicNodeEntry{std::vector<_EdgeEntry>(), std::vector<_EdgeEntry>()};
-        }
-
-        this->node_entries = topology;
+        this->fwd_entries = DynamicTable<_EdgeEntry>(node_count);
+        this->bwd_entries = DynamicTable<_EdgeEntry>(node_count);
     }
 
     // return the node degree for given direction
@@ -96,11 +76,9 @@ public:
 class AdjacencyAccessor
 {
 public:
-    int state;
-    int end;
-    const _EdgeEntry* edge_refs;
+    TableAccessor<_EdgeEntry> state;
 
-    AdjacencyAccessor(const _EdgeEntry* edge_refs, int state, int end) : state(state), end(end), edge_refs(edge_refs) {}
+    AdjacencyAccessor(TableAccessor<_EdgeEntry> state) : state(state) {}
 
     bool next();
     int getEdgeID();
@@ -114,3 +92,24 @@ public:
 
 AdjacencyArray build_adjacency_array(std::vector<Node>& nodes, std::vector<Edge>& edges);
 AdjacencyArray build_adjacency_array(AdjacencyList& adj_list);
+
+//*******************************************
+// read and write adjacency
+//*******************************************
+
+template <>
+struct ReadWrite<AdjacencyArray>
+{
+    AdjacencyArray read(BufferReader& reader)
+    {
+        auto fwd_entries = reader.read<StaticTable<_EdgeEntry>>();
+        auto bwd_entries = reader.read<StaticTable<_EdgeEntry>>();
+
+        return {fwd_entries, bwd_entries};
+    }
+    void write(BufferWriter& writer, const AdjacencyArray& adj)
+    {
+        writer.write(adj.fwd_entries);
+        writer.write(adj.bwd_entries);
+    }
+};

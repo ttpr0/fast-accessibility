@@ -12,7 +12,7 @@
 #include "./loader.h"
 #include "./partition_io.h"
 #include "./tiled_data_io.h"
-#include "./util.h"
+#include "../../util/io.h"
 #include "./weighting_io.h"
 
 //*******************************************
