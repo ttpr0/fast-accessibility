@@ -29,7 +29,7 @@ class TransitObject:
         self.removed_weightings = []
 
     def load(self, path: str):
-        if not os.path.isfile(f"{path}-id_mapping"):
+        if not os.path.isfile(f"{path}-transit_data"):
             raise NotImplementedError("unable to find transit-object")
         if self.transit_data is None or self.has_changed == True:
             self.transit_data = _pyaccess_ext.load_transit_data(f"{path}-transit_data")
