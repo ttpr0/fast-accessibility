@@ -15,8 +15,9 @@ std::shared_ptr<TransitData> load_transit_data(const std::string& file)
     auto connections = reader.read<std::vector<Connection>>();
     auto shortcuts = reader.read<std::vector<Shortcut>>();
     auto adjacency = reader.read<AdjacencyArray>();
+    auto mapping = reader.read<NodeMapping>();
 
-    return std::make_shared<TransitData>(std::move(stops), std::move(connections), std::move(shortcuts), std::move(adjacency));
+    return std::make_shared<TransitData>(std::move(mapping), std::move(stops), std::move(connections), std::move(shortcuts), std::move(adjacency));
 }
 
 void store_transit_data(const TransitData& transit, const std::string& file)
@@ -27,6 +28,7 @@ void store_transit_data(const TransitData& transit, const std::string& file)
     writer.write(transit.connections);
     writer.write(transit.shortcuts);
     writer.write(transit.adjacency);
+    writer.write(transit.mapping);
 
     writeFile(file, writer.bytes());
 }

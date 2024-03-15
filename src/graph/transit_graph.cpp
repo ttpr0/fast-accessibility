@@ -6,23 +6,22 @@
 // transit-graph
 //*******************************************
 
-TransitGraph build_transit_graph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
-                                 std::shared_ptr<TransitWeighting> transit_weighting)
+TransitGraph build_transit_graph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<TransitData> transit, std::shared_ptr<TransitWeighting> transit_weighting)
 {
-    return {base_graph, id_mapping, transit, transit_weighting};
+    return {base_graph, transit, transit_weighting};
 }
 
 IGraph& TransitGraph::getBaseGraph()
 {
     return *this->base_graph;
 }
-int TransitGraph::mapToBaseNode(int stop)
+DSnap TransitGraph::mapToBaseNode(int stop)
 {
-    return this->id_mapping->get_source(stop);
+    return this->transit->mapToNode(stop);
 }
-int TransitGraph::mapToStop(int node)
+void TransitGraph::mapToStops(int node, function_ref<void(Snap)> func)
 {
-    return this->id_mapping->get_target(node);
+    this->transit->mapToStops(node, func);
 }
 
 int TransitGraph::stopCount()

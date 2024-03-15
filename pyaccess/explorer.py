@@ -12,10 +12,9 @@ class Explorer:
     _ch: _pyaccess_ext.CHData | None
     _tiled: _pyaccess_ext.TiledData | None
     _transit: _pyaccess_ext.TransitData | None
-    _stop_mapping: _pyaccess_ext.IDMapping | None
     _transit_weight: _pyaccess_ext.TransitWeighting | None
 
-    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None, transit: _pyaccess_ext.TransitData | None = None, stop_mapping: _pyaccess_ext.IDMapping | None = None, transit_weight: _pyaccess_ext.TransitWeighting | None = None):
+    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None, transit: _pyaccess_ext.TransitData | None = None, transit_weight: _pyaccess_ext.TransitWeighting | None = None):
         self._base = base
         self._index = index
         self._weight = weight
@@ -25,13 +24,11 @@ class Explorer:
             raise ValueError("explorer cannot contain both CH and tiled data")
         self._ch = ch
         self._tiled = tiled
-        if transit is None or stop_mapping is None:
+        if transit is None:
             self._transit = None
-            self._stop_mapping = None
             self._transit_weight = None
         else:
             self._transit = transit
-            self._stop_mapping = stop_mapping
             self._transit_weight = transit_weight
 
     def node_count(self) -> int:
@@ -131,20 +128,26 @@ class Explorer:
         return self._transit.get_stop(stop_id)
 
     def is_stop(self, node_id: int) -> bool:
-        if self._stop_mapping is None:
+        if self._transit is None:
             raise ValueError("explorer does not contain transit information")
-        stop_id = self._stop_mapping.get_target(node_id)
-        return stop_id != -1
+        return self._transit.has_node_stops(node_id)
 
-    def map_node_to_stop(self, node_id: int) -> int:
-        if self._stop_mapping is None:
+    def map_node_to_stops(self, node_id: int) -> list[int]:
+        if self._transit is None:
             raise ValueError("explorer does not contain transit information")
-        return self._stop_mapping.get_target(node_id)
+        snaps: list[_pyaccess_ext.Snap] = self._transit.map_node_to_stops(node_id)
+        l = []
+        for snap in snaps:
+            l.append(snap.node)
+        return l
 
     def map_stop_to_node(self, stop_id: int) -> int:
-        if self._stop_mapping is None:
+        if self._transit is None:
             raise ValueError("explorer does not contain transit information")
-        return self._stop_mapping.get_source(stop_id)
+        snap = self._transit.map_stop_to_node(stop_id)
+        if snap.len() == 0:
+            return -1
+        return snap[0].node
 
     def connection_count(self) -> int:
         if self._transit is None:

@@ -195,6 +195,13 @@ void bind_graph(nanobind::module_& m)
     transit_data.def("stop_count", &TransitData::stopCount);
     transit_data.def("connection_count", &TransitData::connectionCount);
     transit_data.def("get_stop", &TransitData::getStop);
+    transit_data.def("has_node_stops", &TransitData::hasStops);
+    transit_data.def("map_node_to_stops", [](TransitData& transit, int node) {
+        py::list l;
+        transit.mapping.for_targets(node, [&](Snap snap) { l.append(snap); });
+        return l;
+    });
+    transit_data.def("map_stop_to_node", &TransitData::mapToNode);
     transit_data.def("get_connection", &TransitData::getConnection);
     transit_data.def("get_adjacent_connections", [](TransitData& transit, int stop, Direction dir) {
         py::list l;

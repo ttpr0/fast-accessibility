@@ -24,18 +24,16 @@ public:
     std::shared_ptr<IGraph> base_graph;
 
     // additional components
-    std::shared_ptr<_IDMapping> id_mapping;
     std::shared_ptr<TransitData> transit;
     std::shared_ptr<TransitWeighting> transit_weighting;
 
-    TransitGraph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
-                 std::shared_ptr<TransitWeighting> transit_weighting)
-        : base_graph(base_graph), id_mapping(id_mapping), transit(transit), transit_weighting(transit_weighting)
+    TransitGraph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<TransitData> transit, std::shared_ptr<TransitWeighting> transit_weighting)
+        : base_graph(base_graph), transit(transit), transit_weighting(transit_weighting)
     {}
 
     IGraph& getBaseGraph();
-    int mapToBaseNode(int stop);
-    int mapToStop(int node);
+    DSnap mapToBaseNode(int stop);
+    void mapToStops(int node, function_ref<void(Snap)> func);
 
     int stopCount();
     int connectionCount();
@@ -53,5 +51,4 @@ public:
 // build transit-graph
 //*******************************************
 
-TransitGraph build_transit_graph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<_IDMapping> id_mapping, std::shared_ptr<TransitData> transit,
-                                 std::shared_ptr<TransitWeighting> transit_weighting);
+TransitGraph build_transit_graph(std::shared_ptr<IGraph> base_graph, std::shared_ptr<TransitData> transit, std::shared_ptr<TransitWeighting> transit_weighting);

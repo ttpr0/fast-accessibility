@@ -59,5 +59,5 @@ def new_transit_weighting(graph: Graph, transit: str) -> _pyaccess_ext.TransitWe
 
     Schedules are empty by default.
     """
-    data, _ = graph._get_transit(transit)
+    data = graph._get_transit(transit)
     return _pyaccess_ext.new_transit_weighting(data)

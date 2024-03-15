@@ -71,11 +71,11 @@ class Graph:
             w = self._get_weight(self._get_overlay_weight(overlay))
             p = self._get_partition(self._get_overlay_partition(overlay))
         elif transit is not None:
-            t, sm = self._get_transit(transit)
+            t = self._get_transit(transit)
             w = self._get_weight(self._get_transit_base_weight(transit))
             if transit_weight is not None:
                 tw = self._get_transit_weighting(transit, transit_weight)
-        return Explorer(b, i, w, p, im, c, o, t, sm, tw)
+        return Explorer(b, i, w, p, im, c, o, t, tw)
 
     def store(self, name: str | None = None, path: str | None = None):
         """Stores the graph into the given path.
@@ -264,8 +264,8 @@ class Graph:
             g = _pyaccess_ext.build_base_graph(b, w)
         else:
             g = _pyaccess_ext.build_tc_graph(b, w)
-        transit_data, id_mapping = _pyaccess_ext.prepare_transit(g, i, stops, connections, max_transfer_range)
-        transit_obj = TransitObject_new(weight, transit_data, id_mapping)
+        transit_data = _pyaccess_ext.prepare_transit(g, i, stops, connections, max_transfer_range)
+        transit_obj = TransitObject_new(weight, transit_data)
         self._transit[name] = transit_obj
 
     def add_transit_weighting(self, name: str, weights: _pyaccess_ext.TransitWeighting, transit: str):
@@ -461,15 +461,14 @@ class Graph:
         tiled = self._tiled[name]
         return tiled.get_base_partition()
     
-    def _get_transit(self, name: str) -> tuple[_pyaccess_ext.TransitData, _pyaccess_ext.IDMapping]:
+    def _get_transit(self, name: str) -> _pyaccess_ext.TransitData:
         transit = self._transit[name]
         if not transit.is_loaded():
             if self._base_path is None or self._name is None:
                 raise ValueError("Can't load public transit with unknown name and path.")
             transit.load(f"{self._base_path}/{self._name}_transit_{name}")
         transit_data = transit.get_transit_data()
-        id_mapping = transit.get_id_mapping()
-        return transit_data, id_mapping
+        return transit_data
     
     def _get_transit_base_weight(self, name: str) -> str:
         transit = self._transit[name]

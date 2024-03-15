@@ -10,33 +10,14 @@
 #include "../../structs/adjacency.h"
 #include "../../weights/weighting.h"
 
-static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> build_transit_data(IGraph& graph, IGraphIndex& index, std::vector<Node> stops,
-                                                                                                std::vector<Connection> connections, int max_range)
+static std::shared_ptr<TransitData> build_transit_data(IGraph& graph, IGraphIndex& index, std::vector<Node> stops, std::vector<Connection> connections, int max_range)
 {
     // build id-mapping
-    auto mapping = std::vector<std::array<int, 2>>(graph.nodeCount());
-    for (int i = 0; i < graph.nodeCount(); i++) {
-        mapping[i] = {-1, -1};
-    }
+    std::vector<Coord> stop_coords(stops.size());
     for (int i = 0; i < stops.size(); i++) {
-        auto stop = stops[i];
-        auto dsnap = index.getClosestNode(stop.location);
-        int c_id = -1;
-        int min_dist = 100000000;
-        for (int j = 0; j < dsnap.len(); j++) {
-            auto snap = dsnap[j];
-            if (snap.dist < min_dist) {
-                c_id = snap.node;
-                min_dist = snap.dist;
-            }
-        }
-        if (c_id == -1) {
-            continue;
-        }
-        mapping[c_id][0] = i;
-        mapping[i][1] = c_id;
+        stop_coords[i] = stops[i].location;
     }
-    auto id_mapping = std::make_shared<_IDMapping>(mapping);
+    auto mapping = NodeMapping(graph.nodeCount(), stops.size(), index.mapToClosest(stop_coords));
 
     // build stop-connections
     auto adjacency_list = AdjacencyList(stops.size());
@@ -50,20 +31,20 @@ static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> bui
     solver.build();
     auto state = solver.makeComputeState();
     for (int i = 0; i < stops.size(); i++) {
-        int s_node = id_mapping->get_source(i);
-        if (s_node == -1) {
+        auto s_snap = mapping.get_source(i);
+        if (s_snap.len() == 0) {
             continue;
         }
-        solver.compute(s_node, state);
+        solver.compute(s_snap, state);
         for (int j = 0; j < stops.size(); j++) {
             if (i == j) {
                 continue;
             }
-            int t_node = id_mapping->get_source(j);
-            if (t_node == -1) {
+            auto t_snap = mapping.get_source(j);
+            if (t_snap.len() == 0) {
                 continue;
             }
-            int dist = state.getDistance(t_node);
+            int dist = state.getDistance(t_snap);
             if (dist > max_range) {
                 continue;
             }
@@ -74,5 +55,5 @@ static std::tuple<std::shared_ptr<TransitData>, std::shared_ptr<_IDMapping>> bui
     }
     auto adjacency = build_adjacency_array(adjacency_list);
 
-    return std::make_tuple(std::make_shared<TransitData>(stops, connections, shortcuts, adjacency), id_mapping);
+    return std::make_shared<TransitData>(mapping, stops, connections, shortcuts, adjacency);
 }

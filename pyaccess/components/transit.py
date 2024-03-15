@@ -9,18 +9,16 @@ class TransitObject:
     base_weight: str
 
     transit_data: _pyaccess_ext.TransitData | None
-    id_mapping: _pyaccess_ext.IDMapping | None
     weightings: dict[str, _pyaccess_ext.TransitWeighting | None]
 
     has_changed: bool
     added_weightings: list[str]
     removed_weightings: list[str]
 
-    def __init__(self, base_weight: str, transit_data: _pyaccess_ext.TransitData | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, weightings: dict[str, _pyaccess_ext.TransitWeighting | None] = {}):
+    def __init__(self, base_weight: str, transit_data: _pyaccess_ext.TransitData | None = None, weightings: dict[str, _pyaccess_ext.TransitWeighting | None] = {}):
         self.base_weight = base_weight
 
         self.transit_data = transit_data
-        self.id_mapping = id_mapping
         self.weightings = weightings
 
         if transit_data is None:
@@ -35,19 +33,17 @@ class TransitObject:
             raise NotImplementedError("unable to find transit-object")
         if self.transit_data is None or self.has_changed == True:
             self.transit_data = _pyaccess_ext.load_transit_data(f"{path}-transit_data")
-        if self.id_mapping is None or self.has_changed == True:
-            self.id_mapping = _pyaccess_ext.load_id_mapping(f"{path}-id_mapping")
         for w in self.weightings:
             if self.weightings[w] is None or self.has_changed == True:
                 self.weightings[w] = _pyaccess_ext.load_transit_weights(f"{path}-weight-{w}")
 
     def is_loaded(self) -> bool:
-        if self.transit_data is None or self.id_mapping is None:
+        if self.transit_data is None:
             return False
         return True
 
     def store(self, path: str):
-        if self.transit_data is None or self.id_mapping is None:
+        if self.transit_data is None:
             raise NotImplementedError("storing unloaded transit-object not possibile")
         for w in self.removed_weightings:
             if os.path.isfile(f"{path}-weight-{w}"):
@@ -55,7 +51,6 @@ class TransitObject:
         self.removed_weightings = []
         if self.has_changed:
             _pyaccess_ext.store_transit_data(self.transit_data, f"{path}-transit_data")
-            _pyaccess_ext.store_id_mapping(self.id_mapping, f"{path}-id_mapping")
             for w in self.weightings:
                 weights = self.weightings[w]
                 if weights is None:
@@ -73,10 +68,7 @@ class TransitObject:
     def delete(self, path: str):
         if os.path.isfile(f"{path}-transit_data"):
             os.remove(f"{path}-transit_data")
-        if os.path.isfile(f"{path}-id_mapping"):
-            os.remove(f"{path}-id_mapping")
         self.transit_data = None
-        self.id_mapping = None
         for w in self.weightings:
             if os.path.isfile(f"{path}-weight-{w}"):
                 os.remove(f"{path}-weight-{w}")
@@ -105,11 +97,6 @@ class TransitObject:
         if self.transit_data is None:
             raise NotImplementedError("this should not have happened, please load first")
         return self.transit_data
-
-    def get_id_mapping(self) -> _pyaccess_ext.IDMapping:
-        if self.id_mapping is None:
-            raise NotImplementedError("this should not have happened, please load first")
-        return self.id_mapping
     
     def get_weightings(self) -> list[str]:
         return list(self.weightings.keys())
@@ -130,9 +117,9 @@ class TransitObject:
     def reorder_base(self, mapping: _pyaccess_ext.IntVector):
         """updates internal id-mapping if base nodes are reordered
         """
-        if self.transit_data is None or self.id_mapping is None:
+        if self.transit_data is None:
             raise NotImplementedError("unable to reorder unloaded transit-object")
-        self.id_mapping = _pyaccess_ext.reorder_sources(self.id_mapping, mapping)
+        raise NotImplementedError("reordering not implemented for transit-object")
         self.has_changed = True
 
 def TransitObject_from_metadata(meta: dict[str, Any]) -> TransitObject:
@@ -144,6 +131,6 @@ def TransitObject_from_metadata(meta: dict[str, Any]) -> TransitObject:
     obj = TransitObject(weight, weightings=weightings)
     return obj
 
-def TransitObject_new(base_weight: str, transit_data: _pyaccess_ext.TransitData, id_mapping: _pyaccess_ext.IDMapping) -> TransitObject:
-    obj = TransitObject(base_weight, transit_data=transit_data, id_mapping=id_mapping)
+def TransitObject_new(base_weight: str, transit_data: _pyaccess_ext.TransitData) -> TransitObject:
+    obj = TransitObject(base_weight, transit_data=transit_data)
     return obj

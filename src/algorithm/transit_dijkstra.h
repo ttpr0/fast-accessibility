@@ -10,7 +10,7 @@
 #include "../util/pq_item.h"
 #include "./util.h"
 
-void calcBaseRange(IGraph& g, std::vector<std::tuple<int, int>> starts, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range);
+void calcBaseRange(IGraph& g, std::vector<Snap> starts, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range);
 
 struct TransitItem
 {
@@ -23,7 +23,7 @@ struct TransitItem
 void calcTransitDijkstra(TransitGraph& g, DSnap start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, Flags<TransitFlag>& stop_flags, int max_range, int from, int to)
 {
     // step 1: range-dijkstra from start
-    std::vector<std::tuple<int, int>> starts;
+    std::vector<Snap> starts;
     for (int i = 0; i < start.len(); i++) {
         starts.push_back({start[i].node, start[i].dist});
     }
@@ -32,15 +32,22 @@ void calcTransitDijkstra(TransitGraph& g, DSnap start, Flags<DistFlag>& node_fla
     // step 2: transit-dijkstra from all found stops
     std::priority_queue<pq<TransitItem, int>> heap;
     for (int i = 0; i < g.stopCount(); i++) {
-        int base_node = g.mapToBaseNode(i);
-        if (base_node == -1) {
+        auto base_snap = g.mapToBaseNode(i);
+        if (base_snap.len() == 0) {
             continue;
         }
-        auto& flag = node_flags[base_node];
-        if (flag.dist > max_range) {
+        int dist = 100000000;
+        for (int j = 0; j < base_snap.len(); j++) {
+            auto snap = base_snap[j];
+            auto& flag = node_flags[snap.node];
+            int new_dist = snap.dist + flag.dist;
+            if (new_dist < dist) {
+                dist = new_dist;
+            }
+        }
+        if (dist > max_range) {
             continue;
         }
-        int dist = flag.dist;
         heap.push({{to + dist, to, i}, to + dist});
         g.forAdjacentConnections(i, FORWARD, ADJACENT_ALL, [&g, &heap, i, dist, from, to, max_range](EdgeRef ref) {
             if (ref.isShortcut()) {
@@ -105,13 +112,16 @@ void calcTransitDijkstra(TransitGraph& g, DSnap start, Flags<DistFlag>& node_fla
                 dist = d;
             }
         }
-        int base_node = g.mapToBaseNode(i);
-        starts.push_back({base_node, dist});
+        auto base_snap = g.mapToBaseNode(i);
+        for (int j = 0; j < base_snap.len(); j++) {
+            auto snap = base_snap[j];
+            starts.push_back({snap.node, dist + snap.dist});
+        }
     }
     calcBaseRange(g.getBaseGraph(), starts, node_flags, edge_flags, max_range);
 }
 
-void calcBaseRange(IGraph& g, std::vector<std::tuple<int, int>> starts, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range)
+void calcBaseRange(IGraph& g, std::vector<Snap> starts, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range)
 {
     std::priority_queue<pq_item> heap;
     for (auto [start, dist] : starts) {

@@ -51,7 +51,7 @@ def _build_transit_graph(graph: Graph, transit: str, transit_weight: str) -> _py
         g = _pyaccess_ext.build_base_graph(b, w)
     else:
         g = _pyaccess_ext.build_tc_graph(b, w)
-    t_d, id_m = graph._get_transit(transit)
+    t_d = graph._get_transit(transit)
     t_w = graph._get_transit_weighting(transit, transit_weight)
-    tg = _pyaccess_ext.build_transit_graph(g, id_m, t_d, t_w)
+    tg = _pyaccess_ext.build_transit_graph(g, t_d, t_w)
     return tg

@@ -1656,6 +1656,15 @@ class TransitData:
     def get_stop(self, arg: int, /) -> pyaccess._pyaccess_ext.Node:
         ...
     
+    def has_node_stops(self, arg: int, /) -> bool:
+        ...
+    
+    def map_node_to_stops(self, arg: int, /) -> list:
+        ...
+    
+    def map_stop_to_node(self, arg: int, /) -> pyaccess._pyaccess_ext.DSnap:
+        ...
+    
     def stop_count(self) -> int:
         ...
     
@@ -1743,7 +1752,7 @@ def build_tiled_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
 def build_transit_dijkstra_solver(arg: pyaccess._pyaccess_ext.TransitGraph, /) -> pyaccess._pyaccess_ext.TransitDijkstra:
     ...
 
-def build_transit_graph(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.IDMapping, arg2: pyaccess._pyaccess_ext.TransitData, arg3: pyaccess._pyaccess_ext.TransitWeighting, /) -> pyaccess._pyaccess_ext.TransitGraph:
+def build_transit_graph(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.TransitData, arg2: pyaccess._pyaccess_ext.TransitWeighting, /) -> pyaccess._pyaccess_ext.TransitGraph:
     ...
 
 @overload
@@ -2091,7 +2100,7 @@ def prepare_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
 def prepare_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
-def prepare_transit(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.IGraphIndex, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.ConnectionVector, arg4: int, /) -> tuple[pyaccess._pyaccess_ext.TransitData, pyaccess._pyaccess_ext.IDMapping]:
+def prepare_transit(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.IGraphIndex, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.ConnectionVector, arg4: int, /) -> pyaccess._pyaccess_ext.TransitData:
     ...
 
 def remove_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:
