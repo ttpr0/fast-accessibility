@@ -44,6 +44,9 @@ static void writeFile(const std::string& filename, const std::vector<char>& data
     myfile.close();
 }
 
+template <typename T>
+struct ReadWrite;
+
 struct BufferReader
 {
     const std::vector<char>& _buffer;

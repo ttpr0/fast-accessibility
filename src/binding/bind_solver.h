@@ -10,15 +10,15 @@
 #include <nanobind/stl/tuple.h>
 #include <nanobind/stl/unique_ptr.h>
 
-#include "accessibility/2sfca.h"
-#include "accessibility/range_query.h"
-#include "accessibility/reachability.h"
-#include "graph/graph.h"
-#include "solver/one_to_many/dijkstra.h"
-#include "solver/one_to_many/grasp.h"
-#include "solver/one_to_many/phast.h"
-#include "solver/one_to_many/rphast.h"
-#include "solver/one_to_many/transit.h"
+#include "../accessibility/2sfca.h"
+#include "../accessibility/range_query.h"
+#include "../accessibility/reachability.h"
+#include "../graph/graph.h"
+#include "../solver/one_to_many/dijkstra.h"
+#include "../solver/one_to_many/grasp.h"
+#include "../solver/one_to_many/phast.h"
+#include "../solver/one_to_many/rphast.h"
+#include "../solver/one_to_many/transit.h"
 
 void bind_solver(nanobind::module_& m)
 {

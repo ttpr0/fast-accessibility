@@ -107,7 +107,7 @@ struct ReadWrite<StaticTable<T>>
     {
         int size = reader.read<int>();
         int count = reader.read<int>();
-        std::vector<StaticTable<T>::Entry> entries(size);
+        std::vector<struct StaticTable<T>::Entry> entries(size);
         std::vector<T> values(count);
         for (int i = 0; i < size; i++) {
             int s = reader.read<int>();
@@ -164,7 +164,7 @@ struct DynamicTable
 
     StaticTable<T> toStatic()
     {
-        std::vector<StaticTable<T>::Entry> entries(this->entries.size());
+        std::vector<struct StaticTable<T>::Entry> entries(this->entries.size());
         std::vector<T> values;
         for (int i = 0; i < this->entries.size(); i++) {
             Entry entry = this->entries[i];
