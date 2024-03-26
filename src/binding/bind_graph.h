@@ -274,8 +274,8 @@ void bind_graph(nanobind::module_& m)
     m.def("store_id_mapping", &store_id_mapping);
     m.def("store_transit_data", &store_transit_data);
 
-    m.def("prepare_ch", &calc_contraction);
-    m.def("prepare_ch2", &calc_contraction_tiled);
+    m.def("prepare_ch", &calc_phast_contraction);
+    m.def("prepare_ch2", &calc_tiled_contraction);
     m.def("prepare_ch_index", &build_ch_index);
     m.def("prepare_ch_index_2", &build_ch_index_2);
     m.def("new_graph_base", &new_graph_base);

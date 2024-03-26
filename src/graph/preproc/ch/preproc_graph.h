@@ -22,22 +22,23 @@
 class CHPreprocGraph
 {
 public:
-    std::shared_ptr<GraphBase> base;
-    std::shared_ptr<Weighting> weights;
+    const GraphBase& base;
+    const Weighting& weights;
 
     std::vector<short> node_levels;
+    std::vector<bool> node_contracted;
     std::vector<Shortcut> shortcuts;
     AdjacencyList ch_adjacency;
 
-    CHPreprocGraph(std::shared_ptr<GraphBase> base, std::shared_ptr<Weighting> weights)
-        : base(base), weights(weights), node_levels(base->nodeCount()), ch_adjacency(base->nodeCount())
+    CHPreprocGraph(const GraphBase& base, const Weighting& weights)
+        : base(base), weights(weights), node_levels(base.nodeCount(), 0), node_contracted(base.nodeCount(), false), ch_adjacency(base.nodeCount())
     {}
 
-    int nodeCount() const { return this->base->nodeCount(); }
-    int edgeCount() const { return this->base->edgeCount(); }
+    int nodeCount() const { return this->base.nodeCount(); }
+    int edgeCount() const { return this->base.edgeCount(); }
     int shortcutCount() const { return this->shortcuts.size(); }
-    Node getNode(int node) const { return this->base->getNode(node); }
-    Edge getEdge(int edge) const { return this->base->getEdge(edge); }
+    Node getNode(int node) const { return this->base.getNode(node); }
+    Edge getEdge(int edge) const { return this->base.getEdge(edge); }
     Shortcut getShortcut(int shc) const { return this->shortcuts[shc]; }
 
     int getWeight(int id, bool is_shortcut) const
@@ -46,12 +47,15 @@ public:
             auto shc = this->getShortcut(id);
             return shc.weight;
         } else {
-            return this->weights->get_edge_weight(id);
+            return this->weights.get_edge_weight(id);
         }
     }
     short getNodeLevel(int id) const { return this->node_levels[id]; }
     void setNodeLevel(int id, short level) { this->node_levels[id] = level; }
-    void AddShortcut(int node_a, int node_b, std::array<std::tuple<int, bool>, 2> edges)
+    bool isContracted(int id) const { return this->node_contracted[id]; }
+    void setContracted(int id) { this->node_contracted[id] = true; }
+    void setUnContracted(int id) { this->node_contracted[id] = false; }
+    void addShortcut(int node_a, int node_b, std::array<std::tuple<int, bool>, 2> edges)
     {
         if (node_a == node_b) {
             return;
@@ -71,9 +75,10 @@ public:
         this->ch_adjacency.addEdgeEntries(node_a, node_b, shc_id, 100);
     }
 
+    int getNodeDegree(int node, Direction dir) const { return this->base.adjacency.getDegree(node, dir) + this->ch_adjacency.getDegree(node, dir); }
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> callback) const
     {
-        auto accessor = this->base->adjacency.getNeighbours(node, dir);
+        auto accessor = this->base.adjacency.getNeighbours(node, dir);
         auto sh_accessor = this->ch_adjacency.getNeighbours(node, dir);
         while (accessor.next()) {
             int edge_id = accessor.getEdgeID();
@@ -120,12 +125,16 @@ public:
     }
     int getWeightBetween(int from, int to) const
     {
-        auto accessor = this->base->adjacency.getNeighbours(from, Direction::FORWARD);
+        int min_weight = 10000000;
+        auto accessor = this->base.adjacency.getNeighbours(from, Direction::FORWARD);
         while (accessor.next()) {
             int edge_id = accessor.getEdgeID();
             int other_id = accessor.getOtherID();
             if (other_id == to) {
-                return this->getWeight(edge_id, false);
+                int weight = this->getWeight(edge_id, false);
+                if (weight < min_weight) {
+                    min_weight = weight;
+                }
             }
         }
         auto ch_accessor = this->ch_adjacency.getNeighbours(from, Direction::FORWARD);
@@ -133,14 +142,20 @@ public:
             int edge_id = ch_accessor.getEdgeID();
             int other_id = ch_accessor.getOtherID();
             if (other_id == to) {
-                return this->getWeight(edge_id, false);
+                int weight = this->getWeight(edge_id, true);
+                if (weight < min_weight) {
+                    min_weight = weight;
+                }
             }
         }
-        return -1;
+        if (min_weight == 10000000) {
+            return -1;
+        }
+        return min_weight;
     }
     std::tuple<EdgeRef, bool> getEdgeBetween(int from, int to) const
     {
-        auto accessor = this->base->adjacency.getNeighbours(from, Direction::FORWARD);
+        auto accessor = this->base.adjacency.getNeighbours(from, Direction::FORWARD);
         while (accessor.next()) {
             int edge_id = accessor.getEdgeID();
             int other_id = accessor.getOtherID();

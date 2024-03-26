@@ -120,7 +120,7 @@ static std::tuple<std::shared_ptr<TiledData>, std::shared_ptr<_CellIndex>> Prepr
                                                                                                  std::shared_ptr<Partition> partition)
 {
     printf("Compute subset contraction: \n");
-    auto ch_data = calc_partial_contraction(base, weights, partition);
+    auto ch_data = calc_partial_contraction(*base, *weights, *partition);
 
     printf("Set border nodes to maxlevel: \n");
     Graph graph = build_base_graph(base, weights);

@@ -39,6 +39,7 @@ private:
     unsigned short _counter;
 
 public:
+    Flags() {}
     Flags(int size, T _default) : flags(size), _default(_default), _counter(0) { this->hard_reset(); }
 
     inline T& operator[](int pos) noexcept
