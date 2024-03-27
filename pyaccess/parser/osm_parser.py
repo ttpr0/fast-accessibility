@@ -197,6 +197,8 @@ def _get_templimit(templimit:str, streettype:str) -> int:
             w = int(templimit)
         except:
             w = 20
+    if w == 0:
+        w = 10
     return w
 
 def _calc_edge_weights(edges: list[Edge]):

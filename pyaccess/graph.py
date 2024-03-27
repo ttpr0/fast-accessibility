@@ -86,6 +86,8 @@ class Graph:
             self._name = name
         if self._base_path is None or self._name is None:
             raise ValueError("No path or name given.")
+        if not os.path.isdir(f"{self._base_path}"):
+            os.mkdir(f"{self._base_path}")
         meta = {}
         meta["base"] = self._base.get_metadata()
         self._base.store(f"{self._base_path}/{self._name}")
