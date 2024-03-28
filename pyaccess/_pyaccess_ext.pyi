@@ -922,9 +922,9 @@ class IGraphIndex:
         ...
     
     @overload
-    def map_to_closest(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector:
+    def map_to_closest(self, arg: pyaccess._pyaccess_ext.NodeVector, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
-        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector
+        map_to_closest(self, arg: pyaccess._pyaccess_ext.NodeVector, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
     
@@ -946,6 +946,13 @@ class IGraphIndex:
     def map_to_closest(self, arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
         map_to_closest(self, arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector
+        """
+        ...
+    
+    @overload
+    def map_to_closest(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector:
+        """
+        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
     
@@ -2100,7 +2107,18 @@ def prepare_partition(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
 def prepare_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.TiledData:
     ...
 
-def prepare_transit(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pyaccess_ext.IGraphIndex, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.ConnectionVector, arg4: int, /) -> pyaccess._pyaccess_ext.TransitData:
+@overload
+def prepare_transit(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.TCWeighting, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: pyaccess._pyaccess_ext.ConnectionVector, arg5: int, /) -> pyaccess._pyaccess_ext.TransitData:
+    """
+    prepare_transit(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.TCWeighting, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: pyaccess._pyaccess_ext.ConnectionVector, arg5: int, /) -> pyaccess._pyaccess_ext.TransitData
+    """
+    ...
+
+@overload
+def prepare_transit(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: pyaccess._pyaccess_ext.ConnectionVector, arg5: int, /) -> pyaccess._pyaccess_ext.TransitData:
+    """
+    prepare_transit(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.NodeVector, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: pyaccess._pyaccess_ext.ConnectionVector, arg5: int, /) -> pyaccess._pyaccess_ext.TransitData
+    """
     ...
 
 def remove_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:

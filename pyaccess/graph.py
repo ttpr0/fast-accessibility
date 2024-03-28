@@ -262,11 +262,8 @@ class Graph:
         b = self._get_base()
         w = self._get_weight(weight)
         i = self._get_index()
-        if isinstance(w, _pyaccess_ext.Weighting):
-            g = _pyaccess_ext.build_base_graph(b, w)
-        else:
-            g = _pyaccess_ext.build_tc_graph(b, w)
-        transit_data = _pyaccess_ext.prepare_transit(g, i, stops, connections, max_transfer_range)
+        stop_mapping = i.map_to_closest(stops)
+        transit_data = _pyaccess_ext.prepare_transit(b, w, stops, stop_mapping, connections, max_transfer_range)
         transit_obj = TransitObject_new(weight, transit_data)
         self._transit[name] = transit_obj
 

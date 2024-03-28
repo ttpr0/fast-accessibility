@@ -30,14 +30,17 @@ public:
 
     int nodeCount() const;
     int edgeCount() const;
-    int shortcutCount() const;
+
+    Node getNode(int node) const;
+    Edge getEdge(int edge) const;
+    Coord getNodeGeom(int node) const;
 
     short getNodeTile(int node) const;
+    short tileCount() const;
+    int shortcutCount() const;
+    Shortcut getShortcut(int shortcut) const;
 
     void forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) const;
-
     int getEdgeWeight(EdgeRef edge) const;
-    int getTurnCost(EdgeRef from, int via, EdgeRef to) const;
-
     int getOtherNode(EdgeRef edge, int node) const;
 };

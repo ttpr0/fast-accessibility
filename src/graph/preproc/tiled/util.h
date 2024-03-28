@@ -8,7 +8,7 @@
 
 #include "../../../util/flags.h"
 #include "../../../util/pq_item.h"
-#include "../../graph.h"
+#include "../../explorer/base_explorer.h"
 #include "../../speed_ups/partition.h"
 #include "../../structs/adjacency.h"
 #include "../../structs/enums.h"
@@ -26,7 +26,7 @@ struct _Flag
 };
 
 // computes shortest paths from start restricted to tile
-static void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag>& flags, const Partition& partition)
+static void _calc_shortest_paths(BaseGraphExplorer& graph, int start, Flags<_Flag>& flags, const Partition& partition)
 {
     std::priority_queue<pq_item> heap;
 
@@ -71,7 +71,7 @@ static void _calc_shortest_paths(IGraph& graph, int start, Flags<_Flag>& flags, 
 }
 
 // creates topology with cross-border edges (type 10), skip edges (type 20) and shortcuts (type 100)
-static AdjacencyArray _create_skip_topology(IGraph& graph, std::vector<Shortcut>& shortcuts, std::vector<char>& edge_types)
+static AdjacencyArray _create_skip_topology(BaseGraphExplorer& graph, std::vector<Shortcut>& shortcuts, std::vector<char>& edge_types)
 {
     AdjacencyList dyn_top(graph.nodeCount());
 
@@ -101,7 +101,7 @@ static AdjacencyArray _create_skip_topology(IGraph& graph, std::vector<Shortcut>
 // return list of nodes that have at least one cross-border edge
 //
 // returns in_nodes, out_nodes
-static std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& graph, const Partition& partition, short tile_id)
+static std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(BaseGraphExplorer& graph, const Partition& partition, short tile_id)
 {
     std::vector<int> in_list;
     std::vector<int> out_list;
@@ -142,7 +142,7 @@ static std::tuple<std::vector<int>, std::vector<int>> _get_inout_nodes(IGraph& g
 // Computes border and interior nodes of graph tile.
 //
 // If tile doesn't exist arrays will be empty.
-static std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(IGraph& graph, const Partition& partition, short tile_id)
+static std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes(BaseGraphExplorer& graph, const Partition& partition, short tile_id)
 {
     std::vector<int> border_list;
     std::vector<int> interior_list;
@@ -183,7 +183,9 @@ static std::tuple<std::vector<int>, std::vector<int>> _get_border_interior_nodes
 }
 
 // Computes border nodes of graph.
-static std::vector<bool> _get_is_border(IGraph& graph, const Partition& partition)
+template <typename TGraph>
+    requires any_graph<TGraph>
+static std::vector<bool> _get_is_border(TGraph& graph, const Partition& partition)
 {
     std::vector<bool> is_border_list(graph.nodeCount());
 

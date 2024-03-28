@@ -6,6 +6,7 @@
 #include <nanobind/nanobind.h>
 
 #include "../graph/base/graph_index.h"
+#include "../graph/ch_graph.h"
 #include "../graph/graph.h"
 #include "../graph/io/cell_index_io.h"
 #include "../graph/io/ch_data_io.h"
@@ -29,9 +30,8 @@
 #include "../graph/preproc/tiled/tiled.h"
 #include "../graph/preproc/transit/transit.h"
 #include "../graph/structs/geom.h"
-#include "../graph/transit_graph.h"
-#include "../graph/ch_graph.h"
 #include "../graph/tiled_graph.h"
+#include "../graph/transit_graph.h"
 #include "../graph/weights/tc_weighting.h"
 #include "../graph/weights/transit_weighting.h"
 #include "../graph/weights/weighting.h"
@@ -145,6 +145,7 @@ void bind_graph(nanobind::module_& m)
     i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(VectorView<float>, VectorView<float>)>(&IGraphIndex::mapToClosest));
     i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(const std::vector<Coord>&, const _IDMapping&)>(&IGraphIndex::mapToClosest));
     i_graph_index.def("map_to_closest", static_cast<std::vector<DSnap> (IGraphIndex::*)(VectorView<float>, VectorView<float>, const _IDMapping&)>(&IGraphIndex::mapToClosest));
+    i_graph_index.def("map_to_closest", [](IGraphIndex& index, const std::vector<Node>& stops) { return map_stops_to_graph(index, stops); });
 
     auto id_mapping = py::class_<_IDMapping>(m, "IDMapping");
     id_mapping.def("get_source", &_IDMapping::get_source);
@@ -289,10 +290,11 @@ void bind_graph(nanobind::module_& m)
     m.def("prepare_kdtree_index", &build_kdtree_index);
     m.def("prepare_balanced_kdtree_index", &build_balanced_kdtree_index);
     m.def("prepare_partition", &calc_partition);
-    m.def("prepare_tiled", &PreprocessTiledGraph3);
-    m.def("prepare_cell_index", &PrepareGRASPCellIndex2);
-    m.def("prepare_isophast", &PreprocessTiledGraph5);
+    m.def("prepare_tiled", &calc_clique_overlay);
+    m.def("prepare_cell_index", &calc_full_cell_index);
+    m.def("prepare_isophast", &calc_isophast_overlay);
     m.def("prepare_transit", &build_transit_data);
+    m.def("prepare_transit", &build_transit_data_tc);
 
     m.def("build_base_graph", &build_base_graph);
     m.def("build_tc_graph", &build_tc_graph);

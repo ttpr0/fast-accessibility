@@ -13,14 +13,39 @@ int TiledGraphExplorer::edgeCount() const
 {
     return this->base.edgeCount();
 }
+Node TiledGraphExplorer::getNode(int node) const
+{
+    int m_node = this->id_mapping.get_target(node);
+    return this->base.getNode(m_node);
+}
+Edge TiledGraphExplorer::getEdge(int edge) const
+{
+    Edge e = this->base.getEdge(edge);
+    e.nodeA = this->id_mapping.get_target(e.nodeA);
+    e.nodeB = this->id_mapping.get_target(e.nodeB);
+    return e;
+}
+Coord TiledGraphExplorer::getNodeGeom(int node) const
+{
+    int m_node = this->id_mapping.get_target(node);
+    return this->base.getNodeGeom(m_node);
+}
 int TiledGraphExplorer::shortcutCount() const
 {
     return this->tiled.shortcutCount();
+}
+Shortcut TiledGraphExplorer::getShortcut(int shortcut) const
+{
+    return this->tiled.getShortcut(shortcut);
 }
 short TiledGraphExplorer::getNodeTile(int node) const
 {
     int m_node = this->id_mapping.get_source(node);
     return this->partition.get_node_tile(m_node);
+}
+short TiledGraphExplorer::tileCount() const
+{
+    return this->partition.tile_count();
 }
 void TiledGraphExplorer::forAdjacentEdges(int node, Direction dir, Adjacency typ, function_ref<void(EdgeRef)> func) const
 {
@@ -55,10 +80,6 @@ int TiledGraphExplorer::getEdgeWeight(EdgeRef edge) const
     } else {
         return this->weights.get_edge_weight(edge.edge_id);
     }
-}
-int TiledGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to) const
-{
-    return 0;
 }
 int TiledGraphExplorer::getOtherNode(EdgeRef edge, int node) const
 {

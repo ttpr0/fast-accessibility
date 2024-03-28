@@ -13,9 +13,30 @@ int CHGraphExplorer::edgeCount() const
 {
     return this->base.edgeCount();
 }
+Node CHGraphExplorer::getNode(int node) const
+{
+    int m_node = this->id_mapping.get_target(node);
+    return this->base.getNode(m_node);
+}
+Edge CHGraphExplorer::getEdge(int edge) const
+{
+    Edge e = this->base.getEdge(edge);
+    e.nodeA = this->id_mapping.get_target(e.nodeA);
+    e.nodeB = this->id_mapping.get_target(e.nodeB);
+    return e;
+}
+Coord CHGraphExplorer::getNodeGeom(int node) const
+{
+    int m_node = this->id_mapping.get_target(node);
+    return this->base.getNodeGeom(m_node);
+}
 int CHGraphExplorer::shortcutCount() const
 {
     return this->ch.shortcutCount();
+}
+Shortcut CHGraphExplorer::getShortcut(int shortcut) const
+{
+    return this->ch.getShortcut(shortcut);
 }
 short CHGraphExplorer::getNodeLevel(int node) const
 {
@@ -109,10 +130,6 @@ int CHGraphExplorer::getEdgeWeight(EdgeRef edge) const
     } else {
         return this->weights.get_edge_weight(edge.edge_id);
     }
-}
-int CHGraphExplorer::getTurnCost(EdgeRef from, int via, EdgeRef to) const
-{
-    return 0;
 }
 int CHGraphExplorer::getOtherNode(EdgeRef edge, int node) const
 {
