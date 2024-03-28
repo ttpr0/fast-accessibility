@@ -6,23 +6,22 @@
 #include <tuple>
 #include <vector>
 
-#include "../../algorithm/range_dijkstra.h"
-#include "../../algorithm/util.h"
-#include "../../graph/base_graph.h"
 #include "../../graph/graph.h"
-#include "../../util.h"
+#include "./algorithm/range_dijkstra.h"
 #include "./state.h"
 
 // RangeDijkstra
+template <typename TGraph = IGraph>
+    requires any_graph<TGraph>
 class RangeDijkstra
 {
 private:
     bool is_build;
-    IGraph* graph;
+    TGraph& graph;
     int max_range;
 
 public:
-    RangeDijkstra(IGraph* graph) : graph(graph)
+    RangeDijkstra(TGraph& graph) : graph(graph)
     {
         this->is_build = false;
         this->max_range = 10000000;
@@ -45,7 +44,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -58,15 +57,17 @@ public:
 };
 
 // RangeDijkstra with turn-costs
+template <typename TGraph = IGraph>
+    requires any_tc_graph<TGraph>
 class RangeDijkstraTC
 {
 private:
     bool is_build;
-    IGraph* graph;
+    TGraph& graph;
     int max_range;
 
 public:
-    RangeDijkstraTC(IGraph* graph) : graph(graph)
+    RangeDijkstraTC(TGraph& graph) : graph(graph)
     {
         this->is_build = false;
         this->max_range = 10000000;
@@ -89,7 +90,7 @@ public:
         this->is_build = true;
     }
 
-    EdgeBasedState makeComputeState() { return EdgeBasedState(this->graph->nodeCount(), this->graph->edgeCount()); }
+    EdgeBasedState makeComputeState() { return EdgeBasedState(this->graph.nodeCount(), this->graph.edgeCount()); }
     void compute(DSnap start, EdgeBasedState& state)
     {
         if (!this->is_build) {

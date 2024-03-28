@@ -6,9 +6,9 @@
 
 #include "../../util/kd_tree/kd_tree.h"
 #include "../../util/matrix.h"
+#include "../../util/snap.h"
 #include "./graph_base.h"
 #include "./id_mapping.h"
-#include "../../algorithm/util.h"
 
 //*******************************************
 // graph index

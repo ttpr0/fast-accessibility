@@ -6,8 +6,8 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/bind_vector.h>
 
-#include "../algorithm/util.h"
 #include "../graph/structs/geom.h"
+#include "../util/snap.h"
 
 NB_MAKE_OPAQUE(std::vector<int>);
 NB_MAKE_OPAQUE(std::vector<float>);

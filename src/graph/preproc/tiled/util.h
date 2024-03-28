@@ -6,7 +6,8 @@
 #include <tuple>
 #include <vector>
 
-#include "../../../algorithm/util.h"
+#include "../../../util/flags.h"
+#include "../../../util/pq_item.h"
 #include "../../graph.h"
 #include "../../speed_ups/partition.h"
 #include "../../structs/adjacency.h"

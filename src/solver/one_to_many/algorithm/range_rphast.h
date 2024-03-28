@@ -5,11 +5,15 @@
 #include <tuple>
 #include <vector>
 
-#include "../graph/graph.h"
-#include "./util.h"
+#include "../../../graph/graph.h"
+#include "../../../util/flags.h"
+#include "../../../util/pq_item.h"
+#include "../../../util/snap.h"
 
 // RPHAST with simple range restriction
-void calcRangeRPHAST(ICHGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<Shortcut>& down_edges_subset)
+template <typename TGraph>
+    requires any_phast_graph<TGraph>
+void calcRangeRPHAST(TGraph& g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<Shortcut>& down_edges_subset)
 {
     std::priority_queue<pq_item> heap;
     for (int i = 0; i < start.len(); i++) {
@@ -32,13 +36,13 @@ void calcRangeRPHAST(ICHGraph* g, DSnap start, Flags<DistFlag>& flags, int max_r
             continue;
         }
         curr_flag.visited = true;
-        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &g, &heap, &curr_flag, &max_range](EdgeRef ref) {
+        g.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &g, &heap, &curr_flag, &max_range](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g.getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }

@@ -5,11 +5,15 @@
 #include <tuple>
 #include <vector>
 
-#include "../graph/graph.h"
-#include "./util.h"
+#include "../../../graph/graph.h"
+#include "../../../util/flags.h"
+#include "../../../util/pq_item.h"
+#include "../../../util/snap.h"
 
 // computes distances to nodes until "max_range" using dijkstra
-void calcRangeDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range)
+template <typename TGraph>
+    requires any_graph<TGraph>
+void calcRangeDijkstra(TGraph& g, DSnap start, Flags<DistFlag>& flags, int max_range)
 {
     std::priority_queue<pq_item> heap;
     for (int i = 0; i < start.len(); i++) {
@@ -32,7 +36,7 @@ void calcRangeDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, int max_r
             continue;
         }
         curr_flag.visited = true;
-        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
+        g.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
             if (ref.isShortcut()) {
                 return;
             }
@@ -41,7 +45,7 @@ void calcRangeDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, int max_r
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g.getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
@@ -53,7 +57,9 @@ void calcRangeDijkstra(IGraph* g, DSnap start, Flags<DistFlag>& flags, int max_r
     }
 }
 
-void calcRangeDijkstraTC(IGraph* g, DSnap start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range)
+template <typename TGraph>
+    requires any_tc_graph<TGraph>
+void calcRangeDijkstraTC(TGraph& g, DSnap start, Flags<DistFlag>& node_flags, Flags<DistFlag>& edge_flags, int max_range)
 {
     std::priority_queue<pq_item> heap;
     for (int i = 0; i < start.len(); i++) {
@@ -61,10 +67,10 @@ void calcRangeDijkstraTC(IGraph* g, DSnap start, Flags<DistFlag>& node_flags, Fl
         auto& start_flag = node_flags[s.node];
         start_flag.dist = s.dist;
 
-        g->forAdjacentEdges(s.node, FORWARD, ADJACENT_EDGES, [&edge_flags, &node_flags, &g, &heap, &max_range, s](EdgeRef ref) {
+        g.forAdjacentEdges(s.node, FORWARD, ADJACENT_EDGES, [&edge_flags, &node_flags, &g, &heap, &max_range, s](EdgeRef ref) {
             int edge_id = ref.edge_id;
             int next_node_id = ref.other_id;
-            int edge_dist = s.dist + g->getEdgeWeight(ref);
+            int edge_dist = s.dist + g.getEdgeWeight(ref);
             if (edge_dist > max_range) {
                 return;
             }
@@ -91,16 +97,16 @@ void calcRangeDijkstraTC(IGraph* g, DSnap start, Flags<DistFlag>& node_flags, Fl
             continue;
         }
         curr_flag.visited = true;
-        auto curr_edge = g->getEdge(curr_id);
+        auto curr_edge = g.getEdge(curr_id);
         auto curr_ref = EdgeRef{curr_id, curr_edge.nodeB, 0};
-        g->forAdjacentEdges(curr_edge.nodeB, FORWARD, ADJACENT_EDGES, [&edge_flags, &node_flags, &g, &heap, &max_range, &curr_flag, &curr_ref, &curr_edge](EdgeRef ref) {
+        g.forAdjacentEdges(curr_edge.nodeB, FORWARD, ADJACENT_EDGES, [&edge_flags, &node_flags, &g, &heap, &max_range, &curr_flag, &curr_ref, &curr_edge](EdgeRef ref) {
             int other_id = ref.edge_id;
             auto other_node_b = ref.other_id;
             auto& other_flag = edge_flags[other_id];
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + g->getEdgeWeight(ref) + g->getTurnCost(curr_ref, curr_edge.nodeB, ref);
+            int new_length = curr_flag.dist + g.getEdgeWeight(ref) + g.getTurnCost(curr_ref, curr_edge.nodeB, ref);
             if (new_length > max_range) {
                 return;
             }

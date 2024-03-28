@@ -6,25 +6,24 @@
 #include <tuple>
 #include <vector>
 
-#include "../../algorithm/grasp.h"
-#include "../../algorithm/util.h"
 #include "../../graph/graph.h"
-#include "../../graph/tiled_graph.h"
-#include "../../util.h"
+#include "./algorithm/grasp.h"
 #include "./state.h"
 
 // isoGRASP + reGRASP
+template <typename TGraph = ITiledGraph>
+    requires any_grasp_graph<TGraph>
 class GRASP
 {
 private:
     bool is_build;
-    ITiledGraph* graph;
+    TGraph& graph;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
 
 public:
-    GRASP(ITiledGraph* graph) : graph(graph), max_range(max_range), active_tiles(graph->tileCount() + 2, false), found_tiles(graph->tileCount() + 2, false)
+    GRASP(TGraph& graph) : graph(graph), max_range(max_range), active_tiles(graph.tileCount() + 2, false), found_tiles(graph.tileCount() + 2, false)
     {
         this->is_build = false;
         this->max_range = 10000000;
@@ -43,7 +42,7 @@ public:
             return;
         }
         for (int i = 0; i < target.len(); i++) {
-            short tile = this->graph->getNodeTile(target[i].node);
+            short tile = this->graph.getNodeTile(target[i].node);
             this->active_tiles[tile] = true;
         }
     }
@@ -57,7 +56,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {

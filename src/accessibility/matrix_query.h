@@ -6,9 +6,9 @@
 #include <tuple>
 #include <vector>
 
-#include "../algorithm/util.h"
 #include "../graph/graph.h"
 #include "../util/matrix.h"
+#include "../util/snap.h"
 
 template <class S>
 Matrix<int> calcMatrixQuery(S& alg, std::vector<DSnap>& start_nodes, std::vector<DSnap>& target_nodes, int max_range)

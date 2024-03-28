@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include "../../algorithm/util.h"
 #include "../../util/function_ref.h"
 #include "../../util/io.h"
+#include "../../util/snap.h"
 #include "./table.h"
 
 //*******************************************

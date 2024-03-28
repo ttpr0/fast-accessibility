@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../../algorithm/util.h"
+#include "../../util/flags.h"
+#include "../../util/snap.h"
 
 class NodeBasedState
 {

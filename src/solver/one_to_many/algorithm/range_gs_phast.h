@@ -5,13 +5,14 @@
 #include <tuple>
 #include <vector>
 
-#include "../graph/ch_graph.h"
-#include "../graph/graph.h"
-#include "./util.h"
+#include "../../../graph/ch_graph.h"
+#include "../../../graph/graph.h"
+#include "../../../util/flags.h"
+#include "../../../util/pq_item.h"
+#include "../../../util/snap.h"
 
-// RangeRPHAST with graph-partitioning
-void calcGSRPHAST(CHGraph2* g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<Shortcut>& down_edges_subset, std::vector<bool>& contains_targets,
-                  std::vector<bool>& is_found)
+// RangePHAST with graph-partitioning
+void calcGSPHAST(CHGraph2& g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
 {
     std::priority_queue<pq_item> heap;
     for (int i = 0; i < start.len(); i++) {
@@ -34,15 +35,15 @@ void calcGSRPHAST(CHGraph2* g, DSnap start, Flags<DistFlag>& flags, int max_rang
             continue;
         }
         curr_flag.visited = true;
-        short curr_tile = g->getNodeTile(curr_id);
+        short curr_tile = g.getNodeTile(curr_id);
         is_found[curr_tile] = true;
-        g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &g, &heap, &curr_flag, &max_range](EdgeRef ref) {
+        g.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_UPWARDS, [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g.getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
@@ -52,13 +53,14 @@ void calcGSRPHAST(CHGraph2* g, DSnap start, Flags<DistFlag>& flags, int max_rang
             }
         });
     }
-    // iterative down sweep
-    auto overlay_dummy = down_edges_subset[0];
+    // iterative down-sweep
+    const std::vector<Shortcut>& down_edges = g.getDownEdges(Direction::FORWARD);
+    auto overlay_dummy = down_edges[0];
     int overlay_start = 1;
     int overlay_end = 1 + overlay_dummy.to;
     for (int i = overlay_start; i < overlay_end; i++) {
-        auto edge = down_edges_subset[i];
-        auto curr_flag = flags[edge.from];
+        auto edge = down_edges[i];
+        auto& curr_flag = flags[edge.from];
         int new_len = curr_flag.dist + edge.weight;
         if (new_len > max_range) {
             continue;
@@ -71,16 +73,16 @@ void calcGSRPHAST(CHGraph2* g, DSnap start, Flags<DistFlag>& flags, int max_rang
             is_found[to_tile] = true;
         }
     }
-    for (int i = overlay_end; i < down_edges_subset.size(); i++) {
-        auto curr_dummy = down_edges_subset[i];
+    for (int i = overlay_end; i < down_edges.size(); i++) {
+        auto curr_dummy = down_edges[i];
         int curr_tile = curr_dummy.payload.get<short>(0);
         int curr_count = curr_dummy.to;
         if (is_found[curr_tile] && contains_targets[curr_tile]) {
             int tile_start = i + 1;
             int tile_end = i + 1 + curr_count;
             for (int j = tile_start; j < tile_end; j++) {
-                auto edge = down_edges_subset[j];
-                auto curr_flag = flags[edge.from];
+                auto edge = down_edges[j];
+                auto& curr_flag = flags[edge.from];
                 int new_len = curr_flag.dist + edge.weight;
                 if (new_len > max_range) {
                     continue;

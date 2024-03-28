@@ -6,24 +6,24 @@
 #include <tuple>
 #include <vector>
 
-#include "../../algorithm/phast.h"
-#include "../../algorithm/range_gs_phast.h"
-#include "../../algorithm/range_phast.h"
-#include "../../algorithm/util.h"
+#include "./algorithm/phast.h"
+#include "./algorithm/range_gs_phast.h"
+#include "./algorithm/range_phast.h"
 #include "../../graph/ch_graph.h"
 #include "../../graph/graph.h"
-#include "../../util.h"
 #include "./state.h"
 
 // PHAST
+template <typename TGraph = ICHGraph>
+    requires any_phast_graph<TGraph>
 class PHAST
 {
 private:
     bool is_build;
-    ICHGraph* graph;
+    TGraph& graph;
 
 public:
-    PHAST(ICHGraph* graph) : graph(graph) { this->is_build = false; }
+    PHAST(TGraph& graph) : graph(graph) { this->is_build = false; }
 
     void addMaxRange(int range) {}
     void addTarget(DSnap target) {}
@@ -37,7 +37,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -50,15 +50,17 @@ public:
 };
 
 // RangePHAST
+template <typename TGraph = ICHGraph>
+    requires any_phast_graph<TGraph>
 class RangePHAST
 {
 private:
     bool is_build;
-    ICHGraph* graph;
+    TGraph& graph;
     int max_range;
 
 public:
-    RangePHAST(ICHGraph* graph) : graph(graph)
+    RangePHAST(TGraph& graph) : graph(graph)
     {
         this->is_build = false;
         this->max_range = 10000000;
@@ -82,7 +84,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -97,15 +99,18 @@ public:
 // RangePHAST+GS
 class RangePHASTGS
 {
+public:
+    using TGraph = CHGraph2;
+
 private:
     bool is_build;
-    CHGraph2* graph;
+    TGraph& graph;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
     int max_range;
 
 public:
-    RangePHASTGS(CHGraph2* graph) : graph(graph), active_tiles(graph->tileCount() + 2, false), found_tiles(graph->tileCount() + 2, false)
+    RangePHASTGS(TGraph& graph) : graph(graph), active_tiles(graph.tileCount() + 2, false), found_tiles(graph.tileCount() + 2, false)
     {
         this->is_build = false;
         this->max_range = 10000000;
@@ -124,7 +129,7 @@ public:
             return;
         }
         for (int i = 0; i < target.len(); i++) {
-            short tile = this->graph->getNodeTile(target[i].node);
+            short tile = this->graph.getNodeTile(target[i].node);
             this->active_tiles[tile] = true;
         }
     }
@@ -138,7 +143,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {

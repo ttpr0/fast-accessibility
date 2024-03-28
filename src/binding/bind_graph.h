@@ -30,6 +30,8 @@
 #include "../graph/preproc/transit/transit.h"
 #include "../graph/structs/geom.h"
 #include "../graph/transit_graph.h"
+#include "../graph/ch_graph.h"
+#include "../graph/tiled_graph.h"
 #include "../graph/weights/tc_weighting.h"
 #include "../graph/weights/transit_weighting.h"
 #include "../graph/weights/weighting.h"

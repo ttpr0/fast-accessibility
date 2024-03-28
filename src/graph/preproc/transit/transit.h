@@ -26,7 +26,7 @@ static std::shared_ptr<TransitData> build_transit_data(IGraph& graph, IGraphInde
         adjacency_list.addEdgeEntries(connection.stopA, connection.stopB, i, 30);
     }
     auto shortcuts = std::vector<Shortcut>();
-    auto solver = RangeDijkstraTC(&graph);
+    auto solver = RangeDijkstraTC(graph);
     solver.addMaxRange(max_range);
     solver.build();
     auto state = solver.makeComputeState();

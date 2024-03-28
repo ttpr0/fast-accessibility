@@ -6,15 +6,10 @@
 #include <tuple>
 #include <vector>
 
-#include "../algorithm/range_gs_rphast.h"
-#include "../algorithm/range_phast.h"
-#include "../algorithm/range_rphast.h"
-#include "../algorithm/rphast.h"
-#include "../algorithm/rphast_preprocess.h"
-#include "../algorithm/util.h"
 #include "../graph/graph.h"
 #include "../util.h"
 #include "../util/matrix.h"
+#include "../util/snap.h"
 #include "./distance_decay/decay.h"
 
 template <class S>

@@ -6,11 +6,9 @@
 #include <tuple>
 #include <vector>
 
-#include "../../algorithm/transit_dijkstra.h"
-#include "../../algorithm/util.h"
 #include "../../graph/graph.h"
 #include "../../graph/transit_graph.h"
-#include "../../util.h"
+#include "./algorithm/transit_dijkstra.h"
 #include "./state.h"
 
 // RangeDijkstra with public-transit

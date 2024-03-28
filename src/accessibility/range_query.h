@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-#include "../algorithm/util.h"
+#include "../util/snap.h"
 #include "../graph/graph.h"
 #include "../util/matrix.h"
 

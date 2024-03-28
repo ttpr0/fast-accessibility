@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-#include "../../../algorithm/util.h"
+#include "../../../util/flags.h"
 #include "../../graph.h"
 #include "../../structs/enums.h"
 #include "../../structs/structs.h"

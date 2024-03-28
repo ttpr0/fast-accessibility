@@ -8,7 +8,6 @@
 #include <tuple>
 #include <vector>
 
-#include "../../../algorithm/util.h"
 #include "../../base_graph.h"
 #include "../../graph.h"
 #include "../../speed_ups/cell_index.h"

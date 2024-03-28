@@ -6,29 +6,29 @@
 #include <tuple>
 #include <vector>
 
-#include "../../algorithm/range_gs_rphast.h"
-#include "../../algorithm/range_phast.h"
-#include "../../algorithm/range_rphast.h"
-#include "../../algorithm/rphast.h"
-#include "../../algorithm/rphast_preprocess.h"
-#include "../../algorithm/util.h"
 #include "../../graph/ch_graph.h"
 #include "../../graph/graph.h"
-#include "../../util.h"
+#include "./algorithm/range_gs_rphast.h"
+#include "./algorithm/range_phast.h"
+#include "./algorithm/range_rphast.h"
+#include "./algorithm/rphast.h"
+#include "./algorithm/rphast_preprocess.h"
 #include "./state.h"
 
 // RPHAST
+template <typename TGraph = ICHGraph>
+    requires any_phast_graph<TGraph>
 class RPHAST
 {
 private:
     bool is_build;
-    ICHGraph* graph;
+    TGraph& graph;
     std::vector<Shortcut> down_edges_subset;
     int max_range;
     std::queue<int> node_queue;
 
 public:
-    RPHAST(ICHGraph* graph) : graph(graph)
+    RPHAST(TGraph& graph) : graph(graph)
     {
         this->max_range = 10000000;
         this->is_build = false;
@@ -61,7 +61,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -74,17 +74,19 @@ public:
 };
 
 // RangeRPHAST
+template <typename TGraph = ICHGraph>
+    requires any_phast_graph<TGraph>
 class RangeRPHAST
 {
 private:
     bool is_build;
-    ICHGraph* graph;
+    TGraph& graph;
     std::vector<Shortcut> down_edges_subset;
     int max_range;
     std::queue<int> node_queue;
 
 public:
-    RangeRPHAST(ICHGraph* graph) : graph(graph)
+    RangeRPHAST(TGraph& graph) : graph(graph)
     {
         this->max_range = 10000000;
         this->is_build = false;
@@ -117,7 +119,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -130,17 +132,19 @@ public:
 };
 
 // RangeRPHAST (RTS)
+template <typename TGraph = ICHGraph>
+    requires any_phast_graph<TGraph>
 class RangeRPHAST2
 {
 private:
     bool is_build;
-    ICHGraph* graph;
+    TGraph& graph;
     std::vector<Shortcut> down_edges_subset;
     int max_range;
     std::priority_queue<pq_item> node_queue;
 
 public:
-    RangeRPHAST2(ICHGraph* graph) : graph(graph)
+    RangeRPHAST2(TGraph& graph) : graph(graph)
     {
         this->max_range = 10000000;
         this->is_build = false;
@@ -173,7 +177,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -188,9 +192,12 @@ public:
 // RangeRPHAST+GS
 class RangeRPHASTGS
 {
+public:
+    using TGraph = CHGraph2;
+
 private:
     bool is_build;
-    CHGraph2* graph;
+    TGraph& graph;
     std::vector<Shortcut> down_edges_subset;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
@@ -198,7 +205,7 @@ private:
     std::queue<int> node_queue;
 
 public:
-    RangeRPHASTGS(CHGraph2* graph) : graph(graph), active_tiles(graph->tileCount() + 2, false), found_tiles(active_tiles.size(), false)
+    RangeRPHASTGS(TGraph& graph) : graph(graph), active_tiles(graph.tileCount() + 2, false), found_tiles(active_tiles.size(), false)
     {
         this->max_range = 100000000;
         this->is_build = false;
@@ -219,7 +226,7 @@ public:
         for (int i = 0; i < target.len(); i++) {
             int id = target[i].node;
             this->node_queue.push(id);
-            short tile = this->graph->getNodeTile(id);
+            short tile = this->graph.getNodeTile(id);
             this->active_tiles[tile] = true;
         }
     }
@@ -234,7 +241,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {
@@ -252,9 +259,12 @@ public:
 // RangeRPHAST+GS (RTS)
 class RangeRPHASTGS2
 {
+public:
+    using TGraph = CHGraph2;
+
 private:
     bool is_build;
-    CHGraph2* graph;
+    TGraph& graph;
     std::vector<Shortcut> down_edges_subset;
     std::vector<bool> active_tiles;
     std::vector<bool> found_tiles;
@@ -262,7 +272,7 @@ private:
     std::priority_queue<pq_item> node_queue;
 
 public:
-    RangeRPHASTGS2(CHGraph2* graph) : graph(graph), active_tiles(graph->tileCount() + 2, false), found_tiles(active_tiles.size(), false)
+    RangeRPHASTGS2(TGraph& graph) : graph(graph), active_tiles(graph.tileCount() + 2, false), found_tiles(active_tiles.size(), false)
     {
         this->max_range = 10000000;
         this->is_build = false;
@@ -284,7 +294,7 @@ public:
             int id = target[i].node;
             int dist = target[i].dist;
             this->node_queue.push({id, dist});
-            short tile = this->graph->getNodeTile(id);
+            short tile = this->graph.getNodeTile(id);
             this->active_tiles[tile] = true;
         }
     }
@@ -299,7 +309,7 @@ public:
         this->is_build = true;
     }
 
-    NodeBasedState makeComputeState() { return NodeBasedState(this->graph->nodeCount()); }
+    NodeBasedState makeComputeState() { return NodeBasedState(this->graph.nodeCount()); }
     void compute(DSnap start, NodeBasedState& state)
     {
         if (!this->is_build) {

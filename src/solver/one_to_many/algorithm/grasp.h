@@ -5,11 +5,15 @@
 #include <tuple>
 #include <vector>
 
-#include "../graph/graph.h"
-#include "./util.h"
+#include "../../../graph/graph.h"
+#include "../../../util/flags.h"
+#include "../../../util/pq_item.h"
+#include "../../../util/snap.h"
 
 // reGRASP and isoGRASP combination
-void calcGRASP(ITiledGraph* g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
+template <typename TGraph>
+    requires any_grasp_graph<TGraph>
+void calcGRASP(TGraph& g, DSnap start, Flags<DistFlag>& flags, int max_range, std::vector<bool>& contains_targets, std::vector<bool>& is_found)
 {
     std::priority_queue<pq_item> heap;
     short start_tile;
@@ -18,7 +22,7 @@ void calcGRASP(ITiledGraph* g, DSnap start, Flags<DistFlag>& flags, int max_rang
         auto& start_flag = flags[s.node];
         start_flag.dist = s.dist;
 
-        start_tile = g->getNodeTile(s.node);
+        start_tile = g.getNodeTile(s.node);
         is_found[start_tile] = true;
 
         heap.push({s.node, s.dist});
@@ -37,14 +41,14 @@ void calcGRASP(ITiledGraph* g, DSnap start, Flags<DistFlag>& flags, int max_rang
             continue;
         }
         curr_flag.visited = true;
-        short curr_tile = g->getNodeTile(curr_id);
+        short curr_tile = g.getNodeTile(curr_id);
         auto handler = [&flags, &g, &heap, &max_range, &curr_flag](EdgeRef ref) {
             int other_id = ref.other_id;
             auto& other_flag = flags[other_id];
             if (other_flag.visited) {
                 return;
             }
-            int new_length = curr_flag.dist + g->getEdgeWeight(ref);
+            int new_length = curr_flag.dist + g.getEdgeWeight(ref);
             if (new_length > max_range) {
                 return;
             }
@@ -54,17 +58,17 @@ void calcGRASP(ITiledGraph* g, DSnap start, Flags<DistFlag>& flags, int max_rang
             }
         };
         if (curr_tile == start_tile) {
-            g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, std::cref(handler));
+            g.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_EDGES, handler);
         } else {
             is_found[curr_tile] = true;
-            g->forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_SKIP, handler);
+            g.forAdjacentEdges(curr_id, Direction::FORWARD, Adjacency::ADJACENT_SKIP, handler);
         }
     }
     for (int i = 0; i < contains_targets.size(); i++) {
         if (!contains_targets[i] || !is_found[i]) {
             continue;
         }
-        auto& down_edges = g->getIndexEdges(i, Direction::FORWARD);
+        auto& down_edges = g.getIndexEdges(i, Direction::FORWARD);
         for (int j = 0; j < down_edges.size(); j++) {
             auto edge = down_edges[j];
             auto curr_flag = flags[edge.from];
