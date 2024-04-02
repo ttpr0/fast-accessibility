@@ -204,7 +204,7 @@ class Graph:
         partition_obj = PartitionObject_new(partition)
         self._partitions[name] = partition_obj
 
-    def add_contraction(self, name: str, weight: str, partition: str | None = None):
+    def add_contraction(self, name: str, weight: str, partition: str | None = None, method: str = "phast"):
         """Contracts graph with given weighting using 2*ED + CN + EC + 5*L contraction order.
 
         If partition is specified cells will be contracted individually (similar to isophast).
@@ -217,10 +217,20 @@ class Graph:
             raise ValueError("contraction can only be build for static weightings without turn costs")
         if partition is not None:
             p = self._get_partition(partition)
-            ch = _pyaccess_ext.prepare_ch2(b, w, p)
+            match method:
+                case "phast":
+                    ch = _pyaccess_ext.prepare_ch_tiled(b, w, p)
+                case _:
+                    raise ValueError(f"contraction method {method} not implemented for partitioned graphs")
         else:
             p = None
-            ch = _pyaccess_ext.prepare_ch(b, w)
+            match method:
+                case "phast":
+                    ch = _pyaccess_ext.prepare_ch_phast(b, w)
+                case "simple":
+                    ch = _pyaccess_ext.prepare_ch_simple(b, w)
+                case _:
+                    raise ValueError(f"contraction method {method} not implemented")
         id_mapping = _pyaccess_ext.new_id_mapping(b.node_count())
         ch_obj = CHObject_new(weight, ch, id_mapping, partition)
         self._ch[name] = ch_obj

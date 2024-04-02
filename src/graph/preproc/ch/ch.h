@@ -86,7 +86,7 @@ std::shared_ptr<CHData> calc_contraction(const GraphBase& base, const Weighting&
 // preprocessing methods
 //*******************************************
 
-// Computes contraction using 2*ED + CN + EC + 5*L with hop-limits.
+// Computes contraction using node-degree ordering.
 static std::shared_ptr<CHData> calc_simple_contraction(const GraphBase& base, const Weighting& weights)
 {
     return calc_contraction<SimpleOrdering>(base, weights, [](CHPreprocGraph& graph) { return SimpleOrdering(graph); });
