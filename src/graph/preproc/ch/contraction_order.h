@@ -275,7 +275,7 @@ struct GSPHASTOrdering
         this->node_priorities.resize(graph.nodeCount());
         for (int i = 0; i < graph.nodeCount(); i++) {
             if (this->is_border[i]) {
-                this->node_priorities[i] = 10000000000;
+                this->node_priorities[i] = 1000000000;
                 continue;
             }
             int prio = _compute_phast_priority(i, graph, this->flags, this->heap, this->in_neigbours, this->out_neigbours, this->contracted_neighbours, this->shortcut_edgecount,
@@ -420,7 +420,7 @@ struct PartialPHASTOrdering
         this->node_priorities.resize(graph.nodeCount());
         for (int i = 0; i < graph.nodeCount(); i++) {
             if (this->is_border[i]) {
-                this->node_priorities[i] = 10000000000;
+                this->node_priorities[i] = 1000000000;
                 continue;
             }
             int prio = _compute_phast_priority(i, graph, this->flags, this->heap, this->in_neigbours, this->out_neigbours, this->contracted_neighbours, this->shortcut_edgecount,

@@ -15,7 +15,9 @@ set(CMAKE_INSTALL_RPATH $ORIGIN)
 # find dependencies
 #***********************************
 
-find_package(Eigen3 3.3 REQUIRED)
+set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG RELEASE)
+
+find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 
 #***********************************
