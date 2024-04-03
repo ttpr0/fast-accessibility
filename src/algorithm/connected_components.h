@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "./bidirect_bfs.h"
+#include "../util/flags.h"
 
 // Group closely connected components.
 std::vector<int> connected_components(IGraph& graph)

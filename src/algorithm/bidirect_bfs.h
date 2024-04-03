@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../graph/graph.h"
+#include "../util/flags.h"
 
 struct BFSFlag
 {

@@ -6,7 +6,8 @@
 #include <vector>
 
 #include "../graph/graph.h"
-#include "./util.h"
+#include "../util/flags.h"
+#include "../util/pq_item.h"
 
 // computes one-to-all distances using forward-dijkstra
 void calcAllDijkstra(IGraph* g, int start, Flags<DistFlag>& flags)
