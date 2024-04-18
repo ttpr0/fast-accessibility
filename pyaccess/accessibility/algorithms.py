@@ -1,0 +1,15 @@
+from enum import Enum
+
+
+class OneToManyType(Enum):
+    RANGE_DIJKSTRA = 0
+    RANGE_PHAST = 1
+    RANGE_RPHAST = 3
+    RANGE_RPHAST_GS = 4
+    GRASP = 5
+
+RANGE_DIJKSTRA = OneToManyType.RANGE_DIJKSTRA
+RANGE_PHAST = OneToManyType.RANGE_PHAST
+RANGE_RPHAST = OneToManyType.RANGE_RPHAST
+RANGE_RPHAST_GS = OneToManyType.RANGE_RPHAST_GS
+GRASP = OneToManyType.GRASP
