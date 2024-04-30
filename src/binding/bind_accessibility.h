@@ -15,6 +15,7 @@
 #include "../accessibility/matrix_query.h"
 #include "../accessibility/range_query.h"
 #include "../accessibility/reachability.h"
+#include "../accessibility/aggregation.h"
 #include "../graph/graph.h"
 #include "../solver/one_to_many/dijkstra.h"
 #include "../solver/one_to_many/grasp.h"
@@ -73,4 +74,15 @@ void bind_accessibility(nanobind::module_& m)
     m.def("calc_reachability", &calcReachability<GRASP<>>);
     m.def("calc_reachability", &calcReachability<RangeDijkstraTC<>>);
     m.def("calc_reachability", &calcReachability<TransitDijkstra>);
+
+    // closest functions
+    m.def("calc_aggregation", &calcAggregation<RangeDijkstra<>>);
+    m.def("calc_aggregation", &calcAggregation<RangePHAST<>>);
+    m.def("calc_aggregation", &calcAggregation<RangeRPHAST<>>);
+    m.def("calc_aggregation", &calcAggregation<RangeRPHAST2<>>);
+    m.def("calc_aggregation", &calcAggregation<RangePHASTGS>);
+    m.def("calc_aggregation", &calcAggregation<RangeRPHASTGS>);
+    m.def("calc_aggregation", &calcAggregation<GRASP<>>);
+    m.def("calc_aggregation", &calcAggregation<RangeDijkstraTC<>>);
+    m.def("calc_aggregation", &calcAggregation<TransitDijkstra>);
 }

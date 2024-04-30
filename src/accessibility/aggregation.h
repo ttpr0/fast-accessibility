@@ -13,7 +13,7 @@
 #include "./distance_decay/decay.h"
 
 template <class S>
-Vector<float> calcReachability(S& alg, std::vector<DSnap>& dem_nodes, std::vector<DSnap>& sup_nodes, IDistanceDecay& decay)
+Vector<float> calcAggregation(S& alg, std::vector<DSnap>& dem_nodes, std::vector<DSnap>& sup_nodes, VectorView<int> sup_weights, IDistanceDecay& decay)
 {
     int max_dist = decay.get_max_distance();
 
@@ -31,11 +31,9 @@ Vector<float> calcReachability(S& alg, std::vector<DSnap>& dem_nodes, std::vecto
         alg.build();
     }
 
-    // create array containing accessibility results
-    std::vector<std::tuple<int, int>> closest(dem_nodes.size());
-    for (int i = 0; i < closest.size(); i++) {
-        closest[i] = std::make_tuple(10000000, -1);
-    }
+    // create array containing aggregation results
+    Vector<float> access(dem_nodes.size());
+    access.setZero();
 
     auto state = alg.makeComputeState();
     std::mutex m;
@@ -50,7 +48,7 @@ Vector<float> calcReachability(S& alg, std::vector<DSnap>& dem_nodes, std::vecto
         // compute distances
         alg.compute(s_snap, state);
 
-        // update closest supplies
+        // update aggregated supplies
         m.lock();
         for (int j = 0; j < dem_nodes.size(); j++) {
             auto d_snap = dem_nodes[j];
@@ -61,24 +59,10 @@ Vector<float> calcReachability(S& alg, std::vector<DSnap>& dem_nodes, std::vecto
             if (d_dist > max_dist) {
                 continue;
             }
-            auto [c_dist, c_id] = closest[i];
-            if (d_dist < c_dist || c_id == -1) {
-                closest[j] = std::make_tuple(d_dist, i);
-            }
+            float distance_decay = decay.get_distance_weight(d_dist);
+            access(i) += distance_decay * sup_weights(i);
         }
         m.unlock();
-    }
-
-    // create array containing reachability results
-    Vector<float> access(dem_nodes.size());
-    for (int i = 0; i < access.rows(); i++) {
-        auto [c_dist, c_id] = closest[i];
-        if (c_id == -1) {
-            access(i) = -9999;
-        } else {
-            float distance_decay = decay.get_distance_weight(c_dist);
-            access(i) = distance_decay;
-        }
     }
     return access;
 }
