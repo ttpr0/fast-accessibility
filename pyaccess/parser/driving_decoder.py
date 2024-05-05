@@ -79,17 +79,17 @@ def _get_speed(tags: Mapping[str, str], streettype: RoadType) -> int:
                 speed = 20
         speed = int(0.9 * speed)
     elif "zone:maxspeed" in tags:
-        templimit_zone = tags.get("zone:maxspeed", "")
-        templimit = templimit_zone.split(":")[1]
         try:
+            templimit_zone = tags.get("zone:maxspeed", "")
+            templimit = templimit_zone.split(":")[1]
             speed = int(templimit)
         except:
             speed = 20
         speed = int(0.9 * speed)
     elif "zone:traffic" in tags:
-        traffic_zone = tags.get("zone:traffic", "")
-        zone = traffic_zone.split(":")[1]
         try:
+            traffic_zone = tags.get("zone:traffic", "")
+            zone = traffic_zone.split(":")[1]
             match zone:
                 case "motorway": speed = 130
                 case "rural": speed = 100
