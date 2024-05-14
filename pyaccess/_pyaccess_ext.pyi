@@ -1304,6 +1304,26 @@ class Partition:
     def get_node_tile(self, arg: int, /) -> int:
         ...
     
+class PiecewiseLinearDecay(pyaccess._pyaccess_ext.IDistanceDecay):
+    """
+    None
+    """
+
+    def __init__(self, arg0: pyaccess._pyaccess_ext.IntVector, arg1: pyaccess._pyaccess_ext.FloatVector, /) -> None:
+        ...
+    
+    def get_distance_weight(self, distance: int) -> float:
+        """
+        Computes the decayed weight (range [0, 1]) for the given distance.
+        """
+        ...
+    
+    def get_max_distance(self) -> int:
+        """
+        Maximum distance to give distance-weight greater than 0.
+        """
+        ...
+    
 class PolynomDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None

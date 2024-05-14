@@ -285,6 +285,31 @@ class Graph:
         t = self._transit[transit]
         t.add_weighting(name, weights)
 
+    def has_weighting(self, name: str) -> bool:
+        return name in self._weights
+
+    def has_partition(self, name: str) -> bool:
+        return name in self._partitions
+    
+    def has_ch(self, name: str) -> bool:
+        return name in self._ch
+
+    def has_overlay(self, name: str) -> bool:
+        return name in self._tiled
+
+    def has_public_transit(self, name: str) -> bool:
+        return name in self._transit
+
+    def has_transit_weighting(self, name: str, transit: str) -> bool:
+        if transit not in self._transit:
+            return False
+        t = self._transit[transit]
+        try:
+            t.get_weighting(name)
+            return True
+        except:
+            return False
+
     def remove_weighting(self, name: str):
         """Removes and deletes a weighting and all dependant contractions and overlays.
         """

@@ -70,3 +70,18 @@ def polynomial_decay(max_dist: int, koefficients: list[float]) -> _pyaccess_ext.
     if max_dist <= 0:
         raise ValueError("invalid max distance")
     return _pyaccess_ext.PolynomDecay(max_dist, _pyaccess_ext.FloatVector(koefficients))
+
+def piecewise_linear_decay(ranges: list[int], factors: list[float]) -> _pyaccess_ext.PiecewiseLinearDecay:
+    """Creates a piecewise-linear distance weighting from the given ranges and factors.
+
+    Linear functions are build to interpolate between the given ranges and corresponding factors.
+    """
+    if len(ranges) != len(factors):
+        raise ValueError("invalid ranges and factors")
+    combinded = list(zip(ranges, factors))
+    combinded.sort(key=lambda x: x[0])
+    if combinded[0][0] <= 0:
+        raise ValueError("invalid ranges and factors")
+    ranges = [x[0] for x in combinded]
+    factors = [x[1] for x in combinded]
+    return _pyaccess_ext.PiecewiseLinearDecay(_pyaccess_ext.IntVector(ranges), _pyaccess_ext.FloatVector(factors))

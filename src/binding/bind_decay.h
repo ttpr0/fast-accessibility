@@ -20,6 +20,7 @@
 #include "../accessibility/distance_decay/kernel_density_decay.h"
 #include "../accessibility/distance_decay/linear_decay.h"
 #include "../accessibility/distance_decay/polynom_decay.h"
+#include "../accessibility/distance_decay/piecewise_linear_decay.h"
 
 void bind_decay(nanobind::module_& m)
 {
@@ -58,4 +59,7 @@ void bind_decay(nanobind::module_& m)
 
     auto polynom_decay = py::class_<PolynomDecay, IDistanceDecay>(m, "PolynomDecay");
     polynom_decay.def(py::init<int, std::vector<float>>());
+
+    auto piecewise_linear_decay = py::class_<PiecewiseLinearDecay, IDistanceDecay>(m, "PiecewiseLinearDecay");
+    piecewise_linear_decay.def(py::init<std::vector<int>, std::vector<float>>());
 }
