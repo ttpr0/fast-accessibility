@@ -1,7 +1,8 @@
 import math
-from typing import Mapping
+from typing import Mapping, Any
+from shapely import Point, LineString
 
-from .._pyaccess_ext import RoadType
+from .util import haversine_length
 
 road_types = {
     "footway", "path", "steps", "pedestrian", "living_street", "track", "residential", "service",
@@ -18,8 +19,26 @@ class WalkingDecoder:
             return False
         return tags.get("highway") in road_types
 
-    def decode_node(self, tags: Mapping[str, str]) -> int:
-        return 0
+    def is_oneway(self, tags: Mapping[str, str]) -> bool:
+        return False
 
-    def decode_way(self, tags: Mapping[str, str]) -> tuple[int, RoadType, bool]:
-        return 4, RoadType.UNCLASSIFIED, False
+    def get_node_attributes(self) -> dict[str, Any]:
+        return {"type": "int8"}
+
+    def decode_node_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
+        return {"type": 0}
+
+    def finalize_node(self, attr: dict[str, Any], geom: Point) -> None:
+        return
+
+    def get_edge_attributes(self) -> dict[str, Any]:
+        return {
+            "speed": "int8",
+            "length": "float32",
+        }
+
+    def decode_edge_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
+        return {"speed": 4}
+
+    def finalize_edge(self, attr: dict[str, Any], geom: LineString) -> None:
+        attr["length"] = haversine_length(geom)

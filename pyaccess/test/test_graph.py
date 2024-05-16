@@ -2,7 +2,7 @@
 
 from .. import _pyaccess_ext
 from ..builder import GraphBuilder, new_weighting, new_tc_weighting
-from ..accessibility import calc_range, OneToManyType
+from ..accessibility import calc_range, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
 
 nodes = [
     (3, 1),
@@ -55,8 +55,8 @@ def test_shortest_path():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -97,8 +97,8 @@ def test_shortest_path_tc():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -142,8 +142,8 @@ def test_contraction():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -170,7 +170,7 @@ def test_contraction():
     ]
 
     # compute shortest paths using RangePHAST
-    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=OneToManyType.RANGE_PHAST, ch="ch")
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=RANGE_PHAST, ch="ch")
 
     assert len(ranges) == 5
     assert ranges[0] == 4
@@ -180,7 +180,7 @@ def test_contraction():
     assert ranges[4] == 8
 
     # compute shortest paths using RangeRPHAST
-    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=OneToManyType.RANGE_RPHAST, ch="ch")
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=RANGE_RPHAST, ch="ch")
 
     assert len(ranges) == 5
     assert ranges[0] == 4
@@ -197,8 +197,8 @@ def test_contraction_2():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -226,7 +226,7 @@ def test_contraction_2():
     ]
 
     # compute shortest paths using RangePHAST+GS
-    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=OneToManyType.RANGE_RPHAST_GS, ch="ch")
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=RANGE_RPHAST_GS, ch="ch")
 
     assert len(ranges) == 5
     assert ranges[0] == 4
@@ -243,8 +243,8 @@ def test_partition():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -272,7 +272,7 @@ def test_partition():
     ]
 
     # compute shortest paths using GRASP
-    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=OneToManyType.GRASP, overlay="grasp")
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=GRASP, overlay="grasp")
 
     assert len(ranges) == 5
     assert ranges[0] == 4
@@ -289,8 +289,8 @@ def test_partition_2():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -318,7 +318,7 @@ def test_partition_2():
     ]
 
     # compute shortest paths using GRASP
-    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=OneToManyType.GRASP, overlay="isophast")
+    ranges = calc_range(graph, sup_point, dem_points, max_range=10, algorithm=GRASP, overlay="isophast")
 
     assert len(ranges) == 5
     assert ranges[0] == 4

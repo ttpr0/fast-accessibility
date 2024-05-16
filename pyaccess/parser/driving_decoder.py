@@ -1,7 +1,7 @@
-import math
-from typing import Mapping
+from typing import Mapping, Any
+from shapely import Point, LineString
 
-from .._pyaccess_ext import RoadType
+from .util import haversine_length
 
 road_types = {
     "motorway","motorway_link","trunk","trunk_link",
@@ -18,43 +18,53 @@ class DrivingDecoder:
             return False
         return tags.get("highway") in road_types
 
-    def decode_node(self, tags: Mapping[str, str]) -> int:
-        return 0
+    def is_oneway(self, tags: Mapping[str, str]) -> bool:
+        str_type = _get_type(tags)
+        oneway = _is_oneway(tags, str_type)
+        return oneway
 
-    def decode_way(self, tags: Mapping[str, str]) -> tuple[int, RoadType, bool]:
+    def get_node_attributes(self) -> dict[str, Any]:
+        return {"type": "int8"}
+
+    def decode_node_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
+        return {"type": 0}
+    
+    def finalize_node(self, attr: dict[str, Any], geom: Point) -> None:
+        return
+
+    def get_edge_attributes(self) -> dict[str, Any]:
+        return {
+            "speed": "int8",
+            "stree_type": ("motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "residential", "living_street", "unclassified", "road", "track"),
+            "length": "float32",
+        }
+
+    def decode_edge_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
         str_type = _get_type(tags)
         speed = _get_speed(tags, str_type)
-        oneway = _is_oneway(tags, str_type)
-        return speed, str_type, oneway
+        return {
+            "speed": speed,
+            "stree_type": str_type,
+        }
 
-def _is_oneway(tags: Mapping[str, str], str_type: RoadType) -> bool:
-    if str_type == RoadType.MOTORWAY or str_type == RoadType.TRUNK or str_type == RoadType.MOTORWAY_LINK or str_type == RoadType.TRUNK_LINK:
+    def finalize_edge(self, attr: dict[str, Any], geom: LineString) -> None:
+        attr["length"] = haversine_length(geom)
+
+def _is_oneway(tags: Mapping[str, str], str_type: str) -> bool:
+    if str_type == "motorway" or str_type == "trunk" or str_type == "motorway_link" or str_type == "trunk_link":
         return True
     oneway = tags.get("oneway", "")
     if oneway == "yes":
         return True
     return False
 
-def _get_type(tags: Mapping[str, str]) -> RoadType:
+def _get_type(tags: Mapping[str, str]) -> str:
     type = tags.get("highway", "")
-    if type == "motorway": return RoadType.MOTORWAY
-    if type == "motorway_link": return RoadType.MOTORWAY_LINK
-    if type == "trunk": return RoadType.TRUNK
-    if type == "trunk_link": return RoadType.TRUNK_LINK
-    if type == "primary": return RoadType.PRIMARY
-    if type == "primary_link": return RoadType.PRIMARY_LINK
-    if type == "secondary": return RoadType.SECONDARY
-    if type == "secondary_link": return RoadType.SECONDARY_LINK
-    if type == "tertiary": return RoadType.TERTIARY
-    if type == "tertiary_link": return RoadType.TERTIARY_LINK
-    if type == "residential": return RoadType.RESIDENTIAL
-    if type == "living_street": return RoadType.LIVING_STREET
-    if type == "unclassified": return RoadType.UNCLASSIFIED
-    if type == "road": return RoadType.ROAD
-    if type == "track": return RoadType.TRACK
-    return RoadType.ROAD
+    if type in ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "residential", "living_street", "unclassified", "road", "track"]:
+        return type
+    return "road"
 
-def _get_speed(tags: Mapping[str, str], streettype: RoadType) -> int:
+def _get_speed(tags: Mapping[str, str], streettype: str) -> int:
     tracktype = tags.get("tracktype", "")
     surface = tags.get("surface", "")
     speed = 0
@@ -102,31 +112,31 @@ def _get_speed(tags: Mapping[str, str], streettype: RoadType) -> int:
     else:
         # is templimit not set take maxspeed from streettype
         match streettype:
-            case RoadType.MOTORWAY:
+            case "motorway":
                 speed = 100
-            case RoadType.TRUNK:
+            case "trunk":
                 speed = 85
-            case RoadType.MOTORWAY_LINK, RoadType.TRUNK_LINK:
+            case "motorway_link" | "trunk_link":
                 speed = 60
-            case RoadType.PRIMARY:
+            case "primary":
                 speed = 65
-            case RoadType.SECONDARY:
+            case "secondary":
                 speed = 60
-            case RoadType.TERTIARY:
+            case "tertiary":
                 speed = 50
-            case RoadType.PRIMARY_LINK, RoadType.SECONDARY_LINK:
+            case "primary_link" | "secondary_link":
                 speed = 50
-            case RoadType.TERTIARY_LINK:
+            case "tertiary_link":
                 speed = 40
-            case RoadType.UNCLASSIFIED:
+            case "unclassified":
                 speed = 30
-            case RoadType.RESIDENTIAL:
+            case "residential":
                 speed = 30
-            case RoadType.LIVING_STREET:
+            case "living_street":
                 speed = 10
-            case RoadType.ROAD:
+            case "road":
                 speed = 20
-            case RoadType.TRACK:
+            case "track":
                 if tracktype == "":
                     speed = 15
                 else:
@@ -147,22 +157,22 @@ def _get_speed(tags: Mapping[str, str], streettype: RoadType) -> int:
                 speed = 20
     # reduce speed to maximum of given surface
     match surface:
-        case "cement", "compacted":
+        case "cement" | "compacted":
             if speed > 80:
                 speed = 80
         case "fine_gravel":
             if speed > 60:
                 speed = 60
-        case "paving_stones", "metal", "bricks":
+        case "paving_stones" | "metal" | "bricks":
             if speed > 40:
                 speed = 40
-        case "grass", "wood", "sett", "grass_paver", "gravel", "unpaved", "ground", "dirt", "pebblestone", "tartan":
+        case "grass" | "wood" | "sett" | "grass_paver" | "gravel" | "unpaved" | "ground" | "dirt" | "pebblestone" | "tartan":
             if speed > 30:
                 speed = 30
-        case "cobblestone", "clay":
+        case "cobblestone" | "clay":
             if speed > 20:
                 speed = 20
-        case "earth", "stone", "rocky", "sand":
+        case "earth" | "stone" | "rocky" | "sand":
             if speed > 15:
                 speed = 15
         case "mud":

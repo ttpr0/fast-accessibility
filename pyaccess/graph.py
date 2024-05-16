@@ -3,6 +3,7 @@ from typing import Any
 import os
 import json
 import numpy as np
+import geopandas as gpd
 
 from . import _pyaccess_ext
 from .components import Ordering
@@ -48,6 +49,9 @@ class Graph:
         """
         b = self._get_base()
         i = self._get_index()
+        # calling functions directly on _base is ok here since it will always be loaded before
+        na = self._base.get_node_attr()
+        ea = self._base.get_edge_attr()
         w = None
         p = None
         im = None
@@ -75,7 +79,7 @@ class Graph:
             w = self._get_weight(self._get_transit_base_weight(transit))
             if transit_weight is not None:
                 tw = self._get_transit_weighting(transit, transit_weight)
-        return Explorer(b, i, w, p, im, c, o, t, tw)
+        return Explorer(b, i, na, ea, w, p, im, c, o, t, tw)
 
     def store(self, name: str | None = None, path: str | None = None):
         """Stores the graph into the given path.
@@ -171,17 +175,17 @@ class Graph:
                 transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
         self._transit = {}
 
-    def add_default_weighting(self, name: str = "default"):
-        """Adds a new default weighting to the graph.
+    # def add_default_weighting(self, name: str = "default"):
+    #     """Adds a new default weighting to the graph.
 
-        Weights are the time cost of traversing a street (computed from edges maxspeed and roadtype).
-        """
-        if name in self._weights:
-            raise ValueError(f"weighting {name} already exists")
-        base = self._get_base()
-        weight = _pyaccess_ext.prepare_default_weighting(base)
-        weight_obj = WeightObject_new(weight)
-        self._weights[name] = weight_obj
+    #     Weights are the time cost of traversing a street (computed from edges maxspeed and roadtype).
+    #     """
+    #     if name in self._weights:
+    #         raise ValueError(f"weighting {name} already exists")
+    #     base = self._get_base()
+    #     weight = _pyaccess_ext.prepare_default_weighting(base)
+    #     weight_obj = WeightObject_new(weight)
+    #     self._weights[name] = weight_obj
 
     def add_weighting(self, name: str, weights: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting):
         """Adds a new weighting to the graph.
@@ -199,7 +203,7 @@ class Graph:
         if name in self._partitions:
             raise ValueError(f"partition {name} already exists")
         base = self._get_base()
-        weight = _pyaccess_ext.prepare_default_weighting(base)
+        weight = _pyaccess_ext.new_weighting(base)
         partition = _pyaccess_ext.prepare_partition(base, weight, cell_count)
         partition_obj = PartitionObject_new(partition)
         self._partitions[name] = partition_obj
@@ -540,12 +544,12 @@ class Graph:
             return i.get_closest_node(lon, lat, id_m)
         return i.get_closest_node(lon, lat)
 
-def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) -> Graph:
+def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector, node_attr: gpd.GeoDataFrame | None = None, edge_attr: gpd.GeoDataFrame | None = None) -> Graph:
     """Creates a new graph from nodes and edges.
 
     Use graph.store(...) to store and load_graph() to load a graph from a directory.
     """
-    base = BaseObject_new(nodes, edges)
+    base = BaseObject_new(nodes, edges, node_attr, edge_attr)
     return Graph(None, None, base, {}, {}, {}, {}, {})
 
 def load_graph(name: str, path: str) -> Graph:

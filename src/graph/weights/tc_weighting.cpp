@@ -62,19 +62,3 @@ std::shared_ptr<TCWeighting> build_tc_weighting(const GraphBase& base)
 
     return std::make_shared<TCWeighting>(std::move(edge_weights), std::move(edge_indices), std::move(turn_refs), std::move(turn_costs));
 }
-
-std::shared_ptr<TCWeighting> build_default_tc_weighting(const GraphBase& base)
-{
-    auto tc_weight = build_tc_weighting(base);
-
-    for (int i = 0; i < base.edgeCount(); i++) {
-        auto edge = base.edges[i];
-        int w = edge.length * 3.6 / edge.maxspeed;
-        if (w < 1) {
-            w = 1;
-        }
-        tc_weight->set_edge_weight(i, w);
-    }
-
-    return std::move(tc_weight);
-}

@@ -30,10 +30,6 @@ std::shared_ptr<GraphBase> _remove_nodes(const GraphBase& base, const std::vecto
         new_edges.push_back({
             .nodeA = mapping[edge.nodeA],
             .nodeB = mapping[edge.nodeB],
-            .type = edge.type,
-            .length = edge.length,
-            .maxspeed = edge.maxspeed,
-            .oneway = edge.oneway,
         });
     }
 
@@ -55,10 +51,6 @@ std::shared_ptr<GraphBase> _reorder_nodes(const GraphBase& base, const std::vect
         new_edges.push_back({
             .nodeA = mapping[edge.nodeA],
             .nodeB = mapping[edge.nodeB],
-            .type = edge.type,
-            .length = edge.length,
-            .maxspeed = edge.maxspeed,
-            .oneway = edge.oneway,
         });
     }
 

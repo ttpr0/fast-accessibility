@@ -9,7 +9,7 @@
 #include "../mod/graph_base_mod.h"
 #include "../weights/weighting.h"
 
-std::shared_ptr<GraphBase> remove_unconnected(std::shared_ptr<GraphBase> base)
+std::vector<int> extract_unconnected(std::shared_ptr<GraphBase> base)
 {
     auto weight = build_weighting(*base);
     Graph graph = build_base_graph(base, weight);
@@ -47,5 +47,5 @@ std::shared_ptr<GraphBase> remove_unconnected(std::shared_ptr<GraphBase> base)
         }
     }
 
-    return _remove_nodes(*base, remove);
+    return remove;
 }

@@ -1,12 +1,13 @@
 import osmium as osm
-import math
-from typing import Protocol, Mapping
+from typing import Protocol, Mapping, Any
+from shapely import Point, LineString
 
 from .driving_decoder import DrivingDecoder
 from .walking_decoder import WalkingDecoder
 from .cycling_decoder import CyclingDecoder
-from .._pyaccess_ext import Node as GraphNode, Edge as GraphEdge, Coord, CoordVector, NodeVector, EdgeVector, RoadType
-from ..graph import Graph, new_graph
+from .._pyaccess_ext import Node as GraphNode, Edge as GraphEdge, Coord, CoordVector, NodeVector, EdgeVector
+from ..graph import Graph
+from ..builder import GraphBuilder
 
 
 #***************************************************
@@ -18,24 +19,50 @@ class IOSMDecoder(Protocol):
         """Checks if the road is valid for the profile used.
         """
         ...
-    def decode_node(self, tags: Mapping[str, str]) -> int:
+    def is_oneway(self, tags: Mapping[str, str]) -> bool:
+        """Checks if the road is oneway.
+        """
+        ...
+    def get_node_attributes(self) -> dict[str, Any]:
+        """Returns node attributes tags will be decoded to.
+
+        Returns:
+            node attributes as dictionary name->dtype
+        """
+        ...
+    def decode_node_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
         """Decodes node attributes from osm tags.
 
         Args:
             tags: osm tags
 
         Returns:
-            nodetype
+            node attributes
         """
         ...
-    def decode_way(self, tags: Mapping[str, str]) -> tuple[int, RoadType, bool]:
-        """Decodes way attributes from osm tags.
+    def finalize_node(self, attr: dict[str, Any], geom: Point) -> None:
+        """Finalizes node attributes after decoding.
+        """
+        ...
+    def get_edge_attributes(self) -> dict[str, Any]:
+        """Returns edge attributes tags will be decoded to.
+
+        Returns:
+            edge attributes as dictionary name->dtype
+        """
+        ...
+    def decode_edge_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
+        """Decodes edge attributes from osm tags.
 
         Args:
             tags: osm tags
 
         Returns:
-            (speed, roadtype, oneway)
+            edge attributes
+        """
+        ...
+    def finalize_edge(self, attr: dict[str, Any], geom: LineString) -> None:
+        """Finalizes edge attributes after decoding.
         """
         ...
 
@@ -43,38 +70,29 @@ class IOSMDecoder(Protocol):
 # utility classes
 #***************************************************
 
-class Point:
-    __slots__ = "lon", "lat"
-    def __init__(self, lon: float, lat: float):
-        self.lon: float = lon
-        self.lat: float = lat
-
-
 class OsmNode:
     __slots__ = "point", "count"
-    def __init__(self, point: Point, count: int):
-        self.point: Point = point
+    def __init__(self, point: Coord, count: int):
+        self.point: Coord = point
         self.count: int = count
 
 
 class Node:
-    __slots__ = "point", "type", "edges"
-    def __init__(self, point, edges):
-        self.point: Point = point
-        self.type = 0
-        self.edges: list[int] = edges
+    __slots__ = "point", "attr", "edges"
+    def __init__(self, point: Coord, attr: dict, edges: list[int]):
+        self.point = point
+        self.attr = attr
+        self.edges = edges
 
 
 class Edge():
-    __slots__ = "nodeA", "nodeB", "oneway", "type", "templimit", "length", "nodes"
+    __slots__ = "nodeA", "nodeB", "oneway", "attr", "points"
     def __init__(self):
         self.nodeA: int = 0
         self.nodeB: int = 0
         self.oneway: bool = False
-        self.type: RoadType = RoadType.ROAD
-        self.templimit: int = 0
-        self.length: float = 0
-        self.nodes: list[Point] = []
+        self.attr: dict = {}
+        self.points = CoordVector()
 
 #***************************************************
 # osm handlers
@@ -94,7 +112,7 @@ class InitWayHandler(osm.SimpleHandler):
         for i in range(0,l):
             ndref = w.nodes[i].ref
             if ndref not in self.osm_nodes:
-                self.osm_nodes[ndref] = OsmNode(Point(0,0), 1)
+                self.osm_nodes[ndref] = OsmNode(Coord(0.0,0.0), 1)
             else:
                 self.osm_nodes[ndref].count += 1
         self.osm_nodes[w.nodes[0].ref].count += 1
@@ -119,8 +137,8 @@ class NodeHandler(osm.SimpleHandler):
             print(self.c)
         on = self.osm_nodes[n.id]
         if on.count > 1:
-            type_ = self.decoder.decode_node(n.tags)
-            node = Node(Point(n.location.lon, n.location.lat), [])
+            attr = self.decoder.decode_node_tags(n.tags)
+            node = Node(Coord(n.location.lon, n.location.lat), attr, [])
             self.nodes.append(node)
             self.index_mapping[n.id] = self.i
             self.i += 1
@@ -152,15 +170,16 @@ class WayHandler(osm.SimpleHandler):
         for i in range(0,l):
             curr = w.nodes[i].ref
             on = self.osm_nodes[curr]
-            e.nodes.append(on.point)
+            e.points.append(on.point)
             if on.count > 1 and curr != start:
-                e.templimit, e.type, e.oneway = self.decoder.decode_way(w.tags)
+                e.attr = self.decoder.decode_edge_tags(w.tags)
+                e.oneway = self.decoder.is_oneway(w.tags)
                 e.nodeA = self.index_mapping[start]
                 e.nodeB = self.index_mapping[curr]
                 self.edges.append(e)
                 start = curr
                 e = Edge()
-                e.nodes.append(on.point)
+                e.points.append(on.point)
 
 #***************************************************
 # parser functions
@@ -179,64 +198,40 @@ def _parse_osm(file: str, decoder: IOSMDecoder, nodes: list[Node], edges: list[E
         nodes[e.nodeA].edges.append(i)
         nodes[e.nodeB].edges.append(i)
 
-def _calc_edge_weights(edges: list[Edge]):
-    for e in edges:
-        e.length = _haversine_length(e.nodes)
-
-def _haversine_length(points: list[Point], r: float = 6365000) -> float:
-    """Calculate the length of given geometry on a sphere.
-
-    Args:
-        points: elements must contain lon and lat attribute
-        r: radius, default Earth
-
-    Returns:
-        length of given geometry
-    """
-    length = 0
-    for i in range (0, len(points)-1):
-        lat1 = points[i].lat * math.pi / 180
-        lat2 = points[i+1].lat * math.pi / 180
-        lon1 = points[i].lon * math.pi / 180
-        lon2 = points[i+1].lon * math.pi / 180
-        a = math.sin((lat2-lat1)/2)**2
-        b = math.sin((lon2-lon1)/2)**2
-        length += 2*r*math.asin(math.sqrt(a+math.cos(lat1)*math.cos(lat2)*b))
-    return length
-
-def _create_graph_components(nodes: list[Node], edges: list[Edge]):
-    graph_nodes = NodeVector()
-    graph_edges = EdgeVector()
+def _create_graph(nodes: list[Node], edges: list[Edge], decoder: IOSMDecoder) -> Graph:
+    builder = GraphBuilder(decoder.get_node_attributes(), decoder.get_edge_attributes())
 
     for node in nodes:
-        g_node = GraphNode()
-        g_node.loc = Coord(node.point.lon, node.point.lat)
-        graph_nodes.append(g_node)
+        geom = Point(node.point.lon, node.point.lat)
+        decoder.finalize_node(node.attr, geom)
+        builder.add_node(geom, node.attr)
 
     for edge in edges:
-        graph_edges.append(GraphEdge(edge.nodeA, edge.nodeB, edge.type, edge.length, edge.templimit))
+        geom = LineString([(edge.points[i].lon, edge.points[i].lat) for i in range(len(edge.points))])
+        decoder.finalize_edge(edge.attr, geom)
+        builder.add_edge(edge.nodeA, edge.nodeB, geom, edge.attr)
         if not edge.oneway:
-            graph_edges.append(GraphEdge(edge.nodeB, edge.nodeA, edge.type, edge.length, edge.templimit))
+            builder.add_edge(edge.nodeB, edge.nodeA, geom, edge.attr)
     
-    return graph_nodes, graph_edges
+    return builder.build_graph()
 
-def parse_osm(file: str, profile: str = "driving") -> Graph:
+def parse_osm(file: str, profile: str | IOSMDecoder = "driving") -> Graph:
     nodes = []
     edges = []
     index_mapping = {}
-    match profile:
-        case "driving":
-            decoder = DrivingDecoder()
-        case "walking":
-            decoder = WalkingDecoder()
-        case "cycling":
-            decoder = CyclingDecoder()
-        case _:
-            raise ValueError("unknown profile: " + profile)
+    if not isinstance(profile, str):
+        decoder = profile
+    else:
+        match profile:
+            case "driving":
+                decoder = DrivingDecoder()
+            case "walking":
+                decoder = WalkingDecoder()
+            case "cycling":
+                decoder = CyclingDecoder()
+            case _:
+                raise ValueError("unknown profile: " + profile)
     _parse_osm(file, decoder, nodes, edges, index_mapping)
     print("edges: ", len(edges), ", nodes: ", len(nodes))
-    _calc_edge_weights(edges)
-    node_vec, edge_vec = _create_graph_components(nodes, edges)
-    graph =  new_graph(node_vec, edge_vec)
-    graph.add_default_weighting()
+    graph = _create_graph(nodes, edges, decoder)
     return graph

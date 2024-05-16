@@ -1,6 +1,6 @@
 from .. import _pyaccess_ext
 from ..builder import GraphBuilder, new_weighting
-from ..accessibility import calc_2sfca, calc_matrix, OneToManyType
+from ..accessibility import calc_2sfca, calc_matrix
 
 nodes = [
     (3, 1),
@@ -49,8 +49,8 @@ def test_matrix():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()
@@ -95,8 +95,8 @@ def test_enhanced_2sfca():
             builder.add_node(node)
         for edge in edges:
             node_a, node_b, length = edge
-            builder.add_edge(node_a, node_b, length, 30, _pyaccess_ext.RoadType.ROAD)
-            builder.add_edge(node_b, node_a, length, 30, _pyaccess_ext.RoadType.ROAD)
+            builder.add_edge(node_a, node_b)
+            builder.add_edge(node_b, node_a)
     except:
         raise AssertionError("Error while building graph")
     graph = builder.build_graph()

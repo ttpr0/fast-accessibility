@@ -19,7 +19,7 @@ class GTFSService:
     def get_days(self):
         return self.days
 
-def read_calendar(path: str) -> dict[int, GTFSService]:
+def _read_calendar(path: str) -> dict[int, GTFSService]:
     frame = pd.read_csv(f"{path}/calendar.txt")
     service_ids = frame["service_id"]
     monday = frame["monday"]
@@ -75,7 +75,7 @@ class GTFSStop:
     def get_lon_lat(self) -> tuple[float, float]:
         return self.lon, self.lat
 
-def read_stop_locations(path: str, filter: MultiPolygon) -> dict[int, GTFSStop]:
+def _read_stop_locations(path: str, filter: MultiPolygon) -> dict[int, GTFSStop]:
     stops_frame = pd.read_csv(f"{path}/stops.txt")
     stop_ids = stops_frame["stop_id"]
     stop_lon = stops_frame["stop_lon"]
@@ -166,7 +166,7 @@ class GTFSTrip:
     def order_stops(self):
         self.stops.sort(key=lambda x: x.sequence)
 
-def parse_time(time_str: str) -> int:
+def _parse_time(time_str: str) -> int:
     tokens = time_str.split(":")
     time = 0
     time += int(tokens[2])
@@ -174,7 +174,7 @@ def parse_time(time_str: str) -> int:
     time += int(tokens[0]) * 3600
     return time
 
-def read_trips(path: str, stops: dict[int, GTFSStop], services: dict[int, GTFSService]) -> dict[int, GTFSTrip]:
+def _read_trips(path: str, stops: dict[int, GTFSStop], services: dict[int, GTFSService]) -> dict[int, GTFSTrip]:
     trips: dict[int, GTFSTrip] = {}
     
     times_frame = pd.read_csv(f"{path}/stop_times.txt")
@@ -191,8 +191,8 @@ def read_trips(path: str, stops: dict[int, GTFSStop], services: dict[int, GTFSSe
         s_id = int(stop_ids[i])
         if s_id not in stops:
             continue
-        a_time = parse_time(arrival_times[i])
-        d_time = parse_time(departure_times[i])
+        a_time = _parse_time(arrival_times[i])
+        d_time = _parse_time(departure_times[i])
         s_seq = int(stop_sequences[i])
         trip.add_stop(GTFSTripStop(s_id, a_time, d_time, s_seq))
     for trip in trips.values():
@@ -216,7 +216,7 @@ def read_trips(path: str, stops: dict[int, GTFSStop], services: dict[int, GTFSSe
 
     return trips
 
-def build_transit_graph(trips: dict[int, GTFSTrip], stops: dict[int, GTFSStop], services: dict[int, GTFSService]) -> tuple[NodeVector, ConnectionVector, dict[str, list[list[tuple[int, int]]]]]:
+def _build_transit_graph(trips: dict[int, GTFSTrip], stops: dict[int, GTFSStop], services: dict[int, GTFSService]) -> tuple[NodeVector, ConnectionVector, dict[str, list[list[tuple[int, int]]]]]:
     stops_vec = NodeVector()
     stop_mapping = {}
     skiped = []
@@ -304,8 +304,8 @@ def parse_gtfs(gtfs_path: str, filter_polygon: str) -> tuple[NodeVector, Connect
         coords = features[0]["geometry"]["coordinates"]
         filter = Polygon(coords[0], coords[1:])
 
-    stops = read_stop_locations(gtfs_path, filter)
-    services = read_calendar(gtfs_path)
-    trips = read_trips(gtfs_path, stops, services)
+    stops = _read_stop_locations(gtfs_path, filter)
+    services = _read_calendar(gtfs_path)
+    trips = _read_trips(gtfs_path, stops, services)
 
-    return build_transit_graph(trips, stops, services)
+    return _build_transit_graph(trips, stops, services)

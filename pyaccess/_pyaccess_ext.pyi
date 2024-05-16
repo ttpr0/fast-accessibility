@@ -429,9 +429,9 @@ class Edge:
     """
 
     @overload
-    def __init__(self, arg0: int, arg1: int, arg2: pyaccess._pyaccess_ext.RoadType, arg3: float, arg4: int, /) -> None:
+    def __init__(self, arg0: int, arg1: int, /) -> None:
         """
-        __init__(self, arg0: int, arg1: int, arg2: pyaccess._pyaccess_ext.RoadType, arg3: float, arg4: int, /) -> None
+        __init__(self, arg0: int, arg1: int, /) -> None
         """
         ...
     
@@ -440,20 +440,6 @@ class Edge:
         """
         __init__(self) -> None
         """
-        ...
-    
-    @property
-    def length(self) -> float:
-        ...
-    @length.setter
-    def length(self, arg: float, /) -> None:
-        ...
-    
-    @property
-    def maxspeed(self) -> int:
-        ...
-    @maxspeed.setter
-    def maxspeed(self, arg: int, /) -> None:
         ...
     
     @property
@@ -468,13 +454,6 @@ class Edge:
         ...
     @node_b.setter
     def node_b(self, arg: int, /) -> None:
-        ...
-    
-    @property
-    def typ(self) -> pyaccess._pyaccess_ext.RoadType:
-        ...
-    @typ.setter
-    def typ(self, arg: pyaccess._pyaccess_ext.RoadType, /) -> None:
         ...
     
 class EdgeVector:
@@ -1166,7 +1145,18 @@ class Node:
     None
     """
 
+    @overload
+    def __init__(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None:
+        """
+        __init__(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None
+        """
+        ...
+    
+    @overload
     def __init__(self) -> None:
+        """
+        __init__(self) -> None
+        """
         ...
     
     @property
@@ -1174,13 +1164,6 @@ class Node:
         ...
     @loc.setter
     def loc(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None:
-        ...
-    
-    @property
-    def typ(self) -> str:
-        ...
-    @typ.setter
-    def typ(self, arg: str, /) -> None:
         ...
     
 class NodeVector:
@@ -1399,40 +1382,6 @@ class RangeRPHASTGS:
 
     def is_build(self) -> bool:
         ...
-    
-class RoadType(Enum):
-    """
-    <attribute '__doc__' of 'RoadType' objects>
-    """
-    LIVING_STREET: RoadType
-    
-    MOTORWAY: RoadType
-    
-    MOTORWAY_LINK: RoadType
-    
-    PRIMARY: RoadType
-    
-    PRIMARY_LINK: RoadType
-    
-    RESIDENTIAL: RoadType
-    
-    ROAD: RoadType
-    
-    SECONDARY: RoadType
-    
-    SECONDARY_LINK: RoadType
-    
-    TERTIARY: RoadType
-    
-    TERTIARY_LINK: RoadType
-    
-    TRACK: RoadType
-    
-    TRUNK: RoadType
-    
-    TRUNK_LINK: RoadType
-    
-    UNCLASSIFIED: RoadType
     
 class Shortcut:
     """
@@ -2112,6 +2061,9 @@ def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyacce
     """
     ...
 
+def calc_unconnected(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IntVector:
+    ...
+
 def load_cell_index(arg: str, /) -> pyaccess._pyaccess_ext.CellIndex:
     ...
 
@@ -2178,9 +2130,6 @@ def prepare_ch_simple(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._py
 def prepare_ch_tiled(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> pyaccess._pyaccess_ext.CHData:
     ...
 
-def prepare_default_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:
-    ...
-
 def prepare_isophast(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, arg2: pyaccess._pyaccess_ext.Partition, /) -> tuple[pyaccess._pyaccess_ext.TiledData, pyaccess._pyaccess_ext.CellIndex]:
     ...
 
@@ -2208,9 +2157,6 @@ def prepare_transit(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyac
     ...
 
 def remove_nodes(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.IntVector, /) -> pyaccess._pyaccess_ext.GraphBase:
-    ...
-
-def remove_unconnected(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.GraphBase:
     ...
 
 @overload

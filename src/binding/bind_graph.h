@@ -42,22 +42,22 @@ void bind_graph(nanobind::module_& m)
     //*******************************************
     // graph structs
     //*******************************************
-    auto road_type = py::enum_<RoadType>(m, "RoadType", "Type of road.");
-    road_type.value("MOTORWAY", RoadType::MOTORWAY);
-    road_type.value("MOTORWAY_LINK", RoadType::MOTORWAY_LINK);
-    road_type.value("TRUNK", RoadType::TRUNK);
-    road_type.value("TRUNK_LINK", RoadType::TRUNK_LINK);
-    road_type.value("PRIMARY", RoadType::PRIMARY);
-    road_type.value("PRIMARY_LINK", RoadType::PRIMARY_LINK);
-    road_type.value("SECONDARY", RoadType::SECONDARY);
-    road_type.value("SECONDARY_LINK", RoadType::SECONDARY_LINK);
-    road_type.value("TERTIARY", RoadType::TERTIARY);
-    road_type.value("TERTIARY_LINK", RoadType::TERTIARY_LINK);
-    road_type.value("RESIDENTIAL", RoadType::RESIDENTIAL);
-    road_type.value("LIVING_STREET", RoadType::LIVING_STREET);
-    road_type.value("UNCLASSIFIED", RoadType::UNCLASSIFIED);
-    road_type.value("ROAD", RoadType::ROAD);
-    road_type.value("TRACK", RoadType::TRACK);
+    // auto road_type = py::enum_<RoadType>(m, "RoadType", "Type of road.");
+    // road_type.value("MOTORWAY", RoadType::MOTORWAY);
+    // road_type.value("MOTORWAY_LINK", RoadType::MOTORWAY_LINK);
+    // road_type.value("TRUNK", RoadType::TRUNK);
+    // road_type.value("TRUNK_LINK", RoadType::TRUNK_LINK);
+    // road_type.value("PRIMARY", RoadType::PRIMARY);
+    // road_type.value("PRIMARY_LINK", RoadType::PRIMARY_LINK);
+    // road_type.value("SECONDARY", RoadType::SECONDARY);
+    // road_type.value("SECONDARY_LINK", RoadType::SECONDARY_LINK);
+    // road_type.value("TERTIARY", RoadType::TERTIARY);
+    // road_type.value("TERTIARY_LINK", RoadType::TERTIARY_LINK);
+    // road_type.value("RESIDENTIAL", RoadType::RESIDENTIAL);
+    // road_type.value("LIVING_STREET", RoadType::LIVING_STREET);
+    // road_type.value("UNCLASSIFIED", RoadType::UNCLASSIFIED);
+    // road_type.value("ROAD", RoadType::ROAD);
+    // road_type.value("TRACK", RoadType::TRACK);
 
     auto direction = py::enum_<Direction>(m, "Direction", "Incoming or outgoing edges.");
     direction.value("FORWARD", Direction::FORWARD);
@@ -66,22 +66,16 @@ void bind_graph(nanobind::module_& m)
 
     auto edge = py::class_<Edge>(m, "Edge");
     edge.def(py::init<>());
-    edge.def("__init__", [](Edge& e, int nodeA, int nodeB, RoadType typ, float length, int maxspeed) {
+    edge.def("__init__", [](Edge& e, int nodeA, int nodeB) {
         e.nodeA = nodeA;
         e.nodeB = nodeB;
-        e.type = typ;
-        e.length = length;
-        e.maxspeed = maxspeed;
     });
     edge.def_rw("node_a", &Edge::nodeA);
     edge.def_rw("node_b", &Edge::nodeB);
-    edge.def_rw("typ", &Edge::type);
-    edge.def_rw("length", &Edge::length);
-    edge.def_rw("maxspeed", &Edge::maxspeed);
 
     auto node = py::class_<Node>(m, "Node");
     node.def(py::init<>());
-    node.def_rw("typ", &Node::type);
+    node.def("__init__", [](Node& n, Coord loc) { n.location = loc; });
     node.def_rw("loc", &Node::location);
 
     auto shortcut = py::class_<Shortcut>(m, "Shortcut");
@@ -287,7 +281,6 @@ void bind_graph(nanobind::module_& m)
     m.def("new_weighting", &build_weighting);
     m.def("new_tc_weighting", &build_tc_weighting);
     m.def("new_transit_weighting", &build_transit_weighting);
-    m.def("prepare_default_weighting", &build_default_weighting);
     m.def("prepare_kdtree_index", &build_kdtree_index);
     m.def("prepare_balanced_kdtree_index", &build_balanced_kdtree_index);
     m.def("prepare_partition", &calc_partition);
@@ -304,7 +297,7 @@ void bind_graph(nanobind::module_& m)
     m.def("build_ch_graph_2", &build_ch_graph_2);
     m.def("build_transit_graph", &build_transit_graph);
 
-    m.def("remove_unconnected", &remove_unconnected);
+    m.def("calc_unconnected", &extract_unconnected);
     m.def("remove_nodes", &_remove_nodes);
     m.def("calc_dfs_order", &build_base_order);
     m.def("calc_ch_order", &build_ch_order);

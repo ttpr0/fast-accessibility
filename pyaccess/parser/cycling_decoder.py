@@ -1,7 +1,8 @@
 import math
-from typing import Mapping
+from typing import Mapping, Any
+from shapely import Point, LineString
 
-from .._pyaccess_ext import RoadType
+from .util import haversine_length
 
 road_types = {
     "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link",
@@ -28,33 +29,53 @@ class CyclingDecoder:
                 return False
         return tags.get("highway") in road_types
 
-    def decode_node(self, tags: Mapping[str, str]) -> int:
-        return 0
+    def is_oneway(self, tags: Mapping[str, str]) -> bool:
+        return False
 
-    def decode_way(self, tags: Mapping[str, str]) -> tuple[int, RoadType, bool]:
+    def get_node_attributes(self) -> dict[str, Any]:
+        return {"type": "int8"}
+
+    def decode_node_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
+        return {"type": 0}
+
+    def finalize_node(self, attr: dict[str, Any], geom: Point) -> None:
+        return
+
+    def get_edge_attributes(self) -> dict[str, Any]:
+        return {
+            "speed": "int8",
+            "length": "float32",
+        }
+
+    def decode_edge_tags(self, tags: Mapping[str, str]) -> dict[str, Any]:
         maxspeed = tags.get("maxspeed", "")
         highway = tags.get("highway", "")
         tracktype = tags.get("tracktype", "")
         surface = tags.get("surface", "")
         speed = _get_speed(maxspeed, highway, tracktype, surface)
-        return speed, RoadType.ROAD, False
+        return {
+            "speed": speed,
+        }
+
+    def finalize_edge(self, attr: dict[str, Any], geom: LineString) -> None:
+        attr["length"] = haversine_length(geom)
 
 def _get_speed(templimit: str, streettype: str, tracktype: str, surface: str) -> int:
     speed = 0
     # is templimit not set take maxspeed from streettype
     if templimit == "":
         match streettype:
-            case "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "cycleway", "residential":
+            case "trunk" | "trunk_link" | "primary" | "primary_link" | "secondary" | "secondary_link" | "tertiary" | "tertiary_link" | "cycleway" | "residential":
                 speed = 18
             case "unclassified":
                 speed = 16
             case "service":
                 speed = 14
-            case "living_street", "road":
+            case "living_street" | "road":
                 speed = 12
             case "path":
                 speed = 10
-            case "footway", "pedestrian":
+            case "footway" | "pedestrian":
                 speed = 6
             case "steps":
                 speed = 2
@@ -79,19 +100,19 @@ def _get_speed(templimit: str, streettype: str, tracktype: str, surface: str) ->
                 speed = 12
     # reduce speed to maximum of given surface
     match surface:
-        case "asphalt", "concrete", "fine_gravel", "paved":
+        case "asphalt" | "concrete" | "fine_gravel" | "paved":
             speed = min(speed, 18)
-        case "concrete:plates", "concrete:lanes", "compacted", "pebblestone":
+        case "concrete:plates" | "concrete:lanes" | "compacted" | "pebblestone":
             speed = min(speed, 16)
         case "unpaved":
             speed = min(speed, 18)
-        case "earth", "gravel", "ground", "paving_stones", "paving_stones:30", :
+        case "earth" | "gravel" | "ground" | "paving_stones" | "paving_stones:30":
             speed = min(speed, 12)
-        case "cobblestone:flattened", "dirt", "metal", "mud", "sett":
+        case "cobblestone:flattened" | "dirt" | "metal" | "mud" | "sett":
             speed = min(speed, 10)
-        case "cobblestone", "grass", "grass_paver", :
+        case "cobblestone" | "grass" | "grass_paver":
             speed = min(speed, 8)
-        case "cement", "clay", "sand", "salt", "unknown", "wood":
+        case "cement" | "clay" | "sand" | "salt" | "unknown" | "wood":
             speed = min(speed, 6)
         case "ice":
             speed = min(speed, 2)

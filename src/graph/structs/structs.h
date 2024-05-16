@@ -11,15 +11,10 @@ struct Edge
 {
     int nodeA;
     int nodeB;
-    RoadType type;
-    float length;
-    int maxspeed;
-    bool oneway;
 };
 
 struct Node
 {
-    char type;
     Coord location;
 };
 
@@ -79,17 +74,6 @@ struct Connection
     int stopA;
     int stopB;
     int route;
-};
-
-struct NodeAttributes {
-    char type;
-};
-
-struct EdgeAttributes {
-    RoadType type;
-    float length;
-    int maxspeed;
-    bool oneway;
 };
 
 // struct CHEdge
