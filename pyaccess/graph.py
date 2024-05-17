@@ -15,6 +15,10 @@ from .components.tiled import TiledObject, TiledObject_new, TiledObject_from_met
 from .components.transit import TransitObject, TransitObject_new, TransitObject_from_metadata
 from .explorer import Explorer
 
+#************************************************
+# Graph
+#************************************************
+
 class Graph:
     _base_path: str | None
     _name: str | None
@@ -49,9 +53,6 @@ class Graph:
         """
         b = self._get_base()
         i = self._get_index()
-        # calling functions directly on _base is ok here since it will always be loaded before
-        na = self._base.get_node_attr()
-        ea = self._base.get_edge_attr()
         w = None
         p = None
         im = None
@@ -79,7 +80,7 @@ class Graph:
             w = self._get_weight(self._get_transit_base_weight(transit))
             if transit_weight is not None:
                 tw = self._get_transit_weighting(transit, transit_weight)
-        return Explorer(b, i, na, ea, w, p, im, c, o, t, tw)
+        return Explorer(b, i, w, p, im, c, o, t, tw)
 
     def store(self, name: str | None = None, path: str | None = None):
         """Stores the graph into the given path.
@@ -143,16 +144,16 @@ class Graph:
             transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
         self._transit = {}
 
-    def optimize_base(self):
-        """removes all unconnected components and reorders graph with DFS-Ordering
+    def reorder_nodes(self, mapping: _pyaccess_ext.IntVector):
+        """reorders nodes in graph according to given mapping (old-id to new-id).
+
+        Note:
+            Currently all additional components (e.g. weights, partitions, etc.) are removed.
         """
-        change_stored = self._base_path is None or self._name is None
+        change_stored = self._base_path is not None and self._name is not None
         if not self._base.is_loaded():
             if change_stored:
                 self._base.load(f"{self._base_path}/{self._name}")
-        self._base.remove_unconnected()
-        base = self._base.get_base()
-        mapping = _pyaccess_ext.calc_dfs_order(base)
         self._base.reorder(Ordering.DFS_ORDERING, mapping)
         if change_stored:
             for w, o in self._weights.items():
@@ -175,17 +176,49 @@ class Graph:
                 transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
         self._transit = {}
 
-    # def add_default_weighting(self, name: str = "default"):
-    #     """Adds a new default weighting to the graph.
+    def remove_nodes(self, remove_nodes: _pyaccess_ext.IntVector):
+        """removes nodes and all connected edges from graph.
 
-    #     Weights are the time cost of traversing a street (computed from edges maxspeed and roadtype).
-    #     """
-    #     if name in self._weights:
-    #         raise ValueError(f"weighting {name} already exists")
-    #     base = self._get_base()
-    #     weight = _pyaccess_ext.prepare_default_weighting(base)
-    #     weight_obj = WeightObject_new(weight)
-    #     self._weights[name] = weight_obj
+        Note:
+            Currently all additional components (e.g. weights, partitions, etc.) are removed.
+        """
+        change_stored = self._base_path is not None and self._name is not None
+        if not self._base.is_loaded():
+            if change_stored:
+                self._base.load(f"{self._base_path}/{self._name}")
+        self._base.remove_nodes(remove_nodes)
+        if change_stored:
+            for w, o in self._weights.items():
+                o.delete(f"{self._base_path}/{self._name}_{w}")
+        self._weights = {}
+        if change_stored:
+            for p, o in self._partitions.items():
+                o.delete(f"{self._base_path}/{self._name}_partition_{p}")
+        self._partitions = {}
+        if change_stored:
+            for c, o in self._ch.items():
+                o.delete(f"{self._base_path}/{self._name}_ch_{c}")
+        self._ch = {}
+        if change_stored:
+            for t, o in self._tiled.items():
+                o.delete(f"{self._base_path}/{self._name}_tiled_{t}")
+        self._tiled = {}
+        if change_stored:
+            for name, transit in self._transit.items():
+                transit.delete(f"{self._base_path}/{self._name}_transit_{name}")
+        self._transit = {}
+
+    def add_default_weighting(self, name: str = "default"):
+        """Adds a new default weighting to the graph (edge-weight = 1).
+        """
+        if name in self._weights:
+            raise ValueError(f"weighting {name} already exists")
+        base = self._get_base()
+        weight = _pyaccess_ext.new_weighting(base)
+        for i in range(self._base.get_base().edge_count()):
+            weight.set_edge_weight(i, 1)
+        weight_obj = WeightObject_new(weight)
+        self._weights[name] = weight_obj
 
     def add_weighting(self, name: str, weights: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting):
         """Adds a new weighting to the graph.
@@ -544,12 +577,25 @@ class Graph:
             return i.get_closest_node(lon, lat, id_m)
         return i.get_closest_node(lon, lat)
 
-def new_graph(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector, node_attr: gpd.GeoDataFrame | None = None, edge_attr: gpd.GeoDataFrame | None = None) -> Graph:
+def new_graph(nodes: gpd.GeoDataFrame, edges: gpd.GeoDataFrame) -> Graph:
     """Creates a new graph from nodes and edges.
+
+    Note:
+        edges must be a GeoDataFrame with columns 'node_a' and 'node_b' referencing nodes.
 
     Use graph.store(...) to store and load_graph() to load a graph from a directory.
     """
-    base = BaseObject_new(nodes, edges, node_attr, edge_attr)
+    node_count = nodes.shape[0]
+    x = nodes.geometry.x.to_numpy(dtype=np.float32)
+    y = nodes.geometry.y.to_numpy(dtype=np.float32)
+    node_vec = _pyaccess_ext.NodeVector()
+    node_vec.from_array(x, y)
+    edge_count = edges.shape[0]
+    node_a = edges.node_a.to_numpy(dtype=np.int32)
+    node_b = edges.node_b.to_numpy(dtype=np.int32)
+    edge_vec = _pyaccess_ext.EdgeVector()
+    edge_vec.from_array(node_a, node_b)
+    base = BaseObject_new(node_vec, edge_vec)
     return Graph(None, None, base, {}, {}, {}, {}, {})
 
 def load_graph(name: str, path: str) -> Graph:
@@ -577,3 +623,32 @@ def load_graph(name: str, path: str) -> Graph:
     for t, m in meta["transit"].items():
         transit[t] = TransitObject_from_metadata(m)
     return Graph(path, name, base, weights, partitions, ch, tiled, transit)
+
+#************************************************
+# Weightings
+#************************************************
+
+def new_weighting(graph: Graph) -> _pyaccess_ext.Weighting:
+    """Creates a new weighting for the given graph.
+
+    Edge weights are initiallized to 1.
+    """
+    base = graph._get_base()
+    return _pyaccess_ext.new_weighting(base)
+
+def new_tc_weighting(graph: Graph) -> _pyaccess_ext.TCWeighting:
+    """Creates a new turn-cost weighting for the given graph.
+
+    Edge weights are initiallized to 1.
+    Turn costs are initiallized to 0.
+    """
+    base = graph._get_base()
+    return _pyaccess_ext.new_tc_weighting(base)
+
+def new_transit_weighting(graph: Graph, transit: str) -> _pyaccess_ext.TransitWeighting:
+    """Creates a new transit weighting for the given transit-overlay of the graph.
+
+    Schedules are empty by default.
+    """
+    data = graph._get_transit(transit)
+    return _pyaccess_ext.new_transit_weighting(data)

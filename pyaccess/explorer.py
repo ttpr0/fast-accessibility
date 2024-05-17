@@ -1,6 +1,4 @@
 from typing import Any
-import geopandas as gpd
-from shapely import Point, LineString
 
 from . import _pyaccess_ext
 
@@ -8,8 +6,6 @@ from . import _pyaccess_ext
 class Explorer:
     _base: _pyaccess_ext.GraphBase
     _index: _pyaccess_ext.IGraphIndex
-    _node_attr: gpd.GeoDataFrame | None
-    _edge_attr: gpd.GeoDataFrame | None
     _weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None
     _partition: _pyaccess_ext.Partition | None
     _id_mapping: _pyaccess_ext.IDMapping | None
@@ -18,11 +14,9 @@ class Explorer:
     _transit: _pyaccess_ext.TransitData | None
     _transit_weight: _pyaccess_ext.TransitWeighting | None
 
-    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex, node_attr: gpd.GeoDataFrame | None = None, edge_attr: gpd.GeoDataFrame | None = None, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None, transit: _pyaccess_ext.TransitData | None = None, transit_weight: _pyaccess_ext.TransitWeighting | None = None):
+    def __init__(self, base: _pyaccess_ext.GraphBase, index: _pyaccess_ext.IGraphIndex, weight: _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting | None = None, partition: _pyaccess_ext.Partition | None = None, id_mapping: _pyaccess_ext.IDMapping | None = None, ch: _pyaccess_ext.CHData | None = None, tiled: _pyaccess_ext.TiledData | None = None, transit: _pyaccess_ext.TransitData | None = None, transit_weight: _pyaccess_ext.TransitWeighting | None = None):
         self._base = base
         self._index = index
-        self._node_attr = node_attr
-        self._edge_attr = edge_attr
         self._weight = weight
         self._partition = partition
         self._id_mapping = id_mapping
@@ -46,28 +40,8 @@ class Explorer:
     def get_node(self, node_id: int) -> _pyaccess_ext.Node:
         return self._base.get_node(node_id)
 
-    def get_node_attribute(self, node_id: int, attribute: str) -> Any:
-        if self._node_attr is None:
-            raise ValueError("explorer does not contain node-level information")
-        return self._node_attr[attribute][node_id]
-
-    def get_node_geometry(self, node_id: int) -> Point:
-        if self._node_attr is None:
-            raise ValueError("explorer does not contain node-level information")
-        return self._node_attr.geometry[node_id]
-
     def get_edge(self, edge_id: int) -> _pyaccess_ext.Edge:
         return self._base.get_edge(edge_id)
-
-    def get_edge_attribute(self, edge_id: int, attribute: str) -> Any:
-        if self._edge_attr is None:
-            raise ValueError("explorer does not contain edge-level information")
-        return self._edge_attr[attribute][edge_id]
-
-    def get_edge_geometry(self, edge_id: int) -> LineString:
-        if self._edge_attr is None:
-            raise ValueError("explorer does not contain edge-level information")
-        return self._edge_attr.geometry[edge_id]
 
     def get_edge_weight(self, edge_id: int) -> int:
         if self._weight is None:

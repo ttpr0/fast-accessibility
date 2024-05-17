@@ -1,5 +1,8 @@
 import osmium as osm
 from typing import Protocol, Mapping, Any
+import geopandas as gpd
+import pandas as pd
+import numpy as np
 from shapely import Point, LineString
 
 from .driving_decoder import DrivingDecoder
@@ -198,24 +201,60 @@ def _parse_osm(file: str, decoder: IOSMDecoder, nodes: list[Node], edges: list[E
         nodes[e.nodeA].edges.append(i)
         nodes[e.nodeB].edges.append(i)
 
-def _create_graph(nodes: list[Node], edges: list[Edge], decoder: IOSMDecoder) -> Graph:
-    builder = GraphBuilder(decoder.get_node_attributes(), decoder.get_edge_attributes())
+def _create_graph(nodes: list[Node], edges: list[Edge], decoder: IOSMDecoder) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
+    node_cols = decoder.get_node_attributes()
+    node_attr = {attr: [] for attr in node_cols}
+    node_geom = []
+    edge_cols = decoder.get_edge_attributes()
+    edge_attr = {attr: [] for attr in edge_cols}
+    edge_attr["node_a"] = []
+    edge_attr["node_b"] = []
+    edge_geom = []
 
     for node in nodes:
         geom = Point(node.point.lon, node.point.lat)
         decoder.finalize_node(node.attr, geom)
-        builder.add_node(geom, node.attr)
+        for attr in node_cols:
+            node_attr[attr].append(node.attr[attr] if attr in node.attr else None)
+        node_geom.append(geom)
 
     for edge in edges:
         geom = LineString([(edge.points[i].lon, edge.points[i].lat) for i in range(len(edge.points))])
         decoder.finalize_edge(edge.attr, geom)
-        builder.add_edge(edge.nodeA, edge.nodeB, geom, edge.attr)
+        for attr in edge_cols:
+            edge_attr[attr].append(edge.attr[attr] if attr in edge.attr else None)
+        edge_attr["node_a"].append(edge.nodeA)
+        edge_attr["node_b"].append(edge.nodeB)
+        edge_geom.append(geom)
         if not edge.oneway:
-            builder.add_edge(edge.nodeB, edge.nodeA, geom, edge.attr)
-    
-    return builder.build_graph()
+            for attr in edge_cols:
+                edge_attr[attr].append(edge.attr[attr] if attr in edge.attr else None)
+            edge_attr["node_a"].append(edge.nodeB)
+            edge_attr["node_b"].append(edge.nodeA)
+            edge_geom.append(geom)
 
-def parse_osm(file: str, profile: str | IOSMDecoder = "driving") -> Graph:
+    edge_cols["node_a"] = "int32"
+    edge_cols["node_b"] = "int32"
+
+    data = {}
+    for col, dtype in node_cols.items():
+        if isinstance(dtype, tuple) or isinstance(dtype, list):
+            dtype = pd.CategoricalDtype(dtype) # type: ignore
+        data[col] = pd.Series(node_attr[col], dtype=dtype)
+    df = pd.DataFrame(data)
+    gs = gpd.GeoSeries(node_geom, crs="EPSG:4326") # type: ignore
+    node_df = gpd.GeoDataFrame(df, geometry=gs) # type: ignore
+    data = {}
+    for col, dtype in edge_cols.items():
+        if isinstance(dtype, tuple) or isinstance(dtype, list):
+            dtype = pd.CategoricalDtype(dtype) # type: ignore
+        data[col] = pd.Series(edge_attr[col], dtype=dtype)
+    df = pd.DataFrame(data)
+    gs = gpd.GeoSeries(edge_geom, crs="EPSG:4326") # type: ignore
+    edge_df = gpd.GeoDataFrame(df, geometry=gs) # type: ignore
+    return node_df, edge_df
+
+def parse_osm(file: str, profile: str | IOSMDecoder = "driving") -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     nodes = []
     edges = []
     index_mapping = {}
@@ -233,5 +272,5 @@ def parse_osm(file: str, profile: str | IOSMDecoder = "driving") -> Graph:
                 raise ValueError("unknown profile: " + profile)
     _parse_osm(file, decoder, nodes, edges, index_mapping)
     print("edges: ", len(edges), ", nodes: ", len(nodes))
-    graph = _create_graph(nodes, edges, decoder)
-    return graph
+    node_df, edge_df = _create_graph(nodes, edges, decoder)
+    return node_df, edge_df

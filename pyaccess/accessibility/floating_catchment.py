@@ -4,8 +4,8 @@ import pandas as pd
 
 from .. import _pyaccess_ext
 from ..graph import Graph
-from ..util import _build_graph, _build_ch_graph, _build_overlay_graph, _build_ch_graph_2, _build_transit_graph
-from ..util import transform_locations, transform_weights
+from ..method_util import _build_graph, _build_ch_graph, _build_overlay_graph, _build_ch_graph_2, _build_transit_graph
+from ..method_util import transform_locations, transform_weights
 from .algorithms import OneToManyType, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
 
 

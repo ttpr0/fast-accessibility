@@ -557,6 +557,9 @@ class EdgeVector:
         """
         ...
     
+    def from_array(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, /) -> None:
+        ...
+    
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Edge, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
@@ -1265,6 +1268,9 @@ class NodeVector:
         """
         Extend `self` by appending elements from `arg`.
         """
+        ...
+    
+    def from_array(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, /) -> None:
         ...
     
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Node, /) -> None:

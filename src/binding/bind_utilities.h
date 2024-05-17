@@ -7,6 +7,7 @@
 #include <nanobind/stl/bind_vector.h>
 
 #include "../graph/structs/geom.h"
+#include "../util/matrix.h"
 #include "../util/snap.h"
 
 NB_MAKE_OPAQUE(std::vector<int>);
@@ -29,14 +30,23 @@ void bind_utilities(nanobind::module_& m)
     py::bind_vector<vector<int>>(m, "IntVector");
     py::bind_vector<vector<float>>(m, "FloatVector");
     auto coord_vec = py::bind_vector<vector<Coord>>(m, "CoordVector");
-    coord_vec.def(
-        "append",
-        [](vector<Coord>& v, tuple<float, float> val) {
-            v.push_back(Coord{get<0>(val), get<1>(val)});
-        },
-        "Insert Coordinate with (lon, lat).");
-    py::bind_vector<vector<Node>>(m, "NodeVector");
-    py::bind_vector<vector<Edge>>(m, "EdgeVector");
+    coord_vec.def("append", [](vector<Coord>& v, tuple<float, float> val) { v.push_back(Coord{get<0>(val), get<1>(val)}); }, "Insert Coordinate with (lon, lat).");
+    auto node_vec = py::bind_vector<vector<Node>>(m, "NodeVector");
+    node_vec.def("from_array", [](vector<Node>& v, VectorView<float> lons, VectorView<float> lats) {
+        v.clear();
+        v.reserve(lons.size());
+        for (int i = 0; i < lons.size(); i++) {
+            v[i] = {Coord{lons[i], lats[i]}};
+        }
+    });
+    auto edge_vec = py::bind_vector<vector<Edge>>(m, "EdgeVector");
+    edge_vec.def("from_array", [](vector<Edge>& v, VectorView<int> nodes_a, VectorView<int> nodes_b) {
+        v.clear();
+        v.reserve(nodes_a.size());
+        for (int i = 0; i < nodes_a.size(); i++) {
+            v[i] = {nodes_a[i], nodes_b[i]};
+        }
+    });
     py::bind_vector<vector<Connection>>(m, "ConnectionVector");
     py::bind_vector<vector<DSnap>>(m, "SnapVector");
 

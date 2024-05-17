@@ -3,7 +3,7 @@ import numpy as np
 import geopandas as gpd
 import pandas as pd
 
-from ..util import transform_locations, transform_weights
+from ..method_util import transform_locations, transform_weights
 from ..accessibility import calc_matrix
 from ..graph import Graph
 
@@ -63,7 +63,7 @@ def _set_coverage(td_matrix: np.ndarray, demand_weights: np.ndarray, supply_cost
     # run optimization
     bounds = Bounds(0, 1)
     integrality = np.full((n+m,), 1)
-    constraints = LinearConstraint(A=A, lb=lb, ub=ub)
+    constraints = LinearConstraint(A=A, lb=lb, ub=ub) # type: ignore
     res = milp(c, bounds=bounds, integrality=integrality, constraints=constraints)
     # extract solution
     if res.x is None:

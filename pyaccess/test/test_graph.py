@@ -1,7 +1,8 @@
 
 
 from .. import _pyaccess_ext
-from ..builder import GraphBuilder, new_weighting, new_tc_weighting
+from ..builder import GraphBuilder
+from ..graph import new_weighting, new_tc_weighting
 from ..accessibility import calc_range, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
 
 nodes = [

@@ -1,5 +1,6 @@
 from .. import _pyaccess_ext
-from ..builder import GraphBuilder, new_weighting
+from ..builder import GraphBuilder
+from ..graph import new_weighting
 from ..accessibility import calc_2sfca, calc_matrix
 
 nodes = [

@@ -1,6 +1,8 @@
-from .graph import Graph, load_graph
+from .graph import Graph, new_graph, load_graph, new_tc_weighting, new_weighting, new_transit_weighting
+from .graph_util import build_fastest_weighting, build_shortest_weighting, calc_dfs_ordering, calc_unconnected_nodes
+from . import util
 from .explorer import Explorer
-from .builder import GraphBuilder, new_tc_weighting, new_weighting, new_transit_weighting, build_fastest_weighting, build_shortest_weighting
+from .builder import GraphBuilder
 from .parser.osm_parser import parse_osm
 from .parser.gtfs_parser import parse_gtfs
 from .accessibility import calc_2sfca, calc_range, calc_matrix, calc_reachability, calc_aggregation, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
