@@ -36,7 +36,7 @@ void bind_utilities(nanobind::module_& m)
         v.clear();
         v.reserve(lons.size());
         for (int i = 0; i < lons.size(); i++) {
-            v[i] = {Coord{lons[i], lats[i]}};
+            v.push_back({Coord{lons[i], lats[i]}});
         }
     });
     auto edge_vec = py::bind_vector<vector<Edge>>(m, "EdgeVector");
@@ -44,7 +44,7 @@ void bind_utilities(nanobind::module_& m)
         v.clear();
         v.reserve(nodes_a.size());
         for (int i = 0; i < nodes_a.size(); i++) {
-            v[i] = {nodes_a[i], nodes_b[i]};
+            v.push_back({nodes_a[i], nodes_b[i]});
         }
     });
     py::bind_vector<vector<Connection>>(m, "ConnectionVector");
