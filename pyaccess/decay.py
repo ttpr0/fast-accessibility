@@ -80,7 +80,7 @@ def piecewise_linear_decay(ranges: list[int], factors: list[float]) -> _pyaccess
         raise ValueError("invalid ranges and factors")
     combinded = list(zip(ranges, factors))
     combinded.sort(key=lambda x: x[0])
-    if combinded[0][0] <= 0:
+    if combinded[0][0] < 0:
         raise ValueError("invalid ranges and factors")
     ranges = [x[0] for x in combinded]
     factors = [x[1] for x in combinded]

@@ -179,6 +179,8 @@ def _get_speed(tags: Mapping[str, str], streettype: str) -> int:
             if speed > 10:
                 speed = 10
     # if speed is 0 set it to minimum value
-    if speed == 0:
+    if speed < 0:
         speed = 10
+    if speed > 125:
+        speed = 125
     return speed
