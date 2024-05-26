@@ -6,6 +6,7 @@ import pandas as pd
 from ..method_util import transform_locations, transform_weights
 from ..accessibility import calc_matrix
 from ..graph import Graph
+from ..accessibility.algorithms import OneToManyType, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
 
 
 def maximum_coverage(
@@ -13,12 +14,18 @@ def maximum_coverage(
         demand_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         supply_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         k: int,
-        max_range: int = 1800
+        max_range: int = 1800,
+        algorithm: OneToManyType = RANGE_DIJKSTRA,
+        weight: str = "default",
+        transit: str | None = None,
+        transit_weight: str | None = None,
+        min_departure: int = 0,
+        max_departure: int = 1000000
     ) -> np.ndarray:
     # compute td-matrix
     dem_lon, dem_lat = transform_locations(demand_locations)
     sup_lon, sup_lat = transform_locations(supply_locations)
-    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range)
+    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range, algorithm=algorithm, weight=weight, transit=transit, transit_weight=transit_weight, min_departure=min_departure, max_departure=max_departure)
     # run optimization
     n_x = sup_lon.shape[0]
     n_y = dem_lon.shape[0]
@@ -31,12 +38,18 @@ def weighted_maximum_coverage(
         demand_weights: list[int] | np.ndarray | pd.Series,
         supply_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         k: int,
-        max_range: int = 1800
+        max_range: int = 1800,
+        algorithm: OneToManyType = RANGE_DIJKSTRA,
+        weight: str = "default",
+        transit: str | None = None,
+        transit_weight: str | None = None,
+        min_departure: int = 0,
+        max_departure: int = 1000000
     ) -> np.ndarray:
     # compute td-matrix
     dem_lon, dem_lat = transform_locations(demand_locations)
     sup_lon, sup_lat = transform_locations(supply_locations)
-    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range)
+    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range, algorithm=algorithm, weight=weight, transit=transit, transit_weight=transit_weight, min_departure=min_departure, max_departure=max_departure)
     # run optimization
     n_x = sup_lon.shape[0]
     n_y = dem_lon.shape[0]
@@ -52,12 +65,18 @@ def budgeted_maximum_coverage(
         supply_costs: list[int] | np.ndarray | pd.Series,
         is_removal_cost: list[bool] | np.ndarray | pd.Series,
         max_cost: int,
-        max_range: int = 1800
+        max_range: int = 1800,
+        algorithm: OneToManyType = RANGE_DIJKSTRA,
+        weight: str = "default",
+        transit: str | None = None,
+        transit_weight: str | None = None,
+        min_departure: int = 0,
+        max_departure: int = 1000000
     ) -> np.ndarray:
     # compute td-matrix
     dem_lon, dem_lat = transform_locations(demand_locations)
     sup_lon, sup_lat = transform_locations(supply_locations)
-    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range)
+    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range, algorithm=algorithm, weight=weight, transit=transit, transit_weight=transit_weight, min_departure=min_departure, max_departure=max_departure)
     # run optimization
     n_x = sup_lon.shape[0]
     n_y = dem_lon.shape[0]

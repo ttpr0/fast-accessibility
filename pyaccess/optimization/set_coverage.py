@@ -5,6 +5,7 @@ import pandas as pd
 
 from ..method_util import transform_locations, transform_weights
 from ..accessibility import calc_matrix
+from ..accessibility.algorithms import OneToManyType, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
 from ..graph import Graph
 
 def set_coverage(
@@ -12,16 +13,48 @@ def set_coverage(
         demand_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         supply_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         percent_covered: float,
-        max_range: int = 1800
+        max_range: int = 1800,
+        algorithm: OneToManyType = RANGE_DIJKSTRA,
+        weight: str = "default",
+        transit: str | None = None,
+        transit_weight: str | None = None,
+        min_departure: int = 0,
+        max_departure: int = 1000000
     ) -> np.ndarray:
     # compute td-matrix
     dem_lon, dem_lat = transform_locations(demand_locations)
     sup_lon, sup_lat = transform_locations(supply_locations)
-    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range)
+    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range, algorithm=algorithm, weight=weight, transit=transit, transit_weight=transit_weight, min_departure=min_departure, max_departure=max_departure)
     # run optimization
     n_x = sup_lon.shape[0]
     n_y = dem_lon.shape[0]
     solution = _set_coverage(matrix, np.ones((n_y,)), np.ones((n_x,)), int(n_y * percent_covered))
+    return solution
+
+def weighted_set_coverage(
+        graph: Graph,
+        demand_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
+        demand_weights: list[int] | np.ndarray | pd.Series,
+        supply_locations: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
+        percent_covered: float,
+        max_range: int = 1800,
+        algorithm: OneToManyType = RANGE_DIJKSTRA,
+        weight: str = "default",
+        transit: str | None = None,
+        transit_weight: str | None = None,
+        min_departure: int = 0,
+        max_departure: int = 1000000
+    ) -> np.ndarray:
+    # compute td-matrix
+    dem_lon, dem_lat = transform_locations(demand_locations)
+    sup_lon, sup_lat = transform_locations(supply_locations)
+    matrix = calc_matrix(graph, (sup_lon, sup_lat), (dem_lon, dem_lat), max_range, algorithm=algorithm, weight=weight, transit=transit, transit_weight=transit_weight, min_departure=min_departure, max_departure=max_departure)
+    # run optimization
+    n_x = sup_lon.shape[0]
+    n_y = dem_lon.shape[0]
+    dem_weights = transform_weights(demand_weights)
+    dem_sum = np.sum(dem_weights)
+    solution = _set_coverage(matrix, dem_weights, np.ones((n_x,)), int(dem_sum * percent_covered))
     return solution
 
 def _set_coverage(td_matrix: np.ndarray, demand_weights: np.ndarray, supply_costs: np.ndarray, min_covered_weight: int) -> np.ndarray:
