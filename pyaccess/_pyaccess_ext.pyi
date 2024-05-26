@@ -2067,6 +2067,69 @@ def calc_reachability(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyacce
     """
     ...
 
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
+@overload
+def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    """
+    calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: pyaccess._pyaccess_ext.IDistanceDecay, /) -> tuple[numpy.ndarray[dtype=float32, shape=(*), order='C'], numpy.ndarray[dtype=int32, shape=(*), order='C']]
+    """
+    ...
+
 def calc_unconnected(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IntVector:
     ...
 

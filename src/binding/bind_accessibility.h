@@ -74,6 +74,15 @@ void bind_accessibility(nanobind::module_& m)
     m.def("calc_reachability", &calcReachability<GRASP<>>);
     m.def("calc_reachability", &calcReachability<RangeDijkstraTC<>>);
     m.def("calc_reachability", &calcReachability<TransitDijkstra>);
+    m.def("calc_reachability_2", &calcReachability2<RangeDijkstra<>>);
+    m.def("calc_reachability_2", &calcReachability2<RangePHAST<>>);
+    m.def("calc_reachability_2", &calcReachability2<RangeRPHAST<>>);
+    m.def("calc_reachability_2", &calcReachability2<RangeRPHAST2<>>);
+    m.def("calc_reachability_2", &calcReachability2<RangePHASTGS>);
+    m.def("calc_reachability_2", &calcReachability2<RangeRPHASTGS>);
+    m.def("calc_reachability_2", &calcReachability2<GRASP<>>);
+    m.def("calc_reachability_2", &calcReachability2<RangeDijkstraTC<>>);
+    m.def("calc_reachability_2", &calcReachability2<TransitDijkstra>);
 
     // closest functions
     m.def("calc_aggregation", &calcAggregation<RangeDijkstra<>>);
