@@ -8,6 +8,7 @@
 
 #include "../graph/structs/geom.h"
 #include "../util/matrix.h"
+#include "../util/osm/graph_parser.h"
 #include "../util/snap.h"
 
 NB_MAKE_OPAQUE(std::vector<int>);
@@ -70,4 +71,36 @@ void bind_utilities(nanobind::module_& m)
     dsnap.def("len", &DSnap::len);
     dsnap.def("__getitem__", [](DSnap& snap, int index) { return snap[index]; });
     dsnap.def("__setitem__", [](DSnap& snap, int index, Snap item) { snap[index] = item; });
+
+    m.def("graph_bounds", [](std::vector<Node>& nodes) {
+        float minx = 1000000, maxx = -1000000, miny = 1000000, maxy = -1000000;
+        for (int i = 0; i < nodes.size(); i++) {
+            auto coord = nodes[i].location;
+            minx = std::min(minx, coord.lon);
+            maxx = std::max(maxx, coord.lon);
+            miny = std::min(miny, coord.lat);
+            maxy = std::max(maxy, coord.lat);
+        }
+        return std::make_tuple(minx, maxx, miny, maxy);
+    });
+    m.def("nodes_from_edges", [](std::vector<Edge>& edges) {
+        Vector<int> node_a(edges.size());
+        Vector<int> node_b(edges.size());
+        for (int i = 0; i < edges.size(); i++) {
+            node_a[i] = edges[i].nodeA;
+            node_b[i] = edges[i].nodeB;
+        }
+        return std::make_tuple(node_a, node_b);
+    });
+    m.def("edges_with_nodes", [](std::vector<int>& nodes, VectorView<int> edge_node_a, VectorView<int> edge_node_b) {
+        std::unordered_set<int> nodes_set(nodes.begin(), nodes.end());
+        std::vector<int> edges;
+        for (int i = 0; i < edge_node_a.size(); i++) {
+            if (nodes_set.contains(edge_node_a[i]) || nodes_set.contains(edge_node_b[i])) {
+                edges.push_back(i);
+            }
+        }
+        return edges;
+    });
+    m.def("parse_graph_from_osm", &graph_from_osm);
 }

@@ -2,7 +2,9 @@ from __future__ import annotations
 from typing import Any
 from enum import Enum, IntEnum
 import os
+
 import geopandas as gpd
+import numpy as np
 
 from .. import _pyaccess_ext
 from . import Ordering
@@ -35,7 +37,7 @@ class BaseObject:
         if self.base is None:
             self.base = _pyaccess_ext.load_graph_base(f"{path}")
             self.has_changed = False
-    
+
     def is_loaded(self) -> bool:
         if self.base is None:
             return False
@@ -105,14 +107,6 @@ def BaseObject_from_metadata(meta: dict[str, Any]) -> BaseObject:
 
 def BaseObject_new(nodes: _pyaccess_ext.NodeVector, edges: _pyaccess_ext.EdgeVector) -> BaseObject:
     base = _pyaccess_ext.new_graph_base(nodes, edges)
-    minx, miny, maxx, maxy = 1000000, 1000000, -1000000, -1000000
-    for i in range(len(nodes)):
-        node = nodes[i]
-        x = node.loc.lon
-        y = node.loc.lat
-        minx = min(minx, x)
-        miny = min(miny, y)
-        maxx = max(maxx, x)
-        maxy = max(maxy, y)
+    minx, miny, maxx, maxy = _pyaccess_ext.graph_bounds(nodes)
     obj = BaseObject((minx, miny, maxx, maxy), base=base)
     return obj

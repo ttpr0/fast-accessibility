@@ -1,6 +1,7 @@
 from typing import Any, Optional, overload, Sequence, Iterable, Iterator as iterator
 from enum import Enum
 import numpy.typing
+import collections.abc
 import pyaccess._pyaccess_ext
 
 BACKWARD: Direction
@@ -12,19 +13,19 @@ class BinaryDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, max_dist: int) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class CHData:
     """
     None
@@ -32,16 +33,16 @@ class CHData:
 
     def get_adjacent_shortcuts(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
         ...
-    
+
     def get_node_level(self, arg: int, /) -> int:
         ...
-    
+
     def get_shortcut(self, arg: int, /) -> pyaccess._pyaccess_ext.Shortcut:
         ...
-    
+
     def shortcut_count(self) -> int:
         ...
-    
+
 class CHGraph(pyaccess._pyaccess_ext.ICHGraph, pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -77,35 +78,35 @@ class Connection:
         __init__(self, arg0: int, arg1: int, arg2: int, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @property
     def route(self) -> int:
         ...
     @route.setter
     def route(self, arg: int, /) -> None:
         ...
-    
+
     @property
     def stop_a(self) -> int:
         ...
     @stop_a.setter
     def stop_a(self, arg: int, /) -> None:
         ...
-    
+
     @property
     def stop_b(self) -> int:
         ...
     @stop_b.setter
     def stop_b(self, arg: int, /) -> None:
         ...
-    
+
 class ConnectionVector:
     """
     None
@@ -116,109 +117,109 @@ class ConnectionVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.ConnectionVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.ConnectionVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Connection:
         """
         __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Connection
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[pyaccess._pyaccess_ext.Connection], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[pyaccess._pyaccess_ext.Connection], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.ConnectionVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[pyaccess._pyaccess_ext.Connection]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.ConnectionVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.ConnectionVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Connection, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Connection, /) -> None
         """
         ...
-    
+
     def append(self, arg: pyaccess._pyaccess_ext.Connection, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.ConnectionVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Connection, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> pyaccess._pyaccess_ext.Connection:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
 class Coord:
     """
     None
@@ -230,28 +231,28 @@ class Coord:
         __init__(self, arg0: float, arg1: float, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @property
     def lat(self) -> float:
         ...
     @lat.setter
     def lat(self, arg: float, /) -> None:
         ...
-    
+
     @property
     def lon(self) -> float:
         ...
     @lon.setter
     def lon(self, arg: float, /) -> None:
         ...
-    
+
 class CoordVector:
     """
     None
@@ -262,117 +263,117 @@ class CoordVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.CoordVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.CoordVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Coord:
         """
         __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Coord
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[pyaccess._pyaccess_ext.Coord], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[pyaccess._pyaccess_ext.Coord], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.CoordVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[pyaccess._pyaccess_ext.Coord]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.CoordVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.CoordVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Coord, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Coord, /) -> None
         """
         ...
-    
+
     @overload
     def append(self, arg: tuple[float, float], /) -> None:
         """
         Insert Coordinate with (lon, lat).
         """
         ...
-    
+
     @overload
     def append(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.CoordVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Coord, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> pyaccess._pyaccess_ext.Coord:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
 class DSnap:
     """
     None
@@ -380,49 +381,50 @@ class DSnap:
 
     def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Snap:
         ...
-    
+
     @overload
     def __init__(self, arg0: pyaccess._pyaccess_ext.Snap, arg1: pyaccess._pyaccess_ext.Snap, /) -> None:
         """
         __init__(self, arg0: pyaccess._pyaccess_ext.Snap, arg1: pyaccess._pyaccess_ext.Snap, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @overload
     def __init__(self, arg: int, /) -> None:
         """
         __init__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.Snap, /) -> None:
         """
         __init__(self, arg: pyaccess._pyaccess_ext.Snap, /) -> None
         """
         ...
-    
+
     def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Snap, /) -> None:
         ...
-    
+
     def len(self) -> int:
         ...
-    
+
 class Direction(Enum):
     """
-    <attribute '__doc__' of 'Direction' objects>
+    Incoming or outgoing edges.
     """
+
     BACKWARD: Direction
-    
+
     FORWARD: Direction
-    
+
 class Edge:
     """
     None
@@ -434,28 +436,28 @@ class Edge:
         __init__(self, arg0: int, arg1: int, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @property
     def node_a(self) -> int:
         ...
     @node_a.setter
     def node_a(self, arg: int, /) -> None:
         ...
-    
+
     @property
     def node_b(self) -> int:
         ...
     @node_b.setter
     def node_b(self, arg: int, /) -> None:
         ...
-    
+
 class EdgeVector:
     """
     None
@@ -466,112 +468,112 @@ class EdgeVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.EdgeVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.EdgeVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Edge:
         """
         __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Edge
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[pyaccess._pyaccess_ext.Edge], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[pyaccess._pyaccess_ext.Edge], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.EdgeVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[pyaccess._pyaccess_ext.Edge]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.EdgeVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.EdgeVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Edge, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Edge, /) -> None
         """
         ...
-    
+
     def append(self, arg: pyaccess._pyaccess_ext.Edge, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.EdgeVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def from_array(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, /) -> None:
         ...
-    
+
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Edge, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> pyaccess._pyaccess_ext.Edge:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
 class ExponentialDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -579,19 +581,19 @@ class ExponentialDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg: int, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 FORWARD: Direction
 
 class FloatVector:
@@ -604,135 +606,135 @@ class FloatVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __contains__(self, arg: object, /) -> bool:
         """
         __contains__(self, arg: object, /) -> bool
         """
         ...
-    
+
     @overload
     def __contains__(self, arg: float, /) -> bool:
         """
         __contains__(self, arg: float, /) -> bool
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.FloatVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.FloatVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> float:
         """
         __getitem__(self, arg: int, /) -> float
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[float], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[float], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.FloatVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[float]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.FloatVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.FloatVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: float, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: float, /) -> None
         """
         ...
-    
+
     def append(self, arg: float, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def count(self, arg: float, /) -> int:
         """
         Return number of occurrences of `arg`.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.FloatVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def insert(self, arg0: int, arg1: float, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> float:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
     def remove(self, arg: float, /) -> None:
         """
         Remove first occurrence of `arg`.
         """
         ...
-    
+
 class GRASP:
     """
     None
@@ -740,7 +742,7 @@ class GRASP:
 
     def is_build(self) -> bool:
         ...
-    
+
 class GaussianDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -748,19 +750,19 @@ class GaussianDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg: int, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class Graph(pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -774,22 +776,22 @@ class GraphBase:
 
     def edge_count(self) -> int:
         ...
-    
+
     def get_adjacent_edges(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
         ...
-    
+
     def get_edge(self, arg: int, /) -> pyaccess._pyaccess_ext.Edge:
         ...
-    
+
     def get_node(self, arg: int, /) -> pyaccess._pyaccess_ext.Node:
         ...
-    
+
     def get_node_geom(self, arg: int, /) -> pyaccess._pyaccess_ext.Coord:
         ...
-    
+
     def node_count(self) -> int:
         ...
-    
+
 class GravityDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -797,19 +799,19 @@ class GravityDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg0: int, arg1: float, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class HybridDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -817,19 +819,19 @@ class HybridDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, distances: pyaccess._pyaccess_ext.IntVector, factors: pyaccess._pyaccess_ext.FloatVector) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class ICHGraph(pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -843,10 +845,10 @@ class IDMapping:
 
     def get_source(self, arg: int, /) -> int:
         ...
-    
+
     def get_target(self, arg: int, /) -> int:
         ...
-    
+
 class IDistanceDecay:
     """
     None
@@ -857,13 +859,13 @@ class IDistanceDecay:
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class IGraph:
     """
     None
@@ -881,63 +883,63 @@ class IGraphIndex:
         get_closest_node(self, arg0: float, arg1: float, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.DSnap
         """
         ...
-    
+
     @overload
     def get_closest_node(self, arg: pyaccess._pyaccess_ext.Coord, /) -> pyaccess._pyaccess_ext.DSnap:
         """
         get_closest_node(self, arg: pyaccess._pyaccess_ext.Coord, /) -> pyaccess._pyaccess_ext.DSnap
         """
         ...
-    
+
     @overload
     def get_closest_node(self, arg0: float, arg1: float, /) -> pyaccess._pyaccess_ext.DSnap:
         """
         get_closest_node(self, arg0: float, arg1: float, /) -> pyaccess._pyaccess_ext.DSnap
         """
         ...
-    
+
     @overload
     def get_closest_node(self, arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.DSnap:
         """
         get_closest_node(self, arg0: pyaccess._pyaccess_ext.Coord, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.DSnap
         """
         ...
-    
+
     @overload
     def map_to_closest(self, arg: pyaccess._pyaccess_ext.NodeVector, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
         map_to_closest(self, arg: pyaccess._pyaccess_ext.NodeVector, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
-    
+
     @overload
     def map_to_closest(self, arg: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
         map_to_closest(self, arg: pyaccess._pyaccess_ext.CoordVector, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
-    
+
     @overload
     def map_to_closest(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
-        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], /) -> pyaccess._pyaccess_ext.SnapVector
+        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*)], arg1: numpy.ndarray[dtype=float32, shape=(*)], /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
-    
+
     @overload
     def map_to_closest(self, arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
         map_to_closest(self, arg0: pyaccess._pyaccess_ext.CoordVector, arg1: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
-    
+
     @overload
     def map_to_closest(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
-        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg1: numpy.ndarray[dtype=float32, shape=(*), order='*'], arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector
+        map_to_closest(self, arg0: numpy.ndarray[dtype=float32, shape=(*)], arg1: numpy.ndarray[dtype=float32, shape=(*)], arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
-    
+
 class ITiledGraph(pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -954,135 +956,135 @@ class IntVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __contains__(self, arg: object, /) -> bool:
         """
         __contains__(self, arg: object, /) -> bool
         """
         ...
-    
+
     @overload
     def __contains__(self, arg: int, /) -> bool:
         """
         __contains__(self, arg: int, /) -> bool
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.IntVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.IntVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> int:
         """
         __getitem__(self, arg: int, /) -> int
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[int], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[int], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.IntVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[int]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.IntVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.IntVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: int, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: int, /) -> None
         """
         ...
-    
+
     def append(self, arg: int, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def count(self, arg: int, /) -> int:
         """
         Return number of occurrences of `arg`.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.IntVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def insert(self, arg0: int, arg1: int, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> int:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
     def remove(self, arg: int, /) -> None:
         """
         Remove first occurrence of `arg`.
         """
         ...
-    
+
 class InversePowerDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -1090,19 +1092,19 @@ class InversePowerDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg: int, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class KernelDensityDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -1110,19 +1112,19 @@ class KernelDensityDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg0: int, arg1: float, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class LinearDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -1130,19 +1132,19 @@ class LinearDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, max_dist: int) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class Node:
     """
     None
@@ -1154,21 +1156,21 @@ class Node:
         __init__(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @property
     def loc(self) -> pyaccess._pyaccess_ext.Coord:
         ...
     @loc.setter
     def loc(self, arg: pyaccess._pyaccess_ext.Coord, /) -> None:
         ...
-    
+
 class NodeVector:
     """
     None
@@ -1179,112 +1181,112 @@ class NodeVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.NodeVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.NodeVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Node:
         """
         __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.Node
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[pyaccess._pyaccess_ext.Node], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[pyaccess._pyaccess_ext.Node], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.NodeVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[pyaccess._pyaccess_ext.Node]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.NodeVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.NodeVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Node, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.Node, /) -> None
         """
         ...
-    
+
     def append(self, arg: pyaccess._pyaccess_ext.Node, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.NodeVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def from_array(self, arg0: numpy.typing.NDArray, arg1: numpy.typing.NDArray, /) -> None:
         ...
-    
+
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.Node, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> pyaccess._pyaccess_ext.Node:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
 class Partition:
     """
     None
@@ -1292,7 +1294,7 @@ class Partition:
 
     def get_node_tile(self, arg: int, /) -> int:
         ...
-    
+
 class PiecewiseLinearDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -1300,19 +1302,19 @@ class PiecewiseLinearDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg0: pyaccess._pyaccess_ext.IntVector, arg1: pyaccess._pyaccess_ext.FloatVector, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class PolynomDecay(pyaccess._pyaccess_ext.IDistanceDecay):
     """
     None
@@ -1320,19 +1322,19 @@ class PolynomDecay(pyaccess._pyaccess_ext.IDistanceDecay):
 
     def __init__(self, arg0: int, arg1: pyaccess._pyaccess_ext.FloatVector, /) -> None:
         ...
-    
+
     def get_distance_weight(self, distance: int) -> float:
         """
         Computes the decayed weight (range [0, 1]) for the given distance.
         """
         ...
-    
+
     def get_max_distance(self) -> int:
         """
         Maximum distance to give distance-weight greater than 0.
         """
         ...
-    
+
 class RangeDijkstra:
     """
     None
@@ -1340,7 +1342,7 @@ class RangeDijkstra:
 
     def is_build(self) -> bool:
         ...
-    
+
 class RangeDijkstraTC:
     """
     None
@@ -1348,7 +1350,7 @@ class RangeDijkstraTC:
 
     def is_build(self) -> bool:
         ...
-    
+
 class RangePHAST:
     """
     None
@@ -1356,7 +1358,7 @@ class RangePHAST:
 
     def is_build(self) -> bool:
         ...
-    
+
 class RangePHASTGS:
     """
     None
@@ -1364,7 +1366,7 @@ class RangePHASTGS:
 
     def is_build(self) -> bool:
         ...
-    
+
 class RangeRPHAST:
     """
     None
@@ -1372,7 +1374,7 @@ class RangeRPHAST:
 
     def is_build(self) -> bool:
         ...
-    
+
 class RangeRPHAST2:
     """
     None
@@ -1380,7 +1382,7 @@ class RangeRPHAST2:
 
     def is_build(self) -> bool:
         ...
-    
+
 class RangeRPHASTGS:
     """
     None
@@ -1388,7 +1390,7 @@ class RangeRPHASTGS:
 
     def is_build(self) -> bool:
         ...
-    
+
 class Shortcut:
     """
     None
@@ -1400,35 +1402,35 @@ class Shortcut:
         __init__(self, arg0: int, arg1: int, arg2: int, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @property
     def from_(self) -> int:
         ...
     @from_.setter
     def from_(self, arg: int, /) -> None:
         ...
-    
+
     @property
     def to_(self) -> int:
         ...
     @to_.setter
     def to_(self, arg: int, /) -> None:
         ...
-    
+
     @property
     def weight(self) -> int:
         ...
     @weight.setter
     def weight(self, arg: int, /) -> None:
         ...
-    
+
 class Snap:
     """
     None
@@ -1440,28 +1442,28 @@ class Snap:
         __init__(self, arg0: int, arg1: int, /) -> None
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         __init__(self) -> None
         """
         ...
-    
+
     @property
     def dist(self) -> int:
         ...
     @dist.setter
     def dist(self, arg: int, /) -> None:
         ...
-    
+
     @property
     def node(self) -> int:
         ...
     @node.setter
     def node(self, arg: int, /) -> None:
         ...
-    
+
 class SnapVector:
     """
     None
@@ -1472,109 +1474,109 @@ class SnapVector:
         Check whether the vector is nonempty
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: slice, /) -> None:
         """
         __delitem__(self, arg: slice, /) -> None
         """
         ...
-    
+
     @overload
     def __delitem__(self, arg: int, /) -> None:
         """
         __delitem__(self, arg: int, /) -> None
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.SnapVector:
         """
         __getitem__(self, arg: slice, /) -> pyaccess._pyaccess_ext.SnapVector
         """
         ...
-    
+
     @overload
     def __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.DSnap:
         """
         __getitem__(self, arg: int, /) -> pyaccess._pyaccess_ext.DSnap
         """
         ...
-    
+
     @overload
-    def __init__(self, arg: Iterable[pyaccess._pyaccess_ext.DSnap], /) -> None:
+    def __init__(self, arg: collections.abc.Iterable[pyaccess._pyaccess_ext.DSnap], /) -> None:
         """
         Construct from an iterable object
         """
         ...
-    
+
     @overload
     def __init__(self) -> None:
         """
         Default constructor
         """
         ...
-    
+
     @overload
     def __init__(self, arg: pyaccess._pyaccess_ext.SnapVector) -> None:
         """
         Copy constructor
         """
         ...
-    
-    def __iter__(self) -> iterator:
+
+    def __iter__(self) -> collections.abc.Iterator[pyaccess._pyaccess_ext.DSnap]:
         ...
-    
+
     def __len__(self) -> int:
         ...
-    
+
     def __repr__(self) -> str:
         ...
-    
+
     @overload
     def __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.SnapVector, /) -> None:
         """
         __setitem__(self, arg0: slice, arg1: pyaccess._pyaccess_ext.SnapVector, /) -> None
         """
         ...
-    
+
     @overload
     def __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.DSnap, /) -> None:
         """
         __setitem__(self, arg0: int, arg1: pyaccess._pyaccess_ext.DSnap, /) -> None
         """
         ...
-    
+
     def append(self, arg: pyaccess._pyaccess_ext.DSnap, /) -> None:
         """
         Append `arg` to the end of the list.
         """
         ...
-    
+
     def clear(self) -> None:
         """
         Remove all items from list.
         """
         ...
-    
+
     def extend(self, arg: pyaccess._pyaccess_ext.SnapVector, /) -> None:
         """
         Extend `self` by appending elements from `arg`.
         """
         ...
-    
+
     def insert(self, arg0: int, arg1: pyaccess._pyaccess_ext.DSnap, /) -> None:
         """
         Insert object `arg1` before index `arg0`.
         """
         ...
-    
+
     def pop(self, index: int = -1) -> pyaccess._pyaccess_ext.DSnap:
         """
         Remove and return item at `index` (default last).
         """
         ...
-    
+
 class TCGraph(pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -1588,16 +1590,19 @@ class TCWeighting:
 
     def get_edge_weight(self, arg: int, /) -> int:
         ...
-    
+
     def get_turn_cost(self, arg0: int, arg1: int, arg2: int, /) -> int:
         ...
-    
+
     def set_edge_weight(self, arg0: int, arg1: int, /) -> None:
         ...
-    
+
+    def set_edge_weights(self, arg: numpy.typing.NDArray, /) -> None:
+        ...
+
     def set_turn_cost(self, arg0: int, arg1: int, arg2: int, arg3: int, /) -> None:
         ...
-    
+
 class TiledData:
     """
     None
@@ -1605,16 +1610,16 @@ class TiledData:
 
     def get_adjacent_shortcuts(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
         ...
-    
+
     def get_edge_type(self, arg: int, /) -> int:
         ...
-    
+
     def get_shortcut(self, arg: int, /) -> pyaccess._pyaccess_ext.Shortcut:
         ...
-    
+
     def shortcut_count(self) -> int:
         ...
-    
+
 class TiledGraph(pyaccess._pyaccess_ext.ITiledGraph, pyaccess._pyaccess_ext.IGraph):
     """
     None
@@ -1628,28 +1633,28 @@ class TransitData:
 
     def connection_count(self) -> int:
         ...
-    
+
     def get_adjacent_connections(self, arg0: int, arg1: pyaccess._pyaccess_ext.Direction, /) -> list:
         ...
-    
+
     def get_connection(self, arg: int, /) -> pyaccess._pyaccess_ext.Connection:
         ...
-    
+
     def get_stop(self, arg: int, /) -> pyaccess._pyaccess_ext.Node:
         ...
-    
+
     def has_node_stops(self, arg: int, /) -> bool:
         ...
-    
+
     def map_node_to_stops(self, arg: int, /) -> list:
         ...
-    
+
     def map_stop_to_node(self, arg: int, /) -> pyaccess._pyaccess_ext.DSnap:
         ...
-    
+
     def stop_count(self) -> int:
         ...
-    
+
 class TransitDijkstra:
     """
     None
@@ -1657,13 +1662,13 @@ class TransitDijkstra:
 
     def is_build(self) -> bool:
         ...
-    
+
     def set_max_departure(self, arg: int, /) -> None:
         ...
-    
+
     def set_min_departure(self, arg: int, /) -> None:
         ...
-    
+
 class TransitGraph:
     """
     None
@@ -1675,12 +1680,12 @@ class TransitWeighting:
     None
     """
 
-    def get_connection_weight(self, arg0: int, arg1: int, /) -> Optional[tuple[int, int]]:
+    def get_connection_weight(self, arg0: int, arg1: int, /) -> tuple[int, int] | None:
         ...
-    
-    def set_connection_schedule(self, arg0: int, arg1: list[tuple[int, int]], /) -> None:
+
+    def set_connection_schedule(self, arg0: int, arg1: collections.abc.Sequence[tuple[int, int]], /) -> None:
         ...
-    
+
 class Weighting:
     """
     None
@@ -1688,10 +1693,13 @@ class Weighting:
 
     def get_edge_weight(self, arg: int, /) -> int:
         ...
-    
+
     def set_edge_weight(self, arg0: int, arg1: int, /) -> None:
         ...
-    
+
+    def set_edge_weights(self, arg: numpy.typing.NDArray, /) -> None:
+        ...
+
 def build_base_graph(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.Weighting, /) -> pyaccess._pyaccess_ext.Graph:
     ...
 
@@ -1740,126 +1748,126 @@ def build_transit_graph(arg0: pyaccess._pyaccess_ext.IGraph, arg1: pyaccess._pya
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.typing.NDArray, arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.typing.NDArray, arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_2sfca(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: numpy.ndarray[dtype=int32, shape=(*)], arg3: pyaccess._pyaccess_ext.SnapVector, arg4: numpy.ndarray[dtype=int32, shape=(*)], arg5: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.TransitDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeDijkstra, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangePHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHAST, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHAST2, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangePHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeRPHASTGS, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.GRASP, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
 @overload
 def calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.typing.NDArray, arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.typing.NDArray:
     """
-    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*), order='*'], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
+    calc_aggregation(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyaccess._pyaccess_ext.SnapVector, arg2: pyaccess._pyaccess_ext.SnapVector, arg3: numpy.ndarray[dtype=int32, shape=(*)], arg4: pyaccess._pyaccess_ext.IDistanceDecay, /) -> numpy.ndarray[dtype=float32, shape=(*), order='C']
     """
     ...
 
@@ -2133,6 +2141,12 @@ def calc_reachability_2(arg0: pyaccess._pyaccess_ext.RangeDijkstraTC, arg1: pyac
 def calc_unconnected(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IntVector:
     ...
 
+def edges_with_nodes(arg0: pyaccess._pyaccess_ext.IntVector, arg1: numpy.typing.NDArray, arg2: numpy.typing.NDArray, /) -> pyaccess._pyaccess_ext.IntVector:
+    ...
+
+def graph_bounds(arg: pyaccess._pyaccess_ext.NodeVector, /) -> tuple[float, float, float, float]:
+    ...
+
 def load_cell_index(arg: str, /) -> pyaccess._pyaccess_ext.CellIndex:
     ...
 
@@ -2176,6 +2190,12 @@ def new_transit_weighting(arg: pyaccess._pyaccess_ext.TransitData, /) -> pyacces
     ...
 
 def new_weighting(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.Weighting:
+    ...
+
+def nodes_from_edges(arg: pyaccess._pyaccess_ext.EdgeVector, /) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]:
+    ...
+
+def parse_graph_from_osm(arg0: str, arg1: str, /) -> tuple[pyaccess._pyaccess_ext.NodeVector, pyaccess._pyaccess_ext.EdgeVector, numpy.typing.NDArray, numpy.typing.NDArray, numpy.typing.NDArray]:
     ...
 
 def prepare_balanced_kdtree_index(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IGraphIndex:
@@ -2319,4 +2339,3 @@ def store_transit_data(arg0: pyaccess._pyaccess_ext.TransitData, arg1: str, /) -
 
 def store_transit_weights(arg0: pyaccess._pyaccess_ext.TransitWeighting, arg1: str, /) -> None:
     ...
-

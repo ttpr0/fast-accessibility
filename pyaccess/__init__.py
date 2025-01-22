@@ -4,6 +4,7 @@ from . import util
 from .explorer import Explorer
 from .builder import GraphBuilder
 from .parser.osm_parser import parse_osm
+from .parser.fast_parser import parse_osm_fast
 from .parser.gtfs_parser import parse_gtfs
 from .accessibility import calc_2sfca, calc_range, calc_matrix, calc_reachability, calc_reachability_2, calc_aggregation, RANGE_DIJKSTRA, RANGE_PHAST, RANGE_RPHAST, RANGE_RPHAST_GS, GRASP
 from .decay import binary_decay, linear_decay, hybrid_decay, exponential_decay, gaussian_decay, gravity_decay, inverse_power_decay, kernel_density_decay, polynomial_decay, piecewise_linear_decay

@@ -123,10 +123,26 @@ void bind_graph(nanobind::module_& m)
     auto weighting = py::class_<Weighting>(m, "Weighting");
     weighting.def("get_edge_weight", &Weighting::get_edge_weight);
     weighting.def("set_edge_weight", &Weighting::set_edge_weight);
+    weighting.def("set_edge_weights", [](Weighting& w, const VectorView<float> weights) {
+        if (weights.size() != w.edge_weights.size()) {
+            throw std::runtime_error("weights.size() != w.edge_weights.size()");
+        }
+        for (int i = 0; i < weights.size(); i++) {
+            w.set_edge_weight(i, weights(i));
+        }
+    });
 
     auto tc_weighting = py::class_<TCWeighting>(m, "TCWeighting");
     tc_weighting.def("get_edge_weight", &TCWeighting::get_edge_weight);
     tc_weighting.def("set_edge_weight", &TCWeighting::set_edge_weight);
+    tc_weighting.def("set_edge_weights", [](TCWeighting& w, const VectorView<float> weights) {
+        if (weights.size() != w.edge_weights.size()) {
+            throw std::runtime_error("weights.size() != w.edge_weights.size()");
+        }
+        for (int i = 0; i < weights.size(); i++) {
+            w.set_edge_weight(i, weights(i));
+        }
+    });
     tc_weighting.def("get_turn_cost", &TCWeighting::get_turn_cost);
     tc_weighting.def("set_turn_cost", &TCWeighting::set_turn_cost);
 

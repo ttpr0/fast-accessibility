@@ -15,10 +15,12 @@ set(CMAKE_INSTALL_RPATH $ORIGIN)
 # find dependencies
 #***********************************
 
-set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG RELEASE)
+# set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG RELEASE)
 
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
 
 #***********************************
 # library
@@ -59,15 +61,21 @@ add_library(${lib_name} SHARED
     src/graph/mod/partition_mod.cpp
     src/graph/mod/weighting_mod.cpp
     src/util/kd_tree/kd_tree.cpp
+    src/util/osm/graph_parser.cpp
+    src/util/osm/parser.cpp
+    src/util/osm/proto/fileformat.pb.cc
+    src/util/osm/proto/osmformat.pb.cc
 )
 
 target_include_directories(${lib_name} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:pyaccess/include>
 )
-target_link_libraries(${lib_name} PRIVATE 
+target_link_libraries(${lib_name} PRIVATE
     OpenMP::OpenMP_CXX
-    Eigen3::Eigen   
+    Eigen3::Eigen
+    protobuf::libprotobuf
+    ZLIB::ZLIB
 )
 
 #***********************************
@@ -94,7 +102,9 @@ target_link_libraries(${exe_name} PRIVATE
 #***********************************
 set(ext_name _pyaccess_ext)
 
-find_package(Python 3.10 COMPONENTS Interpreter Development.Module REQUIRED)
+# set(CMAKE_BUILD_TYPE Release)
+find_package(Python 3.10 EXACT COMPONENTS Interpreter Development.Module REQUIRED)
+# set(CMAKE_BUILD_TYPE Debug)
 
 find_package(nanobind CONFIG REQUIRED)
 

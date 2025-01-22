@@ -11,4 +11,3 @@ requires-python = ">=3.10"
 [tool.scikit-build]
 wheel.packages = ["pyaccess"]
 sdist.exclude = ["test", "__pycache__"]
-cmake.args = ["-DCMAKE_MODULE_PATH=./build", "-DCMAKE_PREFIX_PATH=./build"]

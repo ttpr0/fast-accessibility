@@ -327,7 +327,7 @@ class Graph:
 
     def has_partition(self, name: str) -> bool:
         return name in self._partitions
-    
+
     def has_ch(self, name: str) -> bool:
         return name in self._ch
 
@@ -531,7 +531,7 @@ class Graph:
     def _get_overlay_partition(self, name: str) -> str:
         tiled = self._tiled[name]
         return tiled.get_base_partition()
-    
+
     def _get_transit(self, name: str) -> _pyaccess_ext.TransitData:
         transit = self._transit[name]
         if not transit.is_loaded():
@@ -540,7 +540,7 @@ class Graph:
             transit.load(f"{self._base_path}/{self._name}_transit_{name}")
         transit_data = transit.get_transit_data()
         return transit_data
-    
+
     def _get_transit_base_weight(self, name: str) -> str:
         transit = self._transit[name]
         return transit.get_base_weigth()
@@ -585,12 +585,10 @@ def new_graph(nodes: gpd.GeoDataFrame, edges: gpd.GeoDataFrame) -> Graph:
 
     Use graph.store(...) to store and load_graph() to load a graph from a directory.
     """
-    node_count = nodes.shape[0]
     x = nodes.geometry.x.to_numpy(dtype=np.float32)
     y = nodes.geometry.y.to_numpy(dtype=np.float32)
     node_vec = _pyaccess_ext.NodeVector()
     node_vec.from_array(x, y)
-    edge_count = edges.shape[0]
     node_a = edges.node_a.to_numpy(dtype=np.int32)
     node_b = edges.node_b.to_numpy(dtype=np.int32)
     edge_vec = _pyaccess_ext.EdgeVector()
