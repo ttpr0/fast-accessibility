@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.21)
 project(test LANGUAGES CXX)
 
 set(pyaccess_VERSION 0.0.1a)
@@ -129,6 +129,7 @@ endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 # install libraries
 install(
     TARGETS ${lib_name}
+    RUNTIME_DEPENDENCY_SET access_dependencies
     EXPORT PyAccessTargets
     RUNTIME DESTINATION pyaccess
     LIBRARY DESTINATION pyaccess
@@ -136,6 +137,21 @@ install(
 )
 install(DIRECTORY include/pyaccess DESTINATION pyaccess/include)
 install(TARGETS ${ext_name} LIBRARY DESTINATION pyaccess)
+
+# install dependencies
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(ACCESS_DEPENDECIES "")
+endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(ACCESS_DEPENDECIES "libprotobuf.dll" "abseil_dll.dll")
+endif()
+install(
+    RUNTIME_DEPENDENCY_SET access_dependencies
+    PRE_INCLUDE_REGEXES ${ACCESS_DEPENDECIES}
+    PRE_EXCLUDE_REGEXES ".*"
+    DIRECTORIES $ENV{PATH}
+    DESTINATION pyaccess
+)
 
 # install exported targets
 install(
