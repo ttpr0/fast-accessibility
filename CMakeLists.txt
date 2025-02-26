@@ -138,21 +138,6 @@ install(
 install(DIRECTORY include/pyaccess DESTINATION pyaccess/include)
 install(TARGETS ${ext_name} LIBRARY DESTINATION pyaccess)
 
-# install dependencies
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(ACCESS_DEPENDECIES "")
-endif()
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(ACCESS_DEPENDECIES "libprotobuf.dll" "abseil_dll.dll")
-endif()
-install(
-    RUNTIME_DEPENDENCY_SET access_dependencies
-    PRE_INCLUDE_REGEXES ${ACCESS_DEPENDECIES}
-    PRE_EXCLUDE_REGEXES ".*"
-    DIRECTORIES $ENV{PATH}
-    DESTINATION pyaccess
-)
-
 # install exported targets
 install(
     EXPORT PyAccessTargets
