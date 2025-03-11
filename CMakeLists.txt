@@ -153,7 +153,13 @@ configure_package_config_file(
     ${CMAKE_CURRENT_BINARY_DIR}/pyaccess-config.cmake
     INSTALL_DESTINATION pyaccess/cmake
 )
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/pyaccess-config-version.cmake
+    VERSION ${pyaccess_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/pyaccess-config.cmake
+          ${CMAKE_CURRENT_BINARY_DIR}/pyaccess-config-version.cmake
     DESTINATION pyaccess/cmake
 )

@@ -7,10 +7,12 @@
 #include "../../graph/structs/geom.h"
 #include "../../graph/structs/structs.h"
 #include "../matrix.h"
+#include "./cycling_profile.h"
 #include "./driving_profile.h"
 #include "./graph_parser.h"
 #include "./parser.h"
 #include "./profile.h"
+#include "./walking_profile.h"
 
 //***************************************************
 // utility classes
@@ -210,8 +212,14 @@ std::tuple<std::vector<Node>, std::vector<Edge>, Vector<int>, Vector<float>, Vec
 
 std::tuple<std::vector<Node>, std::vector<Edge>, Vector<int>, Vector<float>, Vector<int>> graph_from_osm(const std::string& file, const std::string& profile)
 {
-    if (profile == "car") {
+    if (profile == "driving") {
         auto decoder = DrivingDecoder();
+        return graph_from_osm(file, decoder);
+    } else if (profile == "walking") {
+        auto decoder = WalkingDecoder();
+        return graph_from_osm(file, decoder);
+    } else if (profile == "cycling") {
+        auto decoder = CyclingDecoder();
         return graph_from_osm(file, decoder);
     } else {
         auto decoder = DrivingDecoder();
