@@ -126,8 +126,8 @@ Vector<float> calc2SFCA(S& alg, std::vector<DSnap>& dem_nodes, VectorView<int> d
 
             // compute R-value for facility
             float demand_sum = 0.0;
-            for (int i = 0; i < dem_nodes.size(); i++) {
-                auto d_snap = dem_nodes[i];
+            for (int j = 0; j < dem_nodes.size(); j++) {
+                auto d_snap = dem_nodes[j];
                 if (d_snap.len() == 0) {
                     continue;
                 }
@@ -136,12 +136,12 @@ Vector<float> calc2SFCA(S& alg, std::vector<DSnap>& dem_nodes, VectorView<int> d
                     continue;
                 }
                 float distance_decay = decay.get_distance_weight(d_dist);
-                demand_sum += dem_weights(i) * distance_decay;
+                demand_sum += dem_weights(j) * distance_decay;
             }
             float R = s_weight / demand_sum;
             // add new access to reachable demand points
-            for (int i = 0; i < dem_nodes.size(); i++) {
-                auto d_snap = dem_nodes[i];
+            for (int j = 0; j < dem_nodes.size(); j++) {
+                auto d_snap = dem_nodes[j];
                 if (d_snap.len() == 0) {
                     continue;
                 }
@@ -150,7 +150,7 @@ Vector<float> calc2SFCA(S& alg, std::vector<DSnap>& dem_nodes, VectorView<int> d
                     continue;
                 }
                 float distance_decay = decay.get_distance_weight(d_dist);
-                partial_access[i] += R * distance_decay;
+                partial_access[j] += R * distance_decay;
             }
         }
 

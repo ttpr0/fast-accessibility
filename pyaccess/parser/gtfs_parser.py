@@ -2,7 +2,7 @@ from typing import Any
 import json
 import pandas as pd
 import numpy as np
-from shapely import contains_xy, MultiPolygon, Polygon
+from shapely import contains_xy, MultiPolygon, from_geojson
 
 from .._pyaccess_ext import Node, Coord, NodeVector, Connection, ConnectionVector
 
@@ -67,7 +67,7 @@ class GTFSStop:
 
     def has_parent(self) -> bool:
         return self.parent_id is not None
-    
+
     def get_parent(self) -> int:
         assert self.parent_id is not None
         return self.parent_id
@@ -176,7 +176,6 @@ def _parse_time(time_str: str) -> int:
 
 def _read_trips(path: str, stops: dict[int, GTFSStop], services: dict[int, GTFSService]) -> dict[int, GTFSTrip]:
     trips: dict[int, GTFSTrip] = {}
-    
     times_frame = pd.read_csv(f"{path}/stop_times.txt")
     trip_ids = times_frame["trip_id"]
     arrival_times = times_frame["arrival_time"]
@@ -293,7 +292,7 @@ def _build_transit_graph(trips: dict[int, GTFSTrip], stops: dict[int, GTFSStop],
                     case _:
                         raise Exception(f"Invalid day: {day}")
                 sc[conn_id].append((dep, arr))
-    
+
     return stops_vec, conns_vec, schedules
 
 def parse_gtfs(gtfs_path: str, filter_polygon: str) -> tuple[NodeVector, ConnectionVector, dict[str, list[list[tuple[int, int]]]]]:
@@ -301,8 +300,8 @@ def parse_gtfs(gtfs_path: str, filter_polygon: str) -> tuple[NodeVector, Connect
     with open(filter_polygon, "r") as file:
         data = json.loads(file.read())
         features = data["features"]
-        coords = features[0]["geometry"]["coordinates"]
-        filter = Polygon(coords[0], coords[1:])
+        geom = features[0]["geometry"]
+        filter = from_geojson(geom)
 
     stops = _read_stop_locations(gtfs_path, filter)
     services = _read_calendar(gtfs_path)
