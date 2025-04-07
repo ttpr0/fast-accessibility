@@ -2,7 +2,8 @@ from typing import Any
 import json
 import pandas as pd
 import numpy as np
-from shapely import contains_xy, MultiPolygon, from_geojson
+from shapely import contains_xy, MultiPolygon
+from shapely.geometry import shape
 
 from .._pyaccess_ext import Node, Coord, NodeVector, Connection, ConnectionVector
 
@@ -301,7 +302,7 @@ def parse_gtfs(gtfs_path: str, filter_polygon: str) -> tuple[NodeVector, Connect
         data = json.loads(file.read())
         features = data["features"]
         geom = features[0]["geometry"]
-        filter = from_geojson(geom)
+        filter = shape(geom)
 
     stops = _read_stop_locations(gtfs_path, filter)
     services = _read_calendar(gtfs_path)
