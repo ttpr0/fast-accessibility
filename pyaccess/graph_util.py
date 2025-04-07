@@ -42,7 +42,8 @@ def build_fastest_weighting(graph: Graph, edges: gpd.GeoDataFrame | pd.DataFrame
     weight = new_weighting(graph)
     speed = edges["speed"].to_numpy(dtype=np.float32)
     length = edges["length"].to_numpy(dtype=np.float32)
-    weight.set_edge_weights(length*3.6 / speed)
+    penalties = _pyaccess_ext.calc_crossing_penalties(graph._get_base()).astype(np.float32)
+    weight.set_edge_weights(length*3.6 / speed + penalties)
     return weight
 
 def build_shortest_weighting(graph: Graph, edges: gpd.GeoDataFrame | pd.DataFrame) -> _pyaccess_ext.Weighting:

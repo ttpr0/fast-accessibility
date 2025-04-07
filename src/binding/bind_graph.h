@@ -295,6 +295,7 @@ void bind_graph(nanobind::module_& m)
     m.def("new_graph_base", &new_graph_base);
     m.def("new_id_mapping", &new_id_mapping);
     m.def("new_weighting", &build_weighting);
+    m.def("calc_crossing_penalties", &turn_cost_penalty);
     m.def("new_tc_weighting", &build_tc_weighting);
     m.def("new_transit_weighting", &build_transit_weighting);
     m.def("prepare_kdtree_index", &build_kdtree_index);

@@ -1877,6 +1877,9 @@ def calc_ch2_order(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyacc
 def calc_ch_order(arg0: pyaccess._pyaccess_ext.GraphBase, arg1: pyaccess._pyaccess_ext.CHData, arg2: pyaccess._pyaccess_ext.IDMapping, /) -> pyaccess._pyaccess_ext.IntVector:
     ...
 
+def calc_crossing_penalties(arg: pyaccess._pyaccess_ext.GraphBase, /) -> numpy.typing.NDArray:
+    ...
+
 def calc_dfs_order(arg: pyaccess._pyaccess_ext.GraphBase, /) -> pyaccess._pyaccess_ext.IntVector:
     ...
 

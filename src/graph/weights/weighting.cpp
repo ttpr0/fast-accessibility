@@ -24,3 +24,25 @@ std::shared_ptr<Weighting> build_weighting(const GraphBase& base)
 
     return std::make_shared<Weighting>(std::move(weights));
 }
+
+Vector<float> turn_cost_penalty(const GraphBase& base)
+{
+    Vector<float> penalties(base.edgeCount());
+    for (int i = 0; i < base.edgeCount(); i++) {
+        auto edge = base.getEdge(i);
+        auto nodeB = edge.nodeB;
+        auto degree = base.adjacency.getDegree(nodeB, Direction::FORWARD);
+        float w = 0;
+        if (degree == 2) {
+			w += 2;
+		} else if (degree == 3) {
+			w += 3;
+		} else if (degree == 4) {
+			w += 7;
+		} else if (degree > 4) {
+			w += 10;
+		}
+        penalties[i] = w;
+    }
+    return penalties;
+}

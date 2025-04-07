@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../base/graph_base.h"
+#include "../../util/matrix.h"
 
 //*******************************************
 // weighting class
@@ -22,3 +23,4 @@ public:
 
 std::shared_ptr<Weighting> build_weighting(const GraphBase& base);
 std::shared_ptr<Weighting> build_default_weighting(const GraphBase& base);
+Vector<float> turn_cost_penalty(const GraphBase& base);
