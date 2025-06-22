@@ -21,7 +21,7 @@ def calc_2sfca(
         sup_weight: list[int] | np.ndarray | pd.Series,
         decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900),
         algorithm: OneToManyType = RANGE_DIJKSTRA,
-        weight: str = "default",
+        weight: str | _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting = "default",
         partition: str | None = None,
         ch: str | None = None,
         overlay: str | None = None,

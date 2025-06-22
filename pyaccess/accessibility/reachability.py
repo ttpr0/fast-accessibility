@@ -19,7 +19,7 @@ def calc_reachability(
         sup_points: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900),
         algorithm: OneToManyType = RANGE_DIJKSTRA,
-        weight: str = "default",
+        weight: str | _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting = "default",
         transit: str | None = None,
         transit_weight: str | None = None,
         min_departure: int = 0,
@@ -55,7 +55,7 @@ def calc_reachability_2(
         sup_points: list[tuple[float, float]] | tuple[np.ndarray, np.ndarray] | gpd.GeoSeries,
         decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900),
         algorithm: OneToManyType = RANGE_DIJKSTRA,
-        weight: str = "default",
+        weight: str | _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting = "default",
         transit: str | None = None,
         transit_weight: str | None = None,
         min_departure: int = 0,
@@ -96,7 +96,7 @@ def calc_aggregation(
         sup_weight: list[int] | np.ndarray | pd.Series,
         decay: _pyaccess_ext.IDistanceDecay = _pyaccess_ext.BinaryDecay(900),
         algorithm: OneToManyType = RANGE_DIJKSTRA,
-        weight: str = "default",
+        weight: str | _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting = "default",
         transit: str | None = None,
         transit_weight: str | None = None,
         min_departure: int = 0,
@@ -126,4 +126,3 @@ def calc_aggregation(
 
     reachability = _pyaccess_ext.calc_aggregation(solver, dem_nodes, sup_nodes, sup_weights, decay)
     return reachability
-

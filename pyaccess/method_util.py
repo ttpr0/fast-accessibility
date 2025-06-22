@@ -10,9 +10,12 @@ from .graph import Graph
 # Utilities to create graphs
 #************************************************
 
-def _build_graph(graph: Graph, weight: str) -> _pyaccess_ext.Graph | _pyaccess_ext.TCGraph:
+def _build_graph(graph: Graph, weight: str | _pyaccess_ext.Weighting | _pyaccess_ext.TCWeighting) -> _pyaccess_ext.Graph | _pyaccess_ext.TCGraph:
     b = graph._get_base()
-    w = graph._get_weight(weight)
+    if isinstance(weight, str):
+        w = graph._get_weight(weight)
+    else:
+        w = weight
     if isinstance(w, _pyaccess_ext.Weighting):
         g = _pyaccess_ext.build_base_graph(b, w)
     elif isinstance(w, _pyaccess_ext.TCWeighting):
